@@ -1,0 +1,40 @@
+# 處理要點 — 變更與驗收共通要點（w-knowledge-relate）
+
+> 路徑基準:原始碼在 `src/`,本檔所列檔案路徑除已標 `src/`、`test/`、`toolg/` 者外皆相對 `src/`.
+> 本檔為本套件變更與驗收之共通要點(測試、設定、提示詞逐字檢查、模組英文名、設定結構與席位、語言設定);檢定標準之運維見 `process_standards.md`.現況以本套件 `sgud/state/state.md` 與 README 為準.
+
+## 本套件之變更與驗收
+
+**背景**:
+- 本套件只放新格式＋新工作流:不含舊版相容、舊資料遷移、舊名退路(規則帳本 GEN-04);使用端舊資料之處理由使用端另寫一次性工具.發布套件是使用者之事,不列為待辦.
+- **只有一份之機制**(規則帳本 GEN-19):AI 調度層(遞補、冷卻、健康、免費池額度、能力預篩、取最後一段合格之 JSON、斷網不計)、執行期生效值 `resolveRuntime`、總組裝共用件(`createRoundRunner`、`buildAiAdapter`、`startupWarningsOf`…)在抓取套件,經單一匯入點 `core/capturePackage.mjs` 取用;判定小組(`decidePanel`、`runPanelPage`、`panelGroupOf`)與批次 AI(`runAiBatchStage`)在摘要套件,經 `core/summarizePackage.mjs` 取用.本套件不另寫一份——改這些機制屬上游套件,上游升版後自套件根跑本套件全套(兩者皆經埠被取用).指定詞一律「套件名/src/入口檔」(規則帳本 GEN-18):`w-knowledge-capture/src/WKnowledgeCapture.mjs`、`w-knowledge-summarize/src/WKnowledgeSummarize.mjs`,只出現於這兩個匯入點與測試橋接 `test/tools/{capture,summarize}ForTest.mjs`(`unit-relate-package` ① 守門).
+
+### 流程
+
+- 〔流程 2〕**測試一律自套件根**:`npm test`(＝`mocha --parallel "test/*.test.mjs" --timeout 180000`;真 AI 之案未設旗標時為 pending);單檔去掉 `--parallel` 換檔名:`node node_modules/mocha/bin/mocha.js --timeout 180000 test/<檔名>`.暫存落 `test/_tmp/`(`test/tools/relateTestKit.mjs` 之 `tmpRoot(名)`＝`test/_tmp/<名>-<pid>`,測完 `removeRoots` 刪除並回驗).**測試之掃描／匯入根以測試檔位置推導,不用 cwd**(規則帳本 GEN-09):凡以 `readdirSync` 列舉原始碼、或 `import()` 逐檔載入者,根一律 `path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')`——以 cwd 當根,自套件外執行時會掃到、載入他處之檔.盤點:`git grep -nE "path\.resolve\('\.'\)|readdirSync\(\s*'\.'" -- test` 應為空.
+- 〔流程 3〕**測試之形式、共用件與真 AI 案**:本套件測試皆為 mocha 形式(`test/*.test.mjs`,`describe`／`it`;檔名前綴 `unit-`／`api-`);新測試依此寫.
+   - **整輪流程測試**:`test/unit-flow-relate.test.mjs` 與其共用件 `test/tools/relateTestKit.mjs` 走對外之總組裝 `createKnowledgeRelate`(設定、詞彙、domain、鎖、日誌、執行摘要皆為真實件,集合為真 LMDB),只換兩件事:①`workDir` 換成 `test/_tmp/<案名>-<pid>`②AI 調度層換成腳本化替身(依提示詞首句判角色作答,不發網路、不燒額度;回覆經呼叫端之正式 `check` 驗證,不合即失敗).固定埠(≥8000、不隨機):8861 為無人監聽之埠(內建調度層之「整鏈皆敗」)、8862 為本機假 REST、8863～8869 保留.**斷言之報告 summary 格式即外部巡檢之契約**:`relateSummaryOf`(`relateObject.mjs`)之固定格式與 `logContract.mjs` 之 `RELATE_LOG_KNOWN`／`RELATE_LOG_MUST_SEE`／`RELATE_LOG_PARSE`／`RELATE_REPORT_KEYS`——改摘要或日誌字樣須同步改這些常數與 `unit-relate-log-contract`、`unit-relate-object`、`unit-flow-relate`.
+   - **測試之共用件**:上游之共用測試件(日誌替身、暫存根之工廠、`deepMerge`、`parseCsv`、`withCheck`、原始檔走訪 `sourceFilesOf`、提示詞標準檔 `goldenDiffOf`、整輪斷言 `assertSubStagesOk`、替身機制 `stubAdapter`、筆記工廠 `landNoteOf`、子階段 ctx `bagCtx`…)一律經測試專用之橋接 `test/tools/captureForTest.mjs`、`summarizeForTest.mjs` 取得(套件程式碼不 import);**不得在本套件 test/ 自寫副本**(規則帳本 GEN-19、GEN-22);橋接所轉出之每一名皆須被本套件 test/ 下至少一檔取用——本套件尚無自動守門案,維護時人工盤點(README §15).各段測試之手寫 AI 替身一律以 `withCheck` 包住(注入之 `callAI` 契約要求替身自驗).本套件特有之件:`relateTestKit`(`tmpRoot`、`buildTestRelate`、`seedNotes`、`scriptedAi`…)、`promptFixtures`(提示詞之固定輸入;`renderPromptGolden`);提示詞之固定輸入、評分題組(`src/bench/cases/*.json`)等題材夾具屬本套件之資料,不與上游之中立題材收斂.
+   - **真 AI 案(會燒額度,須使用者同意)**:`test/api-relate-bench-ai.test.mjs`(免費模型跑四角色之內建通用題組,每案兩回;評分只報告、不設通過門檻).**未設 `WK_LIVE_AI=1` 一律略過(mocha pending)並綠**;實跑自套件根:`WK_LIVE_AI=1 node node_modules/mocha/bin/mocha.js --timeout 180000 test/api-relate-bench-ai.test.mjs`.`WK_RELATE_MODELS`／`WK_RELATE_ROLES`(逗號分隔之條目 id／角色 id)限範圍,`WK_ENV_FILE` 給金鑰檔(預設席位為免金鑰之免費模型,不給即讀 `process.env`);報表落 `test/_tmp/relate-bench-ai-<時間戳>/`,逐回進度即存.
+   - **改設定鍵須知**:本套件對 `ai`／`relate`／`relationIndexTitle` 三段以 schema 驗鍵集、型別與值域(`src/core/relateSettings.mjs` 之 `RELATE_AI_SCHEMA`、`RELATE_SCHEMA`;`ai` 段之定義即摘要套件之 ai 段,合併與型別規則取抓取套件之 `mergeSettingsGroup`),頂層 cfg 鍵以 `CFG_KEYS`(`createKnowledgeRelate.mjs`)驗——**打錯鍵、數字寫成字串、區段形狀錯皆於建構期拋錯、整輪不執行**,訊息含完整設定路徑與可用鍵(例:`settings.relate.rounds 須為非負整數，收到 "4"`、`settings.relate 含不認得之鍵：roundz（可用：…）`).為何:靜默回套件預設(如席位退回預設家、`'27'` 被算成字串)比拋錯更難察覺(規則帳本 GEN-03).`ai` 段不收 `workspace`、`providerPick`(AI 工作目錄走頂層 `cfg.aiWorkspace`,預設 `<workDir>/tmp/ai-workspace`;`providerPick` 走 `cfg.aiOptions`).新增讀取 `cfg.<鍵>` 處須同步列入 `CFG_KEYS`:`unit-relate-assembly` 以去註解與字串之骨架比對讀取者與 `CFG_KEYS`,且其逐鍵嚴格性案例表之鍵集須等於 `CFG_KEYS`(新增鍵而未補案例即失敗).改完設定相關程式先跑 `unit-settings`、`unit-relate-assembly`,再跑全套.
+- 〔流程 5〕**提示詞逐字相同檢查**:`node test/tools/genPromptGolden.mjs`(自套件根;只比對現行輸出與標準檔 `test/golden/prompts-default.json`,逐鍵列出不同者、不寫檔,離開碼 0＝全同;標準檔涵蓋兩組詞彙〔無、`{ domain }`〕× 6 類固定輸入,`unit-relate-domain` ① 同守).有差異即提示詞改了——查明是否刻意;若是,`--write` 重產(標準檔是提示詞之逐字契約,重產前須確認差異皆為刻意變更並取得使用者同意),並**重跑該角色之免費 AI 能力評分**:提示詞一改,該角色之 `planRelateBench(角色).promptFp` 隨之改變,與 `模型評比.csv` 之「提示詞指紋」欄不符者,該角色既有評比結果失效(列出現值:`node --input-type=module -e "import { planRelateBench, RELATE_BENCH_ROLES } from './src/bench/relateBench.mjs'; for (const r of RELATE_BENCH_ROLES) console.log(r.id, planRelateBench(r.id).promptFp)"`,自套件根;角色 `relate`、`reeval`、`conflict-check`、`edge-review`;重跑 `node src/bench/cli.mjs --role <角色> --models … --board 模型評比.csv`,見 README §14).
+- 〔流程 8〕**留紀錄**:累積經驗(過程性教訓)寫 `sgud/exp/experience.md`;現況(各功能做到哪裡、已知缺口、最近一次驗證)寫 `sgud/state/state.md`,只記現況、不寫過程;完成一項功能或結束一輪工作即更新.
+
+### 模組英文名(一律統一、不得另創或沿用舊名)
+
+| 中文 | 英文(目錄、設定段、hook 前綴、物件工廠、欄位) | 曾用舊名(已全數改掉,不得再出現於 src／test／README) |
+|---|---|---|
+| 關聯 | `relate`(設定段 `relate`〔`relate.ai`、`relate.rounds`…〕、物件工廠 `createRelateObject`、總組裝 `createKnowledgeRelate`、執行期件 `createRelateRuntime`、hook 錨點 `relate.<子階段>.<錨點>`〔`relate.relate.{buildEdges, markDirty, persistEdges, queueReverse, markRelated}`、`relate.reeval.{verdict, agree, apply, markReviewed}`、`relate.project.project`、`relate.relationIndex.rebuild`〕、評分角色 `relate`／`reeval`／`conflict-check`／`edge-review`) | organizeRounds |
+
+- 盤點:`git grep -nE "organizeRounds|\bdistill|knowledge\.relate[A-Z]|ai\.relate(Rounds|Reverse|Reeval|ConflictCheck)|relateRounds|relateBatch|relateCandidates" -- src test README.md g.mjs` 應為空.
+- 上游兩套件(抓取、摘要)之命名見各該套件之 sgud;改錨點名須同步 README §10 與 `unit-relate-object`(`RELATE_TAP_STAGE_KEYS` 由行為推導、對不存在之錨點建立物件時即拋).
+
+### 設定結構與席位清單
+
+**結構**:設定只有三段(`resolveRelateSettings` 只收此三者,其餘拋錯;總組裝只交原給之段):`ai`(AI 調度層與併發;即摘要套件之 ai 段:`timeoutMs`、`maxRetries`、`cooldownMs`、`providerTimeouts`、`extraProviders`、`pools`、`healthStreak`、`providerLimits`、`parallel`)、`relate`(關聯之全部設定,依要點分組:要點 1 從無到有創建關聯＝正向〔`rounds`、`notesPerCall`、`candidatesPerNote`、`ai`〕;要點 2 新知識加入時擴充關聯＝`reverse`〔反向〕、`rotation`〔候選輪巡〕;要點 3 知識變更時調整關聯＝`reeval`〔重評〕;檢定標準＝`standards`〔`conflictCheck`、`edgeReview`、判定小組 `ai`、符合度掃描開關 `scanEachRun`〕)、`relationIndexTitle`(關聯總覽標題,預設「知識關聯總覽」).AI 席位放在用到它的那一組(鍵名一律 `ai`;判定小組席名 `first`／`second`／`third`).只給想調的鍵,其餘沿用套件預設:組(物件節點)逐鍵遞迴合併,葉(席位、樣式陣列)給了即整個取代.預設席位全為免費模型(`relate.ai` 預設 `oc:opencode/mimo-v2.6-flash-free`,遞補 `oc:opencode/big-pickle`;反向段、輪巡未給席位即沿用 `relate.ai`;判定小組預設全空且關閉);`relate.standards.scanEachRun` 預設 false(掃描逐邊讀兩端筆記,大庫耗時,由使用端依庫規模開啟).推導值唯讀:`capacity.relate`＝`relate.rounds`×`ai.parallel`×`relate.notesPerCall`(預設 2×3×6＝36 篇/輪;`resolveRelateSettings(cfg).capacity` 與 `info().settings.capacity` 同源).規則帳本 GEN-03.
+
+- **席位清單之名稱**(`relateSeatsOf(settings)`;只列已設者——null 之選填席位不列,預設只有 `relate.ai`;啟動期檢核席位可解析〔不可解析即拋〕、主力供應商計算與維運工具共用;全部可設之席位與顯示名見 `RELATE_SEAT_LABELS`):`relate.ai`、`relate.reverse.ai`、`relate.reeval.ai.{first,second,third}`、`relate.standards.ai.{first,second,third}`.各段實際使用之席位(「未設即沿用」之唯一規則)見 `relateSeatOf(settings, key)`:reverse／rotation＝`relate.reverse.ai`(未設即 `relate.ai`);`reeval.first`＝`relate.reeval.ai.first`(未設即 `relate.ai`);`reeval.second`＝`relate.reeval.ai.second`(未設即 first);`reeval.third` 未設即 null(不叫第三席).判定小組之組成(成員、必填、投票組合、是否開啟)見 `relatePanelsOf(settings)`,功能表見 `RELATE_FEATURES`(開啟判準、判定小組必填席、所需 domain 成員).
+- **帳檔**:`<state>/relate-{reeval,conflict-check,edge-review}.jsonl` 之 `votes[].seat`／`verdicts[].seat` 為席名 `first`／`second`／`third`(衝突核對之提案席為 `proposer`),另帶 `provider`(實際成交之供應者).
+- **語言設定 `cfg.lang`**(規則帳本 GEN-20):總組裝收頂層 `lang`(BCP 47 代碼;抓取套件 `core/locale.mjs` 之 `resolveLocale`),決定提示詞之輸出語言句、邊標準 RS3(正體)之適用(只有繁體中文有字形標準;其餘語言掃描逐邊列「不適用」、納入閘與存量處置不轉字形)、概念鍵之繁簡折疊(`conceptFold` 未給時依語言設定:中文折、其餘不折;`true` 仍強制內建折疊).**不給即預設 `zh-TW`,行為與語言設定出現前逐字相同**(預設提示詞由 `test/golden/prompts-default.json` 守,`unit-relate-domain` ①;語言設定之落點由 `unit-relate-locale` 守).提示詞本體與總覽版型為繁體中文,`lang` 只換理由之語言句與字形政策(整份提示詞可經 `cfg.prompts` 覆寫);產物契約與零件庫用法之新選項(子階段 `enabled`／`when`、`cfg.aiOptions`…)皆 opt-in、預設行為逐字不變.
+
+---

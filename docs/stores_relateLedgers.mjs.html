@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>stores/relateLedgers.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AI_ADAPTER_OPT">AI_ADAPTER_OPT</a></li><li><a href="global.html#BENCH_NOW">BENCH_NOW</a></li><li><a href="global.html#CALL_TIMEOUT_FALLBACK_MS">CALL_TIMEOUT_FALLBACK_MS</a></li><li><a href="global.html#CFG_KEYS">CFG_KEYS</a></li><li><a href="global.html#CHECKED_STDS">CHECKED_STDS</a></li><li><a href="global.html#CHECK_BLANK">CHECK_BLANK</a></li><li><a href="global.html#CHECK_STATES">CHECK_STATES</a></li><li><a href="global.html#CLI">CLI</a></li><li><a href="global.html#COLLECTION_KEYS">COLLECTION_KEYS</a></li><li><a href="global.html#CONFLICT_DEFINITION">CONFLICT_DEFINITION</a></li><li><a href="global.html#CONFLICT_EVENT_FILE">CONFLICT_EVENT_FILE</a></li><li><a href="global.html#DATA_KEYS">DATA_KEYS</a></li><li><a href="global.html#DELETION_FILES">DELETION_FILES</a></li><li><a href="global.html#DELETION_HALF_STATE_LABEL">DELETION_HALF_STATE_LABEL</a></li><li><a href="global.html#DOMAIN_FACTORY">DOMAIN_FACTORY</a></li><li><a href="global.html#E">E</a></li><li><a href="global.html#EDGE_AUDIT_FILE">EDGE_AUDIT_FILE</a></li><li><a href="global.html#EDGE_FIX_STDS">EDGE_FIX_STDS</a></li><li><a href="global.html#EDGE_INFO_LABELS">EDGE_INFO_LABELS</a></li><li><a href="global.html#EDGE_OBJECT">EDGE_OBJECT</a></li><li><a href="global.html#EDGE_REVIEW_STDS">EDGE_REVIEW_STDS</a></li><li><a href="global.html#EDGE_STANDARDS">EDGE_STANDARDS</a></li><li><a href="global.html#EDGE_VERDICTS">EDGE_VERDICTS</a></li><li><a href="global.html#EDGE_VERDICT_MIN_REASON">EDGE_VERDICT_MIN_REASON</a></li><li><a href="global.html#FIX_STD">FIX_STD</a></li><li><a href="global.html#INFO_STDS">INFO_STDS</a></li><li><a href="global.html#LEDGER_FILES">LEDGER_FILES</a></li><li><a href="global.html#MIN_SHARED_SCORE">MIN_SHARED_SCORE</a></li><li><a href="global.html#MUTEX_KEY">MUTEX_KEY</a></li><li><a href="global.html#NAMESPACES">NAMESPACES</a></li><li><a href="global.html#NO_MATERIAL_DETAIL">NO_MATERIAL_DETAIL</a></li><li><a href="global.html#OPTIONAL_DOMAIN_MEMBERS">OPTIONAL_DOMAIN_MEMBERS</a></li><li><a href="global.html#OWN_KEYS">OWN_KEYS</a></li><li><a href="global.html#PANEL_DEFS">PANEL_DEFS</a></li><li><a href="global.html#PIPELINE_NAME">PIPELINE_NAME</a></li><li><a href="global.html#PLACEHOLDER_REASONS">PLACEHOLDER_REASONS</a></li><li><a href="global.html#PROMPT_DOMAIN">PROMPT_DOMAIN</a></li><li><a href="global.html#PROMPT_KEYS">PROMPT_KEYS</a></li><li><a href="global.html#R">R</a></li><li><a href="global.html#REASON_MAX_CHARS">REASON_MAX_CHARS</a></li><li><a href="global.html#REASON_MIN_CHARS">REASON_MIN_CHARS</a></li><li><a href="global.html#REASON_PROBLEM_CHARS">REASON_PROBLEM_CHARS</a></li><li><a href="global.html#REASON_REWRITE_STDS">REASON_REWRITE_STDS</a></li><li><a href="global.html#REEVAL_BLANK">REEVAL_BLANK</a></li><li><a href="global.html#REEVAL_OPT_KEYS">REEVAL_OPT_KEYS</a></li><li><a href="global.html#REEVAL_REPROPOSE_DAYS">REEVAL_REPROPOSE_DAYS</a></li><li><a href="global.html#RELATE_AI_DEFAULT">RELATE_AI_DEFAULT</a></li><li><a href="global.html#RELATE_AI_SCHEMA">RELATE_AI_SCHEMA</a></li><li><a href="global.html#RELATE_AI_STANDARD_IDS">RELATE_AI_STANDARD_IDS</a></li><li><a href="global.html#RELATE_API_HINT">RELATE_API_HINT</a></li><li><a href="global.html#RELATE_AUDITED_STANDARD_IDS">RELATE_AUDITED_STANDARD_IDS</a></li><li><a href="global.html#RELATE_BASELINE_RULING_PREFIX">RELATE_BASELINE_RULING_PREFIX</a></li><li><a href="global.html#RELATE_BENCH_CASES_FILES">RELATE_BENCH_CASES_FILES</a></li><li><a href="global.html#RELATE_BENCH_CHANGE">RELATE_BENCH_CHANGE</a></li><li><a href="global.html#RELATE_BENCH_MODELS">RELATE_BENCH_MODELS</a></li><li><a href="global.html#RELATE_BENCH_ROLES">RELATE_BENCH_ROLES</a></li><li><a href="global.html#RELATE_BENCH_USAGE">RELATE_BENCH_USAGE</a></li><li><a href="global.html#RELATE_BLANK">RELATE_BLANK</a></li><li><a href="global.html#RELATE_CAPACITY_DESC">RELATE_CAPACITY_DESC</a></li><li><a href="global.html#RELATE_CTX_FLAGS">RELATE_CTX_FLAGS</a></li><li><a href="global.html#RELATE_DATA_KEYS">RELATE_DATA_KEYS</a></li><li><a href="global.html#RELATE_DEFAULT">RELATE_DEFAULT</a></li><li><a href="global.html#RELATE_DIRS">RELATE_DIRS</a></li><li><a href="global.html#RELATE_DOMAIN_KEYS">RELATE_DOMAIN_KEYS</a></li><li><a href="global.html#RELATE_EXPECT_KEYS">RELATE_EXPECT_KEYS</a></li><li><a href="global.html#RELATE_FEATURES">RELATE_FEATURES</a></li><li><a href="global.html#RELATE_GUIDE_FIELDS">RELATE_GUIDE_FIELDS</a></li><li><a href="global.html#RELATE_HOLD_DEADLINE_DAYS">RELATE_HOLD_DEADLINE_DAYS</a></li><li><a href="global.html#RELATE_HOLD_NEXT">RELATE_HOLD_NEXT</a></li><li><a href="global.html#RELATE_INDEX_TITLE">RELATE_INDEX_TITLE</a></li><li><a href="global.html#RELATE_INDEX_TOP_N">RELATE_INDEX_TOP_N</a></li><li><a href="global.html#RELATE_LOG_KNOWN">RELATE_LOG_KNOWN</a></li><li><a href="global.html#RELATE_LOG_MUST_SEE">RELATE_LOG_MUST_SEE</a></li><li><a href="global.html#RELATE_LOG_PARSE">RELATE_LOG_PARSE</a></li><li><a href="global.html#RELATE_MAX_RELATIONS_PER_NOTE">RELATE_MAX_RELATIONS_PER_NOTE</a></li><li><a href="global.html#RELATE_PROMPT_SIGS">RELATE_PROMPT_SIGS</a></li><li><a href="global.html#RELATE_REPORT_KEYS">RELATE_REPORT_KEYS</a></li><li><a href="global.html#RELATE_SCAN_OBJECT">RELATE_SCAN_OBJECT</a></li><li><a href="global.html#RELATE_SCHEMA">RELATE_SCHEMA</a></li><li><a href="global.html#RELATE_SEATS">RELATE_SEATS</a></li><li><a href="global.html#RELATE_SEAT_KEYS">RELATE_SEAT_KEYS</a></li><li><a href="global.html#RELATE_SEAT_LABELS">RELATE_SEAT_LABELS</a></li><li><a href="global.html#RELATE_SECTION_TITLES">RELATE_SECTION_TITLES</a></li><li><a href="global.html#RELATE_SETTING_TYPES">RELATE_SETTING_TYPES</a></li><li><a href="global.html#RELATE_STAGE_KEYS">RELATE_STAGE_KEYS</a></li><li><a href="global.html#RELATE_STANDARDS">RELATE_STANDARDS</a></li><li><a href="global.html#RELATE_STORE_KEYS">RELATE_STORE_KEYS</a></li><li><a href="global.html#RELATE_TAP_STAGE_KEYS">RELATE_TAP_STAGE_KEYS</a></li><li><a href="global.html#RELATE_UNGATED_WRITE_ENTRIES">RELATE_UNGATED_WRITE_ENTRIES</a></li><li><a href="global.html#RELATE_VOCAB_DEFAULT">RELATE_VOCAB_DEFAULT</a></li><li><a href="global.html#RELATE_VOCAB_KEYS">RELATE_VOCAB_KEYS</a></li><li><a href="global.html#RELATE_VOCAB_NULL_AS">RELATE_VOCAB_NULL_AS</a></li><li><a href="global.html#RELATE_VOCAB_OWN_KEYS">RELATE_VOCAB_OWN_KEYS</a></li><li><a href="global.html#RELATION_ROLE_NAMES">RELATION_ROLE_NAMES</a></li><li><a href="global.html#RESTORABLE_REASONS">RESTORABLE_REASONS</a></li><li><a href="global.html#RETIRE_REASONS">RETIRE_REASONS</a></li><li><a href="global.html#REVERTED_OUTCOME">REVERTED_OUTCOME</a></li><li><a href="global.html#REVIEW_KINDS">REVIEW_KINDS</a></li><li><a href="global.html#REVIEW_SOURCE_STDS">REVIEW_SOURCE_STDS</a></li><li><a href="global.html#REVISION_LEDGERS">REVISION_LEDGERS</a></li><li><a href="global.html#ROTATION_RESET">ROTATION_RESET</a></li><li><a href="global.html#ROW_KEYS">ROW_KEYS</a></li><li><a href="global.html#RS4">RS4</a></li><li><a href="global.html#RS5">RS5</a></li><li><a href="global.html#RS6">RS6</a></li><li><a href="global.html#RULING_STD">RULING_STD</a></li><li><a href="global.html#SECTIONS">SECTIONS</a></li><li><a href="global.html#SETTLED_RE">SETTLED_RE</a></li><li><a href="global.html#WKnowledgeRelate">WKnowledgeRelate</a></li><li><a href="global.html#WRITE_ENTRIES">WRITE_ENTRIES</a></li><li><a href="global.html#addToAdjacency">addToAdjacency</a></li><li><a href="global.html#admitItemOf">admitItemOf</a></li><li><a href="global.html#admitRelation">admitRelation</a></li><li><a href="global.html#aiStandardRowOf">aiStandardRowOf</a></li><li><a href="global.html#appendAudit">appendAudit</a></li><li><a href="global.html#appendConflictEvent">appendConflictEvent</a></li><li><a href="global.html#applyEdgeStockFix">applyEdgeStockFix</a></li><li><a href="global.html#archiveFilesOf">archiveFilesOf</a></li><li><a href="global.html#assertGeneration">assertGeneration</a></li><li><a href="global.html#auditDomainOf">auditDomainOf</a></li><li><a href="global.html#auditRelateStandards">auditRelateStandards</a></li><li><a href="global.html#baseVerdictOf">baseVerdictOf</a></li><li><a href="global.html#benchRelateEdgesOf">benchRelateEdgesOf</a></li><li><a href="global.html#bestByIdentity">bestByIdentity</a></li><li><a href="global.html#buildAdjacency">buildAdjacency</a></li><li><a href="global.html#callTimeoutMsOf">callTimeoutMsOf</a></li><li><a href="global.html#candidateNameOf">candidateNameOf</a></li><li><a href="global.html#candidateScoreOf">candidateScoreOf</a></li><li><a href="global.html#canon">canon</a></li><li><a href="global.html#checkEdge">checkEdge</a></li><li><a href="global.html#checkKey">checkKey</a></li><li><a href="global.html#checkPromptItemOf">checkPromptItemOf</a></li><li><a href="global.html#checkSingle">checkSingle</a></li><li><a href="global.html#checkSyncOf">checkSyncOf</a></li><li><a href="global.html#checkVerdictOf">checkVerdictOf</a></li><li><a href="global.html#classDecisionOf">classDecisionOf</a></li><li><a href="global.html#clearStaleReview">clearStaleReview</a></li><li><a href="global.html#closeNoteHold">closeNoteHold</a></li><li><a href="global.html#compareProposals">compareProposals</a></li><li><a href="global.html#conceptKeysOf">conceptKeysOf</a></li><li><a href="global.html#conflictCheckBenchRole">conflictCheckBenchRole</a></li><li><a href="global.html#conflictCheckOf">conflictCheckOf</a></li><li><a href="global.html#conflictNeighborsOf">conflictNeighborsOf</a></li><li><a href="global.html#conflictPageProblems">conflictPageProblems</a></li><li><a href="global.html#conflictVerdictOf">conflictVerdictOf</a></li><li><a href="global.html#coresCiting">coresCiting</a></li><li><a href="global.html#coveredItemOf">coveredItemOf</a></li><li><a href="global.html#createCheckHasher">createCheckHasher</a></li><li><a href="global.html#createDirtyLedger">createDirtyLedger</a></li><li><a href="global.html#createKnowledgeRelate">createKnowledgeRelate</a></li><li><a href="global.html#createMaterialReader">createMaterialReader</a></li><li><a href="global.html#createMutex">createMutex</a></li><li><a href="global.html#createRelateDomain">createRelateDomain</a></li><li><a href="global.html#createRelateObject">createRelateObject</a></li><li><a href="global.html#createRelateQueueRunner">createRelateQueueRunner</a></li><li><a href="global.html#createRelateRuntime">createRelateRuntime</a></li><li><a href="global.html#createRelateState">createRelateState</a></li><li><a href="global.html#createReverseIndex">createReverseIndex</a></li><li><a href="global.html#createReverseLedger">createReverseLedger</a></li><li><a href="global.html#createSideReader">createSideReader</a></li><li><a href="global.html#createTombstones">createTombstones</a></li><li><a href="global.html#currentTypeProblems">currentTypeProblems</a></li><li><a href="global.html#cutOf">cutOf</a></li><li><a href="global.html#cutReason">cutReason</a></li><li><a href="global.html#decideOf">decideOf</a></li><li><a href="global.html#deleteNote">deleteNote</a></li><li><a href="global.html#deletionHalfStatesOf">deletionHalfStatesOf</a></li><li><a href="global.html#deletionStatusOf">deletionStatusOf</a></li><li><a href="global.html#domainNeeds">domainNeeds</a></li><li><a href="global.html#domainOf">domainOf</a></li><li><a href="global.html#domainShapeProblems">domainShapeProblems</a></li><li><a href="global.html#domainTypeRenamerOf">domainTypeRenamerOf</a></li><li><a href="global.html#dropAll">dropAll</a></li><li><a href="global.html#edgeCheckHashOf">edgeCheckHashOf</a></li><li><a href="global.html#edgeCheckScanOf">edgeCheckScanOf</a></li><li><a href="global.html#edgeFixOf">edgeFixOf</a></li><li><a href="global.html#edgeId">edgeId</a></li><li><a href="global.html#edgeInfoOf">edgeInfoOf</a></li><li><a href="global.html#edgeLedgersOf">edgeLedgersOf</a></li><li><a href="global.html#edgePlanOf">edgePlanOf</a></li><li><a href="global.html#edgeProblems">edgeProblems</a></li><li><a href="global.html#edgeRestoredOf">edgeRestoredOf</a></li><li><a href="global.html#edgeReviewBenchRole">edgeReviewBenchRole</a></li><li><a href="global.html#edgeRowUnitsOf">edgeRowUnitsOf</a></li><li><a href="global.html#edgeStd">edgeStd</a></li><li><a href="global.html#edgeTimeOf">edgeTimeOf</a></li><li><a href="global.html#edgeUnitsOf">edgeUnitsOf</a></li><li><a href="global.html#edgesReviewedOf">edgesReviewedOf</a></li><li><a href="global.html#escalatedHoldNextOf">escalatedHoldNextOf</a></li><li><a href="global.html#gateAllows">gateAllows</a></li><li><a href="global.html#gateCtxOf">gateCtxOf</a></li><li><a href="global.html#gateEdgeProposal">gateEdgeProposal</a></li><li><a href="global.html#gateRestore">gateRestore</a></li><li><a href="global.html#generationMismatchOf">generationMismatchOf</a></li><li><a href="global.html#historyOf">historyOf</a></li><li><a href="global.html#historyScriptHoldOf">historyScriptHoldOf</a></li><li><a href="global.html#inRelatePool">inRelatePool</a></li><li><a href="global.html#indexDirtyOf">indexDirtyOf</a></li><li><a href="global.html#info">info</a></li><li><a href="global.html#inputVocabProblems">inputVocabProblems</a></li><li><a href="global.html#isEdgeRow">isEdgeRow</a></li><li><a href="global.html#isRelated">isRelated</a></li><li><a href="global.html#itemTargetOf">itemTargetOf</a></li><li><a href="global.html#lastRevisionOf">lastRevisionOf</a></li><li><a href="global.html#later">later</a></li><li><a href="global.html#ledgerCorruptTextOf">ledgerCorruptTextOf</a></li><li><a href="global.html#levelOf">levelOf</a></li><li><a href="global.html#loadLedgerJson">loadLedgerJson</a></li><li><a href="global.html#maintainRelations">maintainRelations</a></li><li><a href="global.html#makeEdge">makeEdge</a></li><li><a href="global.html#makeSlugResolver">makeSlugResolver</a></li><li><a href="global.html#markNoteProgress">markNoteProgress</a></li><li><a href="global.html#materialOfNote">materialOfNote</a></li><li><a href="global.html#mergeEdge">mergeEdge</a></li><li><a href="global.html#mwBuildEdges">mwBuildEdges</a></li><li><a href="global.html#mwMarkDirty">mwMarkDirty</a></li><li><a href="global.html#mwMarkRelated">mwMarkRelated</a></li><li><a href="global.html#mwPersistEdges">mwPersistEdges</a></li><li><a href="global.html#mwProjectDirty">mwProjectDirty</a></li><li><a href="global.html#mwQueueReverse">mwQueueReverse</a></li><li><a href="global.html#mwRebuildRelationIndex">mwRebuildRelationIndex</a></li><li><a href="global.html#mwReevalAgree">mwReevalAgree</a></li><li><a href="global.html#mwReevalApply">mwReevalApply</a></li><li><a href="global.html#mwReevalMarkReviewed">mwReevalMarkReviewed</a></li><li><a href="global.html#mwReevalVerdict">mwReevalVerdict</a></li><li><a href="global.html#needsCheck">needsCheck</a></li><li><a href="global.html#needsEdgeReview">needsEdgeReview</a></li><li><a href="global.html#needsReeval">needsReeval</a></li><li><a href="global.html#neighborsOf">neighborsOf</a></li><li><a href="global.html#normalizeEdgeProposal">normalizeEdgeProposal</a></li><li><a href="global.html#noteProblems">noteProblems</a></li><li><a href="global.html#noteReader">noteReader</a></li><li><a href="global.html#openChecked">openChecked</a></li><li><a href="global.html#openDeletions">openDeletions</a></li><li><a href="global.html#openRelateLedgers">openRelateLedgers</a></li><li><a href="global.html#openStores">openStores</a></li><li><a href="global.html#packIds">packIds</a></li><li><a href="global.html#pageVotesOf">pageVotesOf</a></li><li><a href="global.html#pagesOf">pagesOf</a></li><li><a href="global.html#paginateBy">paginateBy</a></li><li><a href="global.html#pairCheck">pairCheck</a></li><li><a href="global.html#pairCheckItemOf">pairCheckItemOf</a></li><li><a href="global.html#pairItemOf">pairItemOf</a></li><li><a href="global.html#pairProblems">pairProblems</a></li><li><a href="global.html#parseRelateBenchArgs">parseRelateBenchArgs</a></li><li><a href="global.html#persistEdge">persistEdge</a></li><li><a href="global.html#pickCandidates">pickCandidates</a></li><li><a href="global.html#pickRelateVocab">pickRelateVocab</a></li><li><a href="global.html#pickRelationsOf">pickRelationsOf</a></li><li><a href="global.html#planEdgeStockFix">planEdgeStockFix</a></li><li><a href="global.html#planRelateBench">planRelateBench</a></li><li><a href="global.html#presentOthersOf">presentOthersOf</a></li><li><a href="global.html#projectAffected">projectAffected</a></li><li><a href="global.html#projectAll">projectAll</a></li><li><a href="global.html#projectNote">projectNote</a></li><li><a href="global.html#projectNotes">projectNotes</a></li><li><a href="global.html#projectText">projectText</a></li><li><a href="global.html#proposalOf">proposalOf</a></li><li><a href="global.html#pruneDangling">pruneDangling</a></li><li><a href="global.html#qualityTag">qualityTag</a></li><li><a href="global.html#quarantineHoldNextOf">quarantineHoldNextOf</a></li><li><a href="global.html#queueConflictCheck">queueConflictCheck</a></li><li><a href="global.html#queueConflictProposal">queueConflictProposal</a></li><li><a href="global.html#queueEdgeReview">queueEdgeReview</a></li><li><a href="global.html#queueRewrite">queueRewrite</a></li><li><a href="global.html#rawVerdictText">rawVerdictText</a></li><li><a href="global.html#readArchive">readArchive</a></li><li><a href="global.html#readAuditRows">readAuditRows</a></li><li><a href="global.html#readConflictEvents">readConflictEvents</a></li><li><a href="global.html#readEdgeAudit">readEdgeAudit</a></li><li><a href="global.html#readEdgeStockLedger">readEdgeStockLedger</a></li><li><a href="global.html#reasonFormProblem">reasonFormProblem</a></li><li><a href="global.html#reasonRewriteProblemsOf">reasonRewriteProblemsOf</a></li><li><a href="global.html#rebuildRelationIndex">rebuildRelationIndex</a></li><li><a href="global.html#recentReevalRetiredIds">recentReevalRetiredIds</a></li><li><a href="global.html#recordCheck">recordCheck</a></li><li><a href="global.html#reevalBaseline">reevalBaseline</a></li><li><a href="global.html#reevalBenchRole">reevalBenchRole</a></li><li><a href="global.html#reevalCaseProblems">reevalCaseProblems</a></li><li><a href="global.html#reevalChainOf">reevalChainOf</a></li><li><a href="global.html#reevalMissingOf">reevalMissingOf</a></li><li><a href="global.html#reevalPartsOf">reevalPartsOf</a></li><li><a href="global.html#reevalPromptItemOf">reevalPromptItemOf</a></li><li><a href="global.html#reevalRequeue">reevalRequeue</a></li><li><a href="global.html#reevalTargetIdOf">reevalTargetIdOf</a></li><li><a href="global.html#reevalVerdictOf">reevalVerdictOf</a></li><li><a href="global.html#relateAiCallOf">relateAiCallOf</a></li><li><a href="global.html#relateBenchRole">relateBenchRole</a></li><li><a href="global.html#relateBenchRoleOf">relateBenchRoleOf</a></li><li><a href="global.html#relateCapacityOf">relateCapacityOf</a></li><li><a href="global.html#relateCaseProblems">relateCaseProblems</a></li><li><a href="global.html#relateCheck">relateCheck</a></li><li><a href="global.html#relateDomainNeedsOf">relateDomainNeedsOf</a></li><li><a href="global.html#relateFeatureProblems">relateFeatureProblems</a></li><li><a href="global.html#relateGuideDefaultOf">relateGuideDefaultOf</a></li><li><a href="global.html#relateHoldDeadlineOf">relateHoldDeadlineOf</a></li><li><a href="global.html#relateMaterialOf">relateMaterialOf</a></li><li><a href="global.html#relateOptOf">relateOptOf</a></li><li><a href="global.html#relatePageProblems">relatePageProblems</a></li><li><a href="global.html#relatePanelsOf">relatePanelsOf</a></li><li><a href="global.html#relatePendingOf">relatePendingOf</a></li><li><a href="global.html#relateProblemsOf">relateProblemsOf</a></li><li><a href="global.html#relateScanOf">relateScanOf</a></li><li><a href="global.html#relateSeatOf">relateSeatOf</a></li><li><a href="global.html#relateSeatsOf">relateSeatsOf</a></li><li><a href="global.html#relateSuiteProblems">relateSuiteProblems</a></li><li><a href="global.html#relateSummaryOf">relateSummaryOf</a></li><li><a href="global.html#relateVerdictOf">relateVerdictOf</a></li><li><a href="global.html#relateWarningsOf">relateWarningsOf</a></li><li><a href="global.html#relationTypesVersionOf">relationTypesVersionOf</a></li><li><a href="global.html#removeFromAdjacency">removeFromAdjacency</a></li><li><a href="global.html#renameEdgeTypes">renameEdgeTypes</a></li><li><a href="global.html#renderRelationSections">renderRelationSections</a></li><li><a href="global.html#resolveRelateData">resolveRelateData</a></li><li><a href="global.html#resolveRelateSettings">resolveRelateSettings</a></li><li><a href="global.html#resolveRelateVocab">resolveRelateVocab</a></li><li><a href="global.html#restoreEdge">restoreEdge</a></li><li><a href="global.html#restoreNote">restoreNote</a></li><li><a href="global.html#restoredStandards">restoredStandards</a></li><li><a href="global.html#retireEdge">retireEdge</a></li><li><a href="global.html#retiredEdgesOf">retiredEdgesOf</a></li><li><a href="global.html#retypeAllowed">retypeAllowed</a></li><li><a href="global.html#reversePairsBackOf">reversePairsBackOf</a></li><li><a href="global.html#revertEdgeRevision">revertEdgeRevision</a></li><li><a href="global.html#revertedStandards">revertedStandards</a></li><li><a href="global.html#reviewCaseProblems">reviewCaseProblems</a></li><li><a href="global.html#reviewEdgesOf">reviewEdgesOf</a></li><li><a href="global.html#reviewPageProblems">reviewPageProblems</a></li><li><a href="global.html#reviewQueueOf">reviewQueueOf</a></li><li><a href="global.html#reviewVerdictOf">reviewVerdictOf</a></li><li><a href="global.html#reviewVerdictOfCase">reviewVerdictOfCase</a></li><li><a href="global.html#reviseEdge">reviseEdge</a></li><li><a href="global.html#rewriteEdge">rewriteEdge</a></li><li><a href="global.html#rollbackEdgeStockFix">rollbackEdgeStockFix</a></li><li><a href="global.html#rotationBumpOf">rotationBumpOf</a></li><li><a href="global.html#rotationCursorOf">rotationCursorOf</a></li><li><a href="global.html#rotationPageOf">rotationPageOf</a></li><li><a href="global.html#rotationProgressOf">rotationProgressOf</a></li><li><a href="global.html#rotationQueueOf">rotationQueueOf</a></li><li><a href="global.html#rs4ClassOf">rs4ClassOf</a></li><li><a href="global.html#rs4DecisionOf">rs4DecisionOf</a></li><li><a href="global.html#rs6ClassOf">rs6ClassOf</a></li><li><a href="global.html#rs6DecisionOf">rs6DecisionOf</a></li><li><a href="global.html#rs6VoteActionOf">rs6VoteActionOf</a></li><li><a href="global.html#runCheckPanelPages">runCheckPanelPages</a></li><li><a href="global.html#runConflictCheckSegment">runConflictCheckSegment</a></li><li><a href="global.html#runEdgeReviewSegment">runEdgeReviewSegment</a></li><li><a href="global.html#runReevalSegment">runReevalSegment</a></li><li><a href="global.html#runRelateBench">runRelateBench</a></li><li><a href="global.html#runRelateBenchCli">runRelateBenchCli</a></li><li><a href="global.html#sameEdge">sameEdge</a></li><li><a href="global.html#sameEdgeVerdict">sameEdgeVerdict</a></li><li><a href="global.html#sameVisible">sameVisible</a></li><li><a href="global.html#saveLedgerJson">saveLedgerJson</a></li><li><a href="global.html#scanConflictEdges">scanConflictEdges</a></li><li><a href="global.html#scriptFixHistory">scriptFixHistory</a></li><li><a href="global.html#seatVotesOf">seatVotesOf</a></li><li><a href="global.html#sectionsHashOf">sectionsHashOf</a></li><li><a href="global.html#seqAt">seqAt</a></li><li><a href="global.html#seqOf">seqOf</a></li><li><a href="global.html#settleArchive">settleArchive</a></li><li><a href="global.html#shuffleStable">shuffleStable</a></li><li><a href="global.html#stageRelate">stageRelate</a></li><li><a href="global.html#stageRelateProject">stageRelateProject</a></li><li><a href="global.html#stageRelationIndex">stageRelationIndex</a></li><li><a href="global.html#stdRetiredHowOf">stdRetiredHowOf</a></li><li><a href="global.html#stockDomainOf">stockDomainOf</a></li><li><a href="global.html#stockOrderOf">stockOrderOf</a></li><li><a href="global.html#stockProgressOf">stockProgressOf</a></li><li><a href="global.html#stockQueueOf">stockQueueOf</a></li><li><a href="global.html#stockSourceResolvedOf">stockSourceResolvedOf</a></li><li><a href="global.html#stockWaiverKeyOf">stockWaiverKeyOf</a></li><li><a href="global.html#typeRankOf">typeRankOf</a></li><li><a href="global.html#undoDeleteNote">undoDeleteNote</a></li><li><a href="global.html#unfixableRouteOf">unfixableRouteOf</a></li><li><a href="global.html#uniqIds">uniqIds</a></li><li><a href="global.html#unpackIds">unpackIds</a></li><li><a href="global.html#verdictClassOf">verdictClassOf</a></li><li><a href="global.html#verdictExpectProblems">verdictExpectProblems</a></li><li><a href="global.html#verdictsByIndexOf">verdictsByIndexOf</a></li><li><a href="global.html#verdictsOf">verdictsOf</a></li><li><a href="global.html#verifyEdgeStockChain">verifyEdgeStockChain</a></li><li><a href="global.html#voteMissingOf">voteMissingOf</a></li><li><a href="global.html#waivedSameProblem">waivedSameProblem</a></li><li><a href="global.html#waiverCoversEdge">waiverCoversEdge</a></li><li><a href="global.html#withCut">withCut</a></li><li><a href="global.html#writeEdge">writeEdge</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">stores/relateLedgers.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// relateLedgers.mjs — 關聯段之持久帳(皆在 dirs.state 下,原子寫):待投影(dirty)、反向待處理對、狀態(總覽待重建)、
+//   刪除墓碑、稽核紀錄
+//
+// 【缺檔與壞檔分流】缺檔＝空帳;壞檔(JSON 解析失敗或錯形狀——逐帳驗結構)＝隔離為 &lt;檔>.corrupt-&lt;時戳>、經 onCorrupt 告警(日誌「關聯帳檔損壞」,
+//   字樣只一份 ledgerCorruptTextOf,外部巡檢必看)、以空帳續跑——不可把壞檔當空帳而在下次寫入時無聲覆蓋(通用之 readJson 對缺檔與壞檔回同一
+//   fallback,故本檔自行分流)。隔離失敗不假稱成功:告警明寫「隔離失敗」(壞檔仍在原位);關鍵帳(墓碑)壞而無法隔離即拒(以空帳續行會讓已刪之筆記
+//   被重新收件)。讀取本身失敗(權限等)即拋錯:寫入大概率同樣失敗,不假裝成功。
+// 【預演不開帳】開帳會隔離壞檔,預演(dryRun、非 apply)之路徑一律唯讀直讀(墓碑 stores/deletions 之 openDeletions、稽核 readAuditRows),不經本檔開帳。
+// 【寫入即落檔】add／remove 即時原子寫;空帳刪檔(不留空殼)。JSONL 帳(稽核、裁決紀錄)之讀寫為抓取套件之共用件。
+
+import fs from 'fs'
+import path from 'path'
+import isarr from 'wsemi/src/isarr.mjs'
+import isobj from 'wsemi/src/isobj.mjs'
+import isestr from 'wsemi/src/isestr.mjs'
+import { writeFileAtomic, oneline, readJsonlRows, appendJsonlRow, cmp } from '../core/capturePackage.mjs'
+import { DELETION_FILES } from '../stores/deletions.mjs'
+import { CONFLICT_EVENT_FILE } from '../stores/conflictEvents.mjs'
+import { EDGE_AUDIT_FILE } from '../stores/edgeAudit.mjs'
+import { RELATE_API_HINT } from './relateHolds.mjs'
+
+/** 帳檔名(皆在 dirs.state 下) */
+export const LEDGER_FILES = {
+    dirty: 'relate-dirty.json',
+    reverse: 'relate-reverse.json',
+    state: 'relate-state.json',
+    tombstones: DELETION_FILES.tombstones, // 刪除紀錄之檔名只定義一次(stores/deletions;下游亦讀之)
+    retired: EDGE_AUDIT_FILE, // 撤出稽核(下游讀之為撤銷之證據;stores/edgeAudit,檔名只定義一次)
+    archive: DELETION_FILES.archive,
+    manual: 'relate-manual',
+    reeval: 'relate-reeval.jsonl', // 重評之裁決紀錄(候選／套用／不一致／同一家／陳舊;append-only,含變更前之邊值)
+    conflictCheck: 'relate-conflict-check.jsonl', // 衝突核對(檢定標準 RS4)之裁決紀錄(入口、各票含供應者、結果、寫入值;append-only)
+    edgeReview: 'relate-edge-review.jsonl', // 既有邊覆核(檢定標準 RS6)之裁決紀錄(入口、各票含供應者、結果、寫入值;append-only)
+    conflictEvents: CONFLICT_EVENT_FILE, // 衝突撤銷／降級事件(下游讀;stores/conflictEvents)
+}
+
+/**
+ * 讀 JSON 帳檔並分流
+ *
+ * @param {String} file 輸入檔案路徑
+ * @param {Object} [o={}] 輸入 { onCorrupt:(info)=>void, stamp:String(隔離檔名之時戳), shape:(data)=>String(結構之問題,'' 為合格;錯形狀＝壞檔),
+ *   critical:Boolean(關鍵帳——壞而無法隔離即拒,不以空帳續行), quarantine:Boolean(預設 true;false＝唯讀讀法:壞檔不改名、不拋,只經 onCorrupt 回報
+ *   { movedTo:null, readOnly:true }——預演、掃描、預覽、驗證等純讀入口用,讀到壞帳不得修改檔案;下游套件之 JSON 帳同讀本函數) }
+ * @returns {Object|null} 回傳解析後之資料(缺檔或壞檔為 null)
+ * @throws {Error} 讀取失敗(非缺檔)、關鍵帳壞而無法隔離時拋出(唯讀讀法不拋)
+ * @example
+ * const { mkdtempSync, writeFileSync, existsSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const file = join(dir, 'relate-dirty.json')
+ * console.log(loadLedgerJson(file))
+ * // => null
+ * writeFileSync(file, '{"ids":["n1"]}', 'utf8')
+ * console.log(loadLedgerJson(file))
+ * // => { ids: [ 'n1' ] }
+ * writeFileSync(file, '壞掉的檔', 'utf8')
+ * const seen = []
+ * const data = loadLedgerJson(file, { stamp: '1', onCorrupt: (info) => seen.push(info.movedTo !== null) })
+ * console.log(data, seen, existsSync(file), existsSync(`${file}.corrupt-1`))
+ * // => null [ true ] false true
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function loadLedgerJson(file, o = {}) {
+    let text
+    try {
+        text = fs.readFileSync(file, 'utf8')
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') return null
+        throw new Error(`關聯帳檔讀取失敗（${path.basename(file)}）：${e.message}`)
+    }
+    let error = ''
+    let data = null
+    try {
+        data = JSON.parse(text)
+        error = typeof o.shape === 'function' ? String(o.shape(data) || '') : ''
+    }
+    catch (e) {
+        error = e.message
+    }
+    if (!error) return data
+    // 唯讀讀法:不改名、不拋,只回報(純讀入口不得因讀到壞帳而修改檔案)
+    if (o.quarantine === false) {
+        if (typeof o.onCorrupt === 'function') o.onCorrupt({ file, movedTo: null, error, readOnly: true })
+        return null
+    }
+    // 壞檔(解析失敗或錯形狀):隔離為 .corrupt-&lt;時戳> 並告警;隔離失敗如實告知(movedTo:null、quarantineError),關鍵帳即拒
+    const to = `${file}.corrupt-${o.stamp || Date.now()}`
+    let moved = null
+    let quarantineError = ''
+    try {
+        fs.renameSync(file, to)
+        moved = to
+    }
+    catch (e) {
+        quarantineError = e.message
+    }
+    if (!moved &amp;&amp; o.critical === true) throw new Error(`關聯帳檔損壞且無法隔離（${path.basename(file)}：${error}；隔離失敗：${quarantineError}）——拒寫`)
+    if (typeof o.onCorrupt === 'function') o.onCorrupt({ file, movedTo: moved, error, ...(moved ? {} : { quarantineError }) })
+    return null
+}
+
+/**
+ * 寫 JSON 帳檔(原子;data 為 null 即刪檔)
+ *
+ * @param {String} file 輸入檔案路徑
+ * @param {*} data 輸入資料
+ */
+function saveLedgerJson(file, data) {
+    if (data === null) {
+        fs.rmSync(file, { force: true })
+        return
+    }
+    writeFileAtomic(file, JSON.stringify(data))
+}
+
+/**
+ * 待投影帳(筆記 id 集合)
+ *
+ * @param {String} file 輸入帳檔路徑(dirs.state/relate-dirty.json)
+ * @param {Object} [o={}] 輸入 loadLedgerJson 之選項
+ * @returns {Object} 回傳 { ids():Array, has(id), size(), add(ids), remove(ids) }
+ * @example
+ * const { mkdtempSync, existsSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const file = join(dir, 'relate-dirty.json')
+ * const ledger = createDirtyLedger(file)
+ * ledger.add(['n2', 'n1', 'n1'])
+ * console.log(ledger.ids(), ledger.has('n1'), ledger.size())
+ * // => [ 'n1', 'n2' ] true 2
+ * console.log(createDirtyLedger(file).ids())
+ * // => [ 'n1', 'n2' ]
+ * ledger.remove(['n1', 'n2'])
+ * console.log(ledger.size(), existsSync(file))
+ * // => 0 false
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function createDirtyLedger(file, o = {}) {
+    const raw = loadLedgerJson(file, { ...o, shape: (d) => (isobj(d) &amp;&amp; isarr(d.ids) ? '' : '結構應為 { ids:[筆記 id] }') })
+    const set = new Set(isarr(raw?.ids) ? raw.ids.filter(isestr) : [])
+    const save = () => saveLedgerJson(file, set.size ? { ids: [...set].sort(cmp) } : null)
+    return {
+        ids: () => [...set].sort(cmp),
+        has: (id) => set.has(id),
+        size: () => set.size,
+        add: (ids) => {
+            const before = set.size
+            for (const id of ids || []) if (isestr(id)) set.add(id)
+            if (set.size !== before) save()
+        },
+        remove: (ids) => {
+            const before = set.size
+            for (const id of ids || []) set.delete(id)
+            if (set.size !== before) save()
+        },
+    }
+}
+
+/**
+ * 反向待處理對帳:[{ o(舊筆記), n(新筆記), score, at(入帳時刻), tries }];同一對只留一筆。add 為新入帳(tries 歸零);restore 為原樣放回
+ *   (撤銷刪除時放回封存之對,含 tries;已有者不動)
+ *
+ * @param {String} file 輸入帳檔路徑(dirs.state/relate-reverse.json)
+ * @param {Object} [o={}] 輸入 loadLedgerJson 之選項
+ * @returns {Object} 回傳 { pairs():Array(副本), size(), add(pairs), restore(pairs)→Integer(放回之對數), remove(pred), bump(pairs) }
+ * @example
+ * const { mkdtempSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const ledger = createReverseLedger(join(dir, 'relate-reverse.json'))
+ * ledger.add([{ o: 'old', n: 'new', score: 21, at: 'T1' }])
+ * ledger.bump([{ o: 'old', n: 'new' }])
+ * console.log(ledger.pairs())
+ * // => [ { o: 'old', n: 'new', score: 21, at: 'T1', tries: 1 } ]
+ * console.log(ledger.restore([{ o: 'old', n: 'new', tries: 5 }, { o: 'a', n: 'b', score: 11, at: 'T2', tries: 2 }]), ledger.size())
+ * // => 1 2
+ * ledger.remove((p) => p.tries >= 2)
+ * console.log(ledger.pairs().map((p) => `${p.o}>${p.n}`))
+ * // => [ 'old>new' ]
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function createReverseLedger(file, o = {}) {
+    const raw = loadLedgerJson(file, { ...o, shape: (d) => (isobj(d) &amp;&amp; isarr(d.pairs) ? '' : '結構應為 { pairs:[反向待處理對] }') })
+    const map = new Map()
+    for (const p of isarr(raw?.pairs) ? raw.pairs : []) {
+        if (isobj(p) &amp;&amp; isestr(p.o) &amp;&amp; isestr(p.n)) map.set(`${p.o}|${p.n}`, { o: p.o, n: p.n, score: Number(p.score) || 0, at: String(p.at || ''), tries: Number(p.tries) || 0 })
+    }
+    const save = () => saveLedgerJson(file, map.size ? { pairs: [...map.values()].sort((a, b) => cmp(a.o, b.o) || cmp(a.n, b.n)) } : null)
+    return {
+        pairs: () => [...map.values()].map((p) => ({ ...p })),
+        size: () => map.size,
+        add: (pairs) => {
+            let changed = false
+            for (const p of pairs || []) {
+                const k = `${p.o}|${p.n}`
+                if (map.has(k)) continue
+                map.set(k, { o: p.o, n: p.n, score: Number(p.score) || 0, at: String(p.at || ''), tries: 0 })
+                changed = true
+            }
+            if (changed) save()
+        },
+        restore: (pairs) => {
+            let n = 0
+            for (const p of pairs || []) {
+                if (!isobj(p) || !isestr(p.o) || !isestr(p.n)) continue
+                const k = `${p.o}|${p.n}`
+                if (map.has(k)) continue
+                map.set(k, { o: p.o, n: p.n, score: Number(p.score) || 0, at: String(p.at || ''), tries: Number(p.tries) || 0 })
+                n++
+            }
+            if (n) save()
+            return n
+        },
+        remove: (pred) => {
+            let changed = false
+            for (const [k, p] of map) {
+                if (pred(p)) {
+                    map.delete(k)
+                    changed = true
+                }
+            }
+            if (changed) save()
+        },
+        bump: (pairs) => {
+            let changed = false
+            for (const p of pairs || []) {
+                const cur = map.get(`${p.o}|${p.n}`)
+                if (cur) {
+                    cur.tries++
+                    changed = true
+                }
+            }
+            if (changed) save()
+        },
+    }
+}
+
+/**
+ * 關聯狀態(總覽待重建旗標:內容變更、刪除 op 等無新邊或管線外之事件所設,relationIndex 重建成功後清)
+ *
+ * @param {String} file 輸入檔案路徑(dirs.state/relate-state.json)
+ * @param {Object} [o={}] 輸入 loadLedgerJson 之選項
+ * @returns {Object} 回傳 { get():{indexDirty}, set(patch) }
+ * @example
+ * const { mkdtempSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const file = join(dir, 'relate-state.json')
+ * const state = createRelateState(file)
+ * console.log(state.get())
+ * // => { indexDirty: false }
+ * state.set({ indexDirty: true })
+ * console.log(createRelateState(file).get())
+ * // => { indexDirty: true }
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function createRelateState(file, o = {}) {
+    const raw = loadLedgerJson(file, { ...o, shape: (d) => (isobj(d) ? '' : '結構應為物件 { indexDirty }') })
+    const st = { indexDirty: raw?.indexDirty === true }
+    return {
+        get: () => ({ ...st }),
+        set: (patch) => {
+            Object.assign(st, patch)
+            saveLedgerJson(file, st)
+        },
+    }
+}
+
+/**
+ * 總覽是否待重建(relationIndex 之 when 用;同步讀檔,壞檔視為否——壞檔之告警由關聯段負責)
+ *
+ * @param {String} stateDir 輸入 dirs.state
+ * @returns {Boolean} 回傳是否待重建
+ * @example
+ * const { mkdtempSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * console.log(indexDirtyOf(dir))
+ * // => false
+ * createRelateState(join(dir, 'relate-state.json')).set({ indexDirty: true })
+ * console.log(indexDirtyOf(dir))
+ * // => true
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function indexDirtyOf(stateDir) {
+    try {
+        return JSON.parse(fs.readFileSync(path.join(stateDir, LEDGER_FILES.state), 'utf8'))?.indexDirty === true
+    }
+    catch {
+        return false
+    }
+}
+
+/**
+ * 刪除墓碑({ ids: { 筆記 id: { at:刪除時刻, reason:刪除理由 } } }):懸空清理只認墓碑內之端點(開錯集合不致整批刪掉真理);墓碑記理由(刪除可追溯)
+ *
+ * @param {String} file 輸入檔案路徑(dirs.state/relate-tombstones.json)
+ * @param {Object} [o={}] 輸入 loadLedgerJson 之選項
+ * @returns {Object} 回傳 { has(id), at(id), reasonOf(id), ids(), add(id, at, reason), remove(id) }
+ * @throws {Error} 墓碑檔損壞且無法隔離時拋出(關鍵帳，拒絕以空帳續行)
+ * @example
+ * const { mkdtempSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const t = createTombstones(join(dir, 'relate-tombstones.json'))
+ * t.add('n1', '2026-10-05T10:00:00+08:00', '使用者刪除')
+ * console.log(t.has('n1'), t.at('n1'), t.reasonOf('n1'), t.ids())
+ * // => true 2026-10-05T10:00:00+08:00 使用者刪除 [ 'n1' ]
+ * t.remove('n1')
+ * console.log(t.has('n1'), t.ids())
+ * // => false []
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function createTombstones(file, o = {}) {
+    // 墓碑為關鍵帳:壞而無法隔離即拒(以空帳續行會讓已刪之筆記被重新收件)
+    const raw = loadLedgerJson(file, { ...o, critical: true, shape: (d) => (isobj(d) &amp;&amp; isobj(d.ids) ? '' : '結構應為 { ids:{ 筆記 id:時刻 } }') })
+    const ids = isobj(raw?.ids) ? { ...raw.ids } : {}
+    const save = () => saveLedgerJson(file, Object.keys(ids).length ? { ids } : null)
+    return {
+        has: (id) => Object.prototype.hasOwnProperty.call(ids, id),
+        at: (id) => String(ids[id]?.at || ''),
+        reasonOf: (id) => String(ids[id]?.reason || ''),
+        ids: () => Object.keys(ids).sort(cmp),
+        add: (id, at, reason) => {
+            ids[id] = { at: String(at || ''), reason: String(reason || '') }
+            save()
+        },
+        remove: (id) => {
+            if (!Object.prototype.hasOwnProperty.call(ids, id)) return
+            delete ids[id]
+            save()
+        },
+    }
+}
+
+/**
+ * 稽核紀錄(append-only JSONL;刪邊一律先記再刪)
+ *
+ * @param {String} file 輸入檔案路徑(dirs.state/relate-retired.jsonl)
+ * @param {Object} entry 輸入紀錄 { at, reason, note?, edge }
+ * @returns {undefined} 無回傳值(追加一行 JSON 至檔尾)
+ * @example
+ * const { mkdtempSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const file = join(dir, 'relate-retired.jsonl')
+ * appendAudit(file, { at: '2026-10-05T10:00:00Z', reason: 'reeval-retire', edge: { id: 'e1' } })
+ * appendAudit(file, { at: '2026-10-06T10:00:00Z', reason: 'restore', edge: { id: 'e1' } })
+ * console.log(readAuditRows(file).map((x) => x.reason))
+ * // => [ 'reeval-retire', 'restore' ]
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function appendAudit(file, entry) {
+    appendJsonlRow(file, entry)
+}
+
+/**
+ * 讀 append-only JSONL 帳(稽核 relate-retired.jsonl、重評帳 relate-reeval.jsonl 共用之單一讀法):缺檔＝空、壞行略過(append 中途被砍之半行);
+ *   讀取本身失敗(權限等)即拋錯(同檔頭之分流)
+ *
+ * @param {String} file 輸入檔案路徑
+ * @returns {Array} 回傳依寫入序之紀錄
+ * @example
+ * const { mkdtempSync, appendFileSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const file = join(dir, 'relate-retired.jsonl')
+ * console.log(readAuditRows(file))
+ * // => []
+ * appendAudit(file, { at: 'T1', reason: 'a' })
+ * appendFileSync(file, '{"at":"T2","rea', 'utf8')
+ * console.log(readAuditRows(file))
+ * // => [ { at: 'T1', reason: 'a' } ]
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function readAuditRows(file) {
+    return readJsonlRows(file) // 單一讀法為抓取套件之 JSONL 共用件(下游同用)
+}
+
+/**
+ * 近期被重評撤銷之邊 id(振盪觀察:正向／反向／輪巡段再建同一對時計 reevalReproposed;只觀察、不擋——撤銷是否過度由此判斷)
+ *
+ * @param {String} file 輸入稽核檔(dirs.state/relate-retired.jsonl)
+ * @param {Number} sinceMs 輸入起算時刻(毫秒;撤銷時刻 ≥ 此者計入)
+ * @returns {Set} 回傳邊 id 集合
+ * @example
+ * const { mkdtempSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * const file = join(dir, 'relate-retired.jsonl')
+ * appendAudit(file, { at: '2026-10-05T10:00:00Z', reason: 'reeval-retire', edge: { id: 'e1' } })
+ * appendAudit(file, { at: '2026-09-01T10:00:00Z', reason: 'reeval-retire', edge: { id: 'e2' } })
+ * appendAudit(file, { at: '2026-10-06T10:00:00Z', reason: 'other', edge: { id: 'e3' } })
+ * console.log(recentReevalRetiredIds(file, Date.parse('2026-10-01T00:00:00Z')))
+ * // => Set(1) { 'e1' }
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function recentReevalRetiredIds(file, sinceMs) {
+    return new Set(readAuditRows(file).filter((x) => x?.reason === 'reeval-retire' &amp;&amp; isestr(x?.edge?.id) &amp;&amp; Date.parse(x.at) >= sinceMs).map((x) => x.edge.id))
+}
+
+/**
+ * 帳檔損壞之告警文(唯一一份;開帳者之日誌與外部巡檢之必看字樣「關聯帳檔損壞」):已隔離者附隔離檔名;隔離失敗者明寫失敗原因與壞檔仍在原位
+ *
+ * @param {Object} info 輸入 loadLedgerJson 之 onCorrupt 參數 { file, movedTo, error, quarantineError? }
+ * @returns {String} 回傳告警文
+ * @example
+ * console.log(ledgerCorruptTextOf({ file: '/s/relate-dirty.json', movedTo: '/s/relate-dirty.json.corrupt-1', error: 'Unexpected token' }))
+ * // => 關聯帳檔損壞：relate-dirty.json（Unexpected token），已隔離為 relate-dirty.json.corrupt-1；以空帳續跑——可用 projectAll（opt.all）全庫重投補回
+ */
+export function ledgerCorruptTextOf(info) {
+    const name = path.basename(String(info?.file || ''))
+    const how = info?.movedTo
+        ? `，已隔離為 ${path.basename(String(info.movedTo))}`
+        : `，隔離失敗：${oneline(info?.quarantineError || '', 80)}（壞檔仍在原位，下次寫入會覆寫——請先手動移走）`
+    return `關聯帳檔損壞：${name}（${oneline(info?.error, 80)}）${how}；以空帳續跑——${RELATE_API_HINT.projectAll}`
+}
+
+/**
+ * 以 dirs.state 開齊全部帳(壞檔之告警:給 onCorrupt 者從之;否則給 log 者以 ledgerCorruptTextOf 之字樣 warn;皆無即靜默)
+ *
+ * @param {String} stateDir 輸入 dirs.state
+ * @param {Object} [o={}] 輸入 { onCorrupt?:(info)=>void, log?:{ warn }, stamp?:String(隔離檔名之時戳) }
+ * @returns {Object} 回傳 { dirty, reverse, state, tombstones, files, touch:(ids, { has? })=>undefined(邊庫將變:端點記待投影＋總覽待重建,先記後寫之「記」) }
+ * @throws {Error} 關鍵帳(墓碑)損壞且無法隔離時拋出(拒寫)
+ * @example
+ * const { mkdtempSync, writeFileSync, rmSync } = await import('fs')
+ * const { join } = await import('path')
+ * const { tmpdir } = await import('os')
+ * const dir = mkdtempSync(join(tmpdir(), 'ledger-'))
+ * writeFileSync(join(dir, 'relate-dirty.json'), '壞掉的檔', 'utf8')
+ * const warns = []
+ * const ledgers = openRelateLedgers(dir, { stamp: '1', log: { warn: (m) => warns.push(m) } })
+ * console.log(warns.length, warns[0].startsWith('關聯帳檔損壞：relate-dirty.json'))
+ * // => 1 true
+ * ledgers.touch(['n1', 'n2', 'gone'], { has: (id) => id !== 'gone' })
+ * console.log(ledgers.dirty.ids(), ledgers.state.get())
+ * // => [ 'n1', 'n2' ] { indexDirty: true }
+ * ledgers.tombstones.add('n3', 'T1', '理由')
+ * console.log(ledgers.tombstones.has('n3'), ledgers.reverse.size(), Object.keys(ledgers.files).length)
+ * // => true 0 6
+ * rmSync(dir, { recursive: true, force: true })
+ */
+export function openRelateLedgers(stateDir, o = {}) {
+    const f = (k) => path.join(stateDir, LEDGER_FILES[k])
+    const warn = typeof o?.log?.warn === 'function' ? (m) => o.log.warn(m) : null
+    const onCorrupt = typeof o?.onCorrupt === 'function' ? o.onCorrupt : (warn ? (i) => warn(ledgerCorruptTextOf(i)) : undefined)
+    const lo = { stamp: o?.stamp, onCorrupt }
+    const dirty = createDirtyLedger(f('dirty'), lo)
+    const state = createRelateState(f('state'), lo)
+    return {
+        dirty,
+        reverse: createReverseLedger(f('reverse'), lo),
+        state,
+        tombstones: createTombstones(f('tombstones'), lo),
+        files: { retired: f('retired'), archive: f('archive'), manual: f('manual'), reeval: f('reeval'), conflictCheck: f('conflictCheck'), edgeReview: f('edgeReview') },
+        // 寫邊之前一律經此(單一規則):受影響之筆記(has 篩出現存者)記待投影、總覽待重建——兩者成對,不各自手寫
+        touch: (ids, t = {}) => {
+            const has = typeof t?.has === 'function' ? t.has : () => true
+            dirty.add((Array.isArray(ids) ? ids : []).filter((x) => has(x)))
+            state.set({ indexDirty: true })
+        },
+    }
+}
+
+export default { LEDGER_FILES, loadLedgerJson, createDirtyLedger, createReverseLedger, createRelateState, indexDirtyOf, createTombstones, appendAudit, readAuditRows, recentReevalRetiredIds, ledgerCorruptTextOf, openRelateLedgers }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Nov 02 2026 13:25:06 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

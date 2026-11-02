@@ -1,0 +1,199 @@
+{
+  "std": "RS6",
+  "v": 1,
+  "note": "通用題組(領域中立):檢定標準 RS6(內容未變之非衝突型既有關聯:仍成立、型別正確——含漏標之衝突——、理由具體)之既有邊覆核——以正式覆核提示詞(relateDomain.buildEdgeReviewPrompt＋預設詞彙之型別、型別角色與 guide.relate)逐項判定。每案一對筆記(input.a、input.b)與兩者之間現行之非衝突型關聯(input.edge),格式同 RS6 題組。應然以處置(expect.kind)表示,由提示詞之步驟推得:keep＝有關聯、非漏標之衝突、型別不屬改正之兩種情形、理由具體;reason＝型別正確而理由只寫關係類別或籠統說法 → 同型改寫理由;retype＝型別錯,只收預設詞彙之型別改正封閉清單內者(一方為另一方之方法之實作或應用實例而標為同類方法或互補搭配 → 實作範例;一方在另一方之模型或方法上延伸修正而標為同類方法或互補搭配 → 延伸深化),改正之型別記於 expect.type;upgrade＝結論互斥之真衝突而現行未標衝突;retire＝只有題材撞名而無知識關聯;unsure＝一方之材料未載具體內容。類別涵蓋上述六種處置(keep 含前置、實作、同類、共用指標、延伸五種型別,驗模型不把說得通之型別改成另一個也說得通之型別)。判不清楚之類別不收:現行型別已不在清單者(其 keep 於型別層視同不確定,屬兩席之兩層判定,單席之處置無法表達)。現行理由皆無確定性之違反(RS2 之空泛片語去除後仍逾 10 字、無兩方材料皆無之數字),正式管線送審時不附改寫指示,提示詞與本題組所送逐字同。衝突案之兩方為匿名之示意敘述(彼此矛盾,不指涉真實研究);其餘材料為正確之一般知識;不含網址與文獻出處。保留題(holdout)不得用於調提示詞。",
+  "cases": [
+    {
+      "id": "k01",
+      "holdout": false,
+      "type": "keep-prerequisite",
+      "input": {
+        "a": { "title": "由 P 波與 S 波之到時差估算震央距離", "category": "方法與技術", "evidenceLevel": "高", "concepts": ["震央距離", "P 波", "S 波"], "summary": "P 波比 S 波傳得快，兩者到時差隨距離增加，以平均波速換算，到時差每秒約對應 8 公里之震央距離。", "keyPoints": ["到時差隨距離增加", "到時差每秒約對應 8 公里"], "conditions": ["以地殼之平均波速換算"] },
+        "b": { "title": "P 波與 S 波之傳播特性", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["P 波", "S 波"], "summary": "P 波為縱波、速度較快且可穿過液體；S 波為橫波、速度較慢且無法穿過液體。", "keyPoints": ["P 波速度較快", "S 波無法穿過液體"], "conditions": [] },
+        "edge": { "type": "前置概念", "reason": "甲以乙所述 P 波快於 S 波之速度差換算震央距離" }
+      },
+      "expect": { "kind": "keep" },
+      "why": "乙之兩種波之速度差是理解甲之換算之先備,前置概念說得通(不屬型別改正之兩種情形);理由指出共同之參數(兩種波之速度差)＝具體 → keep"
+    },
+    {
+      "id": "k02",
+      "holdout": false,
+      "type": "keep-implementation",
+      "input": {
+        "a": { "title": "Dijkstra 最短路徑演算法", "category": "模型與演算法", "evidenceLevel": "高", "concepts": ["Dijkstra 演算法", "最短路徑"], "summary": "在邊權重非負之圖上，每次取出暫定距離最小之節點並更新鄰點，求單一起點至各點之最短路徑。", "keyPoints": ["邊權重須非負", "每次取出暫定距離最小之節點"], "conditions": ["邊權重非負"] },
+        "b": { "title": "以程式實作 Dijkstra 演算法規劃公車轉乘", "category": "應用與案例", "evidenceLevel": "中", "concepts": ["Dijkstra 演算法", "公車路網"], "summary": "把公車站當節點、站間行車時間當權重，以優先佇列實作 Dijkstra 演算法，求行車時間最短之路線。", "keyPoints": ["以優先佇列取出最近之站", "輸出轉乘站"], "conditions": ["站間行車時間非負"] },
+        "edge": { "type": "實作範例", "reason": "乙以優先佇列實作甲之演算法，求公車路網之最短行車時間路線" }
+      },
+      "expect": { "kind": "keep" },
+      "why": "乙為甲之演算法之具體實作,實作範例正確;理由指出共同之方法與其實作方式＝具體 → keep"
+    },
+    {
+      "id": "k03",
+      "holdout": false,
+      "type": "keep-sibling",
+      "input": {
+        "a": { "title": "合併排序法", "category": "模型與演算法", "evidenceLevel": "高", "concepts": ["合併排序", "分治法"], "summary": "把序列對半拆分、各自遞迴排序後再合併，最壞情況為 O(n log n)，屬穩定排序但需要額外之暫存空間。", "keyPoints": ["對半拆分後遞迴排序再合併", "穩定排序、需要額外空間"], "conditions": [] },
+        "b": { "title": "快速排序法", "category": "模型與演算法", "evidenceLevel": "高", "concepts": ["快速排序", "分治法"], "summary": "選一個樞紐把序列分成兩段後遞迴排序，平均為 O(n log n)，可就地排序但不穩定。", "keyPoints": ["以樞紐分段後遞迴排序", "就地排序、不穩定"], "conditions": [] },
+        "edge": { "type": "同類方法", "reason": "兩者皆以分治法遞迴排序，甲穩定但需額外空間，乙可就地排序但不穩定" }
+      },
+      "expect": { "kind": "keep" },
+      "why": "兩者為同一類(分治法排序)之不同方法,同類方法正確——不是一方實作另一方,也不是一方在另一方之上延伸;理由點出共同之方法與各自之取捨＝具體 → keep"
+    },
+    {
+      "id": "k04",
+      "holdout": false,
+      "type": "keep-shared",
+      "input": {
+        "a": { "title": "以露點溫度預估夜間最低氣溫", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["露點溫度", "最低氣溫"], "summary": "晴朗無風之夜晚氣溫降近傍晚露點時降溫趨緩，傍晚露點可作為夜間最低氣溫之粗估下限。", "keyPoints": ["降近露點時降溫趨緩", "傍晚露點作為最低氣溫之下限"], "conditions": ["晴朗無風之夜晚"] },
+        "b": { "title": "以溫度露點差判斷起霧", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["露點溫度", "輻射霧"], "summary": "氣溫與露點之差小於約 2 度且夜間無風時，地面附近容易形成輻射霧。", "keyPoints": ["溫度露點差小於約 2 度", "夜間無風"], "conditions": ["夜間無風"] },
+        "edge": { "type": "共用資料或指標", "reason": "兩篇皆以傍晚之露點溫度為依據，甲估計夜間最低氣溫，乙判斷是否起霧" }
+      },
+      "expect": { "kind": "keep" },
+      "why": "兩篇皆以露點溫度為判斷依據,共用資料或指標正確;理由點出共同之指標與各自之用途＝具體 → keep"
+    },
+    {
+      "id": "r01",
+      "holdout": false,
+      "type": "vague-reason",
+      "input": {
+        "a": { "title": "由 P 波與 S 波之到時差估算震央距離", "category": "方法與技術", "evidenceLevel": "高", "concepts": ["震央距離", "P 波", "S 波"], "summary": "P 波比 S 波傳得快，兩者到時差隨距離增加，以平均波速換算，到時差每秒約對應 8 公里之震央距離。", "keyPoints": ["到時差隨距離增加", "到時差每秒約對應 8 公里"], "conditions": ["以地殼之平均波速換算"] },
+        "b": { "title": "P 波與 S 波之傳播特性", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["P 波", "S 波"], "summary": "P 波為縱波、速度較快且可穿過液體；S 波為橫波、速度較慢且無法穿過液體。", "keyPoints": ["P 波速度較快", "S 波無法穿過液體"], "conditions": [] },
+        "edge": { "type": "前置概念", "reason": "兩者都和地震有關，可以互相參考著看" }
+      },
+      "expect": { "kind": "reason" },
+      "why": "關聯成立、型別(前置概念)正確,但理由只寫「都和地震有關、可互相參考」,未點出甲乙各自之具體內容＝不具體 → 同型改寫理由"
+    },
+    {
+      "id": "r02",
+      "holdout": false,
+      "type": "vague-reason",
+      "input": {
+        "a": { "title": "Dijkstra 最短路徑演算法", "category": "模型與演算法", "evidenceLevel": "高", "concepts": ["Dijkstra 演算法", "最短路徑"], "summary": "在邊權重非負之圖上，每次取出暫定距離最小之節點並更新鄰點，求單一起點至各點之最短路徑。", "keyPoints": ["邊權重須非負", "每次取出暫定距離最小之節點"], "conditions": ["邊權重非負"] },
+        "b": { "title": "以程式實作 Dijkstra 演算法規劃公車轉乘", "category": "應用與案例", "evidenceLevel": "中", "concepts": ["Dijkstra 演算法", "公車路網"], "summary": "把公車站當節點、站間行車時間當權重，以優先佇列實作 Dijkstra 演算法，求行車時間最短之路線。", "keyPoints": ["以優先佇列取出最近之站", "輸出轉乘站"], "conditions": ["站間行車時間非負"] },
+        "edge": { "type": "實作範例", "reason": "這兩篇的主題相當接近，適合放在一起閱讀" }
+      },
+      "expect": { "kind": "reason" },
+      "why": "關聯成立、型別(實作範例)正確,但理由只寫「主題相當接近、適合一起閱讀」＝不具體 → 同型改寫理由"
+    },
+    {
+      "id": "t01",
+      "holdout": false,
+      "type": "retype-implementation",
+      "input": {
+        "a": { "title": "Dijkstra 最短路徑演算法", "category": "模型與演算法", "evidenceLevel": "高", "concepts": ["Dijkstra 演算法", "最短路徑"], "summary": "在邊權重非負之圖上，每次取出暫定距離最小之節點並更新鄰點，求單一起點至各點之最短路徑。", "keyPoints": ["邊權重須非負", "每次取出暫定距離最小之節點"], "conditions": ["邊權重非負"] },
+        "b": { "title": "以程式實作 Dijkstra 演算法規劃公車轉乘", "category": "應用與案例", "evidenceLevel": "中", "concepts": ["Dijkstra 演算法", "公車路網"], "summary": "把公車站當節點、站間行車時間當權重，以優先佇列實作 Dijkstra 演算法，求行車時間最短之路線。", "keyPoints": ["以優先佇列取出最近之站", "輸出轉乘站"], "conditions": ["站間行車時間非負"] },
+        "edge": { "type": "同類方法", "reason": "兩篇皆以每次取出暫定距離最小之節點之作法求最短路徑" }
+      },
+      "expect": { "kind": "retype", "type": "實作範例" },
+      "why": "乙不是與甲並列之另一種方法,而是以程式實作甲之演算法(一方為另一方之方法之具體實作)——現行「同類方法」屬型別錯 → 改為實作範例;理由已具體"
+    },
+    {
+      "id": "t02",
+      "holdout": false,
+      "type": "retype-extension",
+      "input": {
+        "a": { "title": "理想拋體運動之軌跡", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["拋體運動", "拋物線軌跡"], "summary": "忽略空氣阻力時，水平速度不變、垂直方向等加速度，軌跡為拋物線，仰角 45 度時射程最遠。", "keyPoints": ["水平速度不變", "軌跡為拋物線"], "conditions": ["忽略空氣阻力"] },
+        "b": { "title": "考慮空氣阻力之拋體運動", "category": "模型與演算法", "evidenceLevel": "中", "concepts": ["拋體運動", "空氣阻力"], "summary": "在理想拋體運動之重力項外加入與速度平方成正比之空氣阻力，以數值積分求軌跡，射程比理想模型短。", "keyPoints": ["加入與速度平方成正比之阻力", "射程比理想模型短"], "conditions": ["考慮空氣阻力"] },
+        "edge": { "type": "互補搭配", "reason": "乙在甲之理想拋體模型上加入與速度平方成正比之空氣阻力" }
+      },
+      "expect": { "kind": "retype", "type": "延伸深化" },
+      "why": "乙直接在甲之模型上加入空氣阻力之新變數(一方在另一方之模型上延伸修正)——現行「互補搭配」屬型別錯 → 改為延伸深化;理由已具體"
+    },
+    {
+      "id": "u01",
+      "holdout": false,
+      "type": "missed-conflict",
+      "input": {
+        "a": { "title": "萵苣種子需要光照才會發芽", "category": "原理與概念", "evidenceLevel": "中", "concepts": ["種子發芽", "需光性種子"], "summary": "某品種萵苣種子吸水後須照到紅光才會發芽，置於全黑環境之種子幾乎都不發芽。", "keyPoints": ["照紅光之一組發芽率逾九成", "全黑之一組幾乎不發芽"], "conditions": ["同一品種", "吸水後之種子"] },
+        "b": { "title": "同品種萵苣種子在黑暗中發芽最佳", "category": "原理與概念", "evidenceLevel": "中", "concepts": ["種子發芽", "需光性種子"], "summary": "另一試驗以同一品種萵苣種子比較，全黑環境下之發芽率最高，照光反而抑制發芽。", "keyPoints": ["全黑之一組發芽率最高", "照光之一組發芽率較低"], "conditions": ["同一品種", "吸水後之種子"] },
+        "edge": { "type": "延伸深化", "reason": "乙以同一品種萵苣種子比較照光與全黑環境之發芽率" }
+      },
+      "expect": { "kind": "upgrade" },
+      "why": "同一品種之發芽條件,甲說須照光才發芽、乙說黑暗中最佳而照光抑制——結論互斥之真衝突,現行卻標為延伸深化 → 漏標之衝突 → 升為衝突型"
+    },
+    {
+      "id": "x01",
+      "holdout": false,
+      "type": "homonym",
+      "input": {
+        "a": { "title": "病毒之複製週期", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["病毒", "複製週期"], "summary": "病毒進入宿主細胞後利用宿主之酵素與原料複製遺傳物質，組裝成新病毒顆粒後釋出。", "keyPoints": ["須在宿主細胞內複製", "組裝後釋出新病毒顆粒"], "conditions": ["生物之病毒"] },
+        "b": { "title": "元素週期表之週期與族", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["週期表", "電子組態"], "summary": "週期表之橫列稱為週期，同一週期之元素電子殼層數相同；直行稱為族，同族元素之化學性質相近。", "keyPoints": ["橫列為週期", "直行為族"], "conditions": [] },
+        "edge": { "type": "共用資料或指標", "reason": "兩篇都用到週期之概念來描述重複出現之規律" }
+      },
+      "expect": { "kind": "retire" },
+      "why": "病毒之複製週期與元素週期表只共用「週期」一詞,無共同之機制、參數、前提、資料或方法 → 無知識關聯 → retire"
+    },
+    {
+      "id": "s01",
+      "holdout": false,
+      "type": "material-missing",
+      "input": {
+        "a": { "title": "變星觀測隨筆", "category": "其他", "evidenceLevel": "低", "concepts": ["變星", "研究筆記"], "summary": "作者記錄觀測某顆變星之一些心得，細節未載。", "keyPoints": [], "conditions": [] },
+        "b": { "title": "造父變星之週光關係", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["造父變星", "週光關係"], "summary": "造父變星之光變週期越長、絕對亮度越高，可由週期推得亮度再估算距離。", "keyPoints": ["週期越長絕對亮度越高", "可由週期估算距離"], "conditions": ["造父變星"] },
+        "edge": { "type": "前置概念", "reason": "甲以乙之週光關係由光變週期推算變星之距離" }
+      },
+      "expect": { "kind": "unsure" },
+      "why": "甲之材料未載任何具體內容,無從確認甲是否以週光關係推算距離、亦無從確認是否談造父變星 → 材料不足 → unsure"
+    },
+    {
+      "id": "h1",
+      "holdout": true,
+      "type": "keep-extension",
+      "input": {
+        "a": { "title": "理想氣體方程式", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["理想氣體", "狀態方程式"], "summary": "理想氣體之壓力、體積、莫耳數與絕對溫度滿足 PV = nRT，高溫低壓下真實氣體近似成立。", "keyPoints": ["PV = nRT"], "conditions": ["理想氣體"] },
+        "b": { "title": "凡得瓦方程式", "category": "模型與演算法", "evidenceLevel": "高", "concepts": ["凡得瓦方程式", "真實氣體"], "summary": "在理想氣體方程式中加入分子體積與分子間引力之修正項，較能描述高壓低溫下之真實氣體。", "keyPoints": ["修正分子體積", "修正分子間引力"], "conditions": ["真實氣體"] },
+        "edge": { "type": "延伸深化", "reason": "乙在甲之理想氣體方程式上加入分子體積與分子間引力之修正項" }
+      },
+      "expect": { "kind": "keep" },
+      "why": "乙直接在甲之方程式上加入修正項,延伸深化正確;理由點出所加之修正項＝具體 → keep"
+    },
+    {
+      "id": "h2",
+      "holdout": true,
+      "type": "missed-conflict",
+      "input": {
+        "a": { "title": "中間插入時鏈結串列比動態陣列快", "category": "資料與指標", "evidenceLevel": "低", "concepts": ["鏈結串列", "動態陣列"], "summary": "在同一台電腦上對十萬筆整數反覆於中間插入，鏈結串列之總耗時比動態陣列短。", "keyPoints": ["十萬筆整數", "鏈結串列之總耗時較短"], "conditions": ["同一台電腦", "中間位置插入"] },
+        "b": { "title": "中間插入時動態陣列反而比鏈結串列快", "category": "資料與指標", "evidenceLevel": "中", "concepts": ["鏈結串列", "快取區域性"], "summary": "在相同硬體與相同筆數下，動態陣列之中間插入總耗時較短，因連續記憶體之快取命中率高。", "keyPoints": ["相同硬體與筆數", "動態陣列之總耗時較短"], "conditions": ["同一台電腦", "中間位置插入"] },
+        "edge": { "type": "互補搭配", "reason": "兩篇皆以十萬筆整數比較兩種結構之中間插入耗時" }
+      },
+      "expect": { "kind": "upgrade" },
+      "why": "同一操作、相同硬體與筆數,甲說鏈結串列較快、乙說動態陣列較快——相反之結論＝真衝突,現行卻標為互補搭配 → 漏標之衝突 → 升為衝突型"
+    },
+    {
+      "id": "h3",
+      "holdout": true,
+      "type": "retype-implementation",
+      "input": {
+        "a": { "title": "以樣線法調查鳥類族群數量", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["樣線法", "鳥類調查"], "summary": "調查員沿固定路線步行，記錄目視與聽到之鳥種與距離，再以偵測函數校正漏記，估計單位面積之族群密度。", "keyPoints": ["沿固定路線記錄", "以偵測函數校正漏記"], "conditions": ["日間活動之鳥種"] },
+        "b": { "title": "某濕地以樣線法調查水鳥之結果", "category": "應用與案例", "evidenceLevel": "中", "concepts": ["樣線法", "水鳥"], "summary": "調查員沿濕地內 3 條固定路線記錄水鳥，以偵測函數校正漏記後，估計小白鷺之密度。", "keyPoints": ["沿 3 條固定路線記錄", "以偵測函數校正漏記"], "conditions": ["某濕地", "日間調查"] },
+        "edge": { "type": "互補搭配", "reason": "乙沿固定路線記錄水鳥並以偵測函數校正漏記，與甲之調查程序相同" }
+      },
+      "expect": { "kind": "retype", "type": "實作範例" },
+      "why": "乙是以甲之樣線法在某濕地實際調查之應用實例(一方為另一方之方法之應用實例)——現行「互補搭配」屬型別錯 → 改為實作範例;理由已具體"
+    },
+    {
+      "id": "h4",
+      "holdout": true,
+      "type": "homonym",
+      "input": {
+        "a": { "title": "光纖之全反射", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["全反射", "光纖通訊"], "summary": "光線由高折射率之纖芯射向低折射率之包層，入射角大於臨界角即全部反射，可沿光纖長距離傳輸。", "keyPoints": ["入射角大於臨界角即全反射"], "conditions": ["纖芯折射率高於包層"] },
+        "b": { "title": "光合作用之光反應", "category": "原理與概念", "evidenceLevel": "高", "concepts": ["光合作用", "光反應"], "summary": "葉綠體類囊體膜上之色素吸收光能，分解水並釋出氧氣，同時產生 ATP 與 NADPH。", "keyPoints": ["色素吸收光能", "分解水並釋出氧氣"], "conditions": ["葉綠體"] },
+        "edge": { "type": "互補搭配", "reason": "兩篇都在討論光之性質與光能之利用" }
+      },
+      "expect": { "kind": "retire" },
+      "why": "光纖之全反射與光合作用只共用「光」字,無共同之機制、參數、前提、資料或方法 → 無知識關聯 → retire"
+    },
+    {
+      "id": "h5",
+      "holdout": true,
+      "type": "vague-reason",
+      "input": {
+        "a": { "title": "以露點溫度預估夜間最低氣溫", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["露點溫度", "最低氣溫"], "summary": "晴朗無風之夜晚氣溫降近傍晚露點時降溫趨緩，傍晚露點可作為夜間最低氣溫之粗估下限。", "keyPoints": ["降近露點時降溫趨緩", "傍晚露點作為最低氣溫之下限"], "conditions": ["晴朗無風之夜晚"] },
+        "b": { "title": "以溫度露點差判斷起霧", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["露點溫度", "輻射霧"], "summary": "氣溫與露點之差小於約 2 度且夜間無風時，地面附近容易形成輻射霧。", "keyPoints": ["溫度露點差小於約 2 度", "夜間無風"], "conditions": ["夜間無風"] },
+        "edge": { "type": "共用資料或指標", "reason": "兩篇都屬於天氣預報方面的知識內容" }
+      },
+      "expect": { "kind": "reason" },
+      "why": "兩篇皆以露點溫度為依據,共用資料或指標正確;理由只寫「都屬於天氣預報方面」＝籠統、未點出共同之指標 → 同型改寫理由"
+    }
+  ]
+}

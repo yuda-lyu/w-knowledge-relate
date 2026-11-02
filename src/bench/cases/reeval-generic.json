@@ -1,0 +1,187 @@
+{
+  "std": "RS5",
+  "v": 2,
+  "note": "通用題組(領域中立):檢定標準 RS5(內容變更後既有關聯仍成立)之重評——以正式重評提示詞(relateDomain.buildReevalPrompt＋預設詞彙之型別與 guide.relate)逐條裁決。每案一篇「內容已更新」之目標(input.target;一句話重點即提示詞所列之新內容)、一位鄰居(input.neighbor)與兩者之間現行之一條關聯(input.edge),格式同 RS5 題組。應然由重評提示詞之判準推得:只有能具體指出新內容哪一點改變了關聯才 change／retire;keep＝關聯仍成立(措辭改寫、補充說明、改了細節而機制仍在、衝突之兩方結論仍相反);retire＝新內容換了主題而與對象不再有共同之機制、參數或前提;change 衝突型＝新內容之結論與對象相反;change 非衝突型＝原為衝突而新內容已與對象一致(仍有知識關聯者不撤銷);unsure＝新內容細節未載、無從確認關聯是否仍成立。類別涵蓋 keep(措辭、衝突仍在、機制仍在)、retire、change 衝突型、change 非衝突型、unsure。判不清楚之類別不收:非衝突型別之間之改型與只更新理由(新內容使現行理由部分失準時,keep 與 change 皆說得通)。衝突案之兩方為匿名之示意敘述(彼此矛盾,不指涉真實研究);其餘材料為正確之一般知識;不含網址與文獻出處。保留題(holdout)不得用於調提示詞。",
+  "cases": [
+    {
+      "id": "k1",
+      "holdout": false,
+      "type": "reword",
+      "input": {
+        "target": { "title": "以克卜勒第三定律估算行星公轉週期", "category": "應用與案例", "evidenceLevel": "高", "concepts": ["克卜勒第三定律", "公轉週期"], "summary": "以週期平方與軌道半長軸立方成正比之關係，由地球之數值換算其他行星之公轉週期（本版改寫說明並補上換算表，結論不變）。" },
+        "neighbor": { "id": "克卜勒第三定律-8e04d7f3", "title": "克卜勒第三定律", "category": "原理與概念", "concepts": ["克卜勒第三定律", "軌道半長軸"], "summary": "行星公轉週期之平方與軌道半長軸之立方成正比，可由萬有引力定律推得。" },
+        "edge": { "type": "前置概念", "reason": "甲以乙之週期平方與半長軸立方成正比之關係換算公轉週期" }
+      },
+      "expect": { "verdict": "keep" },
+      "why": "新內容只改寫說明、補換算表,仍以乙之定律換算週期 → 前置關係不變 → keep"
+    },
+    {
+      "id": "kc1",
+      "holdout": false,
+      "type": "reword-conflict",
+      "input": {
+        "target": { "title": "萵苣種子需要光照才會發芽", "category": "原理與概念", "evidenceLevel": "中", "concepts": ["種子發芽", "需光性種子"], "summary": "某品種萵苣種子吸水後須照到紅光才會發芽，全黑環境中幾乎不發芽（本版重新整理段落並補上實驗照片之說明，結論不變）。" },
+        "neighbor": { "id": "同品種萵苣種子在黑暗中發芽最佳-f0c7b294", "title": "同品種萵苣種子在黑暗中發芽最佳", "category": "原理與概念", "concepts": ["種子發芽", "需光性種子"], "summary": "以同一品種比較，全黑環境下之發芽率最高，照光反而抑制發芽。" },
+        "edge": { "type": "衝突或反例", "reason": "甲說此品種萵苣種子須照紅光才發芽；乙說同品種在全黑環境下發芽率最高" }
+      },
+      "expect": { "verdict": "keep" },
+      "why": "新內容只整理段落,結論(須照光才發芽)仍與乙(黑暗中最佳)相反,同一品種 → 衝突仍成立 → keep"
+    },
+    {
+      "id": "m1",
+      "holdout": false,
+      "type": "mechanism-kept",
+      "input": {
+        "target": { "title": "以露點溫度預估夜間最低氣溫", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["露點溫度", "最低氣溫"], "summary": "本版改以傍晚每小時觀測之露點平均值計算，仍以露點作為晴朗無風夜晚最低氣溫之下限估計。" },
+        "neighbor": { "id": "露點溫度之定義-71c4e0a9", "title": "露點溫度之定義", "category": "原理與概念", "concepts": ["露點溫度", "飽和"], "summary": "空氣在氣壓與水氣量不變下冷卻至飽和、水氣開始凝結時之溫度稱為露點溫度。" },
+        "edge": { "type": "前置概念", "reason": "甲以乙所定義之露點溫度作為夜間最低氣溫之估計下限" }
+      },
+      "expect": { "verdict": "keep" },
+      "why": "新內容只改了露點之取值方式(逐時平均),仍以乙所定義之露點為最低氣溫下限 → 前置關係不變 → keep"
+    },
+    {
+      "id": "r1",
+      "holdout": false,
+      "type": "topic-replaced",
+      "input": {
+        "target": { "title": "麵團發酵之溫度控制", "category": "其他", "evidenceLevel": "低", "concepts": ["麵團", "發酵"], "summary": "本篇已改寫為麵團發酵之溫度控制：攝氏 26 至 28 度時酵母產氣最穩定，溫度過高易帶酸味，與公車路網規劃無關。" },
+        "neighbor": { "id": "dijkstra最短路徑演算法-c5a19f62", "title": "Dijkstra 最短路徑演算法", "category": "模型與演算法", "concepts": ["Dijkstra 演算法", "最短路徑"], "summary": "在邊權重非負之圖上，每次取出暫定距離最小之節點並更新鄰點，求單一起點之最短路徑。" },
+        "edge": { "type": "實作範例", "reason": "甲以程式實作乙之演算法並用於公車路網之最短行車時間路線" }
+      },
+      "expect": { "verdict": "retire" },
+      "why": "新內容換成麵團發酵且明言與公車路網無關,與最短路徑演算法已無共同之機制、參數或前提 → retire"
+    },
+    {
+      "id": "r2",
+      "holdout": false,
+      "type": "topic-replaced",
+      "input": {
+        "target": { "title": "盆栽之換盆時機", "category": "其他", "evidenceLevel": "低", "concepts": ["盆栽", "換盆"], "summary": "本篇已改寫為盆栽之換盆：根系從排水孔長出、或澆水後很快乾透時，即宜換到大一號之盆器。" },
+        "neighbor": { "id": "以自動錄音辨識夜行性鳥類-6f0b2d94", "title": "以自動錄音辨識夜行性鳥類", "category": "方法與技術", "concepts": ["被動聲學監測", "鳥類調查"], "summary": "在樣區架設自動錄音機整夜錄音，以鳴聲辨識夜行性鳥種。" },
+        "edge": { "type": "互補搭配", "reason": "甲之日間樣線調查與乙之夜間錄音合併使用，可補足夜行性鳥種之漏記" }
+      },
+      "expect": { "verdict": "retire" },
+      "why": "新內容換成盆栽換盆,與夜間錄音之鳥類調查已無共同之機制、參數或前提 → retire"
+    },
+    {
+      "id": "c1",
+      "holdout": false,
+      "type": "to-conflict",
+      "input": {
+        "target": { "title": "放養濾食性魚類對藍綠藻之影響", "category": "應用與案例", "evidenceLevel": "中", "concepts": ["生物操縱", "藍綠藻"], "summary": "新版內容：於同一座優養化湖泊放養濾食性魚類兩年後，夏季藍綠藻之生物量反而較放養前增加，作者改認為放養會促進藍綠藻。" },
+        "neighbor": { "id": "放養濾食性魚類使湖泊藍綠藻減少-6a0e4c7d", "title": "放養濾食性魚類使湖泊藍綠藻減少", "category": "應用與案例", "concepts": ["生物操縱", "藍綠藻"], "summary": "於同一座湖泊放養濾食性魚類兩年，夏季藍綠藻之生物量較放養前下降。" },
+        "edge": { "type": "延伸深化", "reason": "兩篇皆追蹤同一座湖泊放養濾食性魚類後藍綠藻之變化" }
+      },
+      "expect": { "verdict": "change", "typeConflict": true },
+      "why": "新內容之結論(藍綠藻增加)與乙(下降)相反,同一湖泊、同一做法 → 改為衝突型"
+    },
+    {
+      "id": "c2",
+      "holdout": false,
+      "type": "to-conflict",
+      "input": {
+        "target": { "title": "中間插入之效能比較", "category": "資料與指標", "evidenceLevel": "中", "concepts": ["鏈結串列", "動態陣列"], "summary": "新版內容：重新量測後，在相同硬體與十萬筆整數下，動態陣列之中間插入總耗時比鏈結串列短，作者改認為中間插入應選動態陣列。" },
+        "neighbor": { "id": "中間插入時鏈結串列比動態陣列快-8c2e5b07", "title": "中間插入時鏈結串列比動態陣列快", "category": "資料與指標", "concepts": ["鏈結串列", "動態陣列"], "summary": "在同一台電腦上對十萬筆整數反覆於中間插入，鏈結串列之總耗時較短。" },
+        "edge": { "type": "互補搭配", "reason": "兩篇皆以十萬筆整數比較鏈結串列與動態陣列之插入耗時" }
+      },
+      "expect": { "verdict": "change", "typeConflict": true },
+      "why": "新內容之結論(動態陣列較快)與乙(鏈結串列較快)相反,同樣是十萬筆整數之中間插入 → 改為衝突型"
+    },
+    {
+      "id": "d1",
+      "holdout": false,
+      "type": "conflict-resolved",
+      "input": {
+        "target": { "title": "萵苣種子之發芽條件", "category": "原理與概念", "evidenceLevel": "中", "concepts": ["種子發芽", "需光性種子"], "summary": "新版內容：此品種萵苣種子須照到紅光才會發芽，全黑環境中幾乎不發芽（舊版誤述為黑暗中發芽最佳，已更正）。" },
+        "neighbor": { "id": "萵苣種子為需光性種子-3e8a0c51", "title": "萵苣種子為需光性種子", "category": "原理與概念", "concepts": ["種子發芽", "光敏素"], "summary": "同品種萵苣種子之發芽需要紅光，紅光使光敏素轉為活化型而啟動發芽。" },
+        "edge": { "type": "衝突或反例", "reason": "甲說此品種萵苣種子在黑暗中發芽最佳；乙說同品種須照紅光才發芽" }
+      },
+      "expect": { "verdict": "change", "typeConflict": false },
+      "why": "新內容已更正為須照光才發芽,與乙一致而不再相反;兩篇仍談同一品種之發芽條件 → 改為非衝突型(仍有知識關聯,不撤銷)"
+    },
+    {
+      "id": "d2",
+      "holdout": false,
+      "type": "conflict-resolved",
+      "input": {
+        "target": { "title": "某鋁合金之最佳時效溫度", "category": "資料與指標", "evidenceLevel": "中", "concepts": ["時效硬化", "鋁合金"], "summary": "新版內容：此型鋁合金於攝氏 175 度時效 8 小時之硬度最高（舊版誤植為 120 度，已更正）。" },
+        "neighbor": { "id": "同型鋁合金之時效實驗-9b4f2d6e", "title": "同型鋁合金之時效實驗", "category": "資料與指標", "concepts": ["時效硬化", "鋁合金"], "summary": "以同型鋁合金重做時效實驗，同樣在攝氏 175 度時效 8 小時之硬度最高。" },
+        "edge": { "type": "衝突或反例", "reason": "甲說最佳時效溫度為攝氏 120 度；乙說同型合金於 175 度之硬度最高" }
+      },
+      "expect": { "verdict": "change", "typeConflict": false },
+      "why": "新內容已更正為攝氏 175 度,與乙一致而不再矛盾;兩篇仍檢驗同型合金之時效溫度 → 改為非衝突型(不撤銷)"
+    },
+    {
+      "id": "u1",
+      "holdout": false,
+      "type": "material-missing",
+      "input": {
+        "target": { "title": "某排序實作之筆記", "category": "其他", "evidenceLevel": "低", "concepts": ["排序演算法", "研究筆記"], "summary": "本篇已更新：作者記錄對某個排序實作之新想法，未說明使用何種演算法與樞紐之選法。" },
+        "neighbor": { "id": "快速排序之三數取中-0e7c4a93", "title": "快速排序之三數取中", "category": "方法與技術", "concepts": ["快速排序", "樞紐選擇"], "summary": "取首、中、尾三個元素之中位數當樞紐，可避免已排序之輸入使快速排序退化。" },
+        "edge": { "type": "前置概念", "reason": "甲之排序實作以乙之三數取中法選擇樞紐" }
+      },
+      "expect": { "verdict": "unsure" },
+      "why": "新內容未說明演算法與樞紐之選法,無從確認是否仍以乙之三數取中選樞紐(不能確認關聯仍成立,也指不出哪一點改變了關聯)→ 材料不足 → unsure"
+    },
+    {
+      "id": "h1",
+      "holdout": true,
+      "type": "reword",
+      "input": {
+        "target": { "title": "由 P 波與 S 波之到時差估算震央距離", "category": "方法與技術", "evidenceLevel": "高", "concepts": ["震央距離", "P 波", "S 波"], "summary": "兩種波之到時差隨距離增加，到時差每秒約對應 8 公里之震央距離（本版修正錯字並補上示意圖說明）。" },
+        "neighbor": { "id": "p波與s波之傳播特性-a7c30e5b", "title": "P 波與 S 波之傳播特性", "category": "原理與概念", "concepts": ["P 波", "S 波"], "summary": "P 波為縱波且速度較快；S 波為橫波、速度較慢且無法穿過液體。" },
+        "edge": { "type": "前置概念", "reason": "甲以乙所述兩種波之速度差換算震央距離" }
+      },
+      "expect": { "verdict": "keep" },
+      "why": "新內容只修錯字、補示意圖,仍以兩種波之速度差換算距離 → 前置關係不變 → keep"
+    },
+    {
+      "id": "h2",
+      "holdout": true,
+      "type": "topic-replaced",
+      "input": {
+        "target": { "title": "手沖咖啡之水溫", "category": "其他", "evidenceLevel": "低", "concepts": ["咖啡", "沖煮"], "summary": "本篇已改寫為手沖咖啡之水溫：攝氏 88 至 92 度較能沖出平衡之風味，與鳥類調查無關。" },
+        "neighbor": { "id": "以樣線法調查鳥類族群數量-1d8c7e3a", "title": "以樣線法調查鳥類族群數量", "category": "方法與技術", "concepts": ["樣線法", "鳥類調查"], "summary": "沿固定路線步行記錄目視與聽到之鳥種與距離，以偵測函數校正漏記後估計族群密度。" },
+        "edge": { "type": "互補搭配", "reason": "甲之夜間錄音與乙之日間樣線調查合併使用，可補足漏記之鳥種" }
+      },
+      "expect": { "verdict": "retire" },
+      "why": "新內容換成手沖咖啡且明言與鳥類調查無關,與樣線法已無共同之機制、參數或前提 → retire"
+    },
+    {
+      "id": "h3",
+      "holdout": true,
+      "type": "to-conflict",
+      "input": {
+        "target": { "title": "傍晚露點與夜間最低氣溫", "category": "方法與技術", "evidenceLevel": "中", "concepts": ["露點溫度", "最低氣溫"], "summary": "新版內容：分析後發現晴朗無風之夜晚最低氣溫常比傍晚露點低 5 度以上，作者改認為露點不能作為最低氣溫之下限。" },
+        "neighbor": { "id": "以露點溫度預估夜間最低氣溫-9c4a1f07", "title": "以露點溫度預估夜間最低氣溫", "category": "方法與技術", "concepts": ["露點溫度", "最低氣溫"], "summary": "晴朗無風之夜晚氣溫降近傍晚露點時降溫趨緩，傍晚露點可作為夜間最低氣溫之粗估下限。" },
+        "edge": { "type": "延伸深化", "reason": "兩篇皆探討傍晚露點與夜間最低氣溫之關係" }
+      },
+      "expect": { "verdict": "change", "typeConflict": true },
+      "why": "新內容之結論(露點不能作為下限)與乙(可作為下限)相反,同樣是晴朗無風之夜晚 → 改為衝突型"
+    },
+    {
+      "id": "h4",
+      "holdout": true,
+      "type": "conflict-resolved",
+      "input": {
+        "target": { "title": "放養濾食性魚類與藍綠藻", "category": "應用與案例", "evidenceLevel": "中", "concepts": ["生物操縱", "藍綠藻"], "summary": "新版內容：放養濾食性魚類兩年後，夏季藍綠藻之生物量下降（舊版誤述為增加，已更正）。" },
+        "neighbor": { "id": "同一湖泊放養後藍綠藻下降-c71e5f02", "title": "同一湖泊放養後藍綠藻下降", "category": "應用與案例", "concepts": ["生物操縱", "藍綠藻"], "summary": "同一座湖泊放養濾食性魚類兩年，夏季藍綠藻之生物量較放養前下降。" },
+        "edge": { "type": "衝突或反例", "reason": "甲說放養後藍綠藻增加；乙說同一湖泊放養後藍綠藻下降" }
+      },
+      "expect": { "verdict": "change", "typeConflict": false },
+      "why": "新內容已更正為下降,與乙一致而不再相反;仍檢驗同一做法之效果 → 改為非衝突型(不撤銷)"
+    },
+    {
+      "id": "h5",
+      "holdout": true,
+      "type": "material-missing",
+      "input": {
+        "target": { "title": "變星觀測之心得", "category": "其他", "evidenceLevel": "低", "concepts": ["變星", "研究筆記"], "summary": "本篇已更新：作者分享觀測某顆變星之新心得，未說明以何種方法推算距離。" },
+        "neighbor": { "id": "造父變星之週光關係-5f1a8e3c", "title": "造父變星之週光關係", "category": "原理與概念", "concepts": ["造父變星", "週光關係"], "summary": "造父變星之光變週期越長、絕對亮度越高，可由週期推得亮度再估算距離。" },
+        "edge": { "type": "前置概念", "reason": "甲以乙之週光關係由光變週期推算變星之距離" }
+      },
+      "expect": { "verdict": "unsure" },
+      "why": "新內容未說明推算距離之方法,無從確認是否仍以週光關係推距離 → 材料不足 → unsure"
+    }
+  ]
+}

@@ -1,0 +1,1000 @@
+// relateBench.mjs — 關聯之 AI 能力評分(四角色):以抓取套件之角色化評分核心(defineBenchRole、runBench、defineBenchRoles)定義
+//   正向關聯(relate)、重評(reeval;RS5)、衝突核對(conflict-check;RS4)、既有邊覆核(edge-review;RS6);判準、失敗與停測、併發、
+//   報表與評比表皆在核心
+//
+// 【提示詞與判定同正式管線】提示詞一律以本套件之正式 domain(createRelateDomain;建構參數只有詞彙)組;逐案之類別以正式之判定函數算出——
+//   正向:納入閘 admitRelation(slug 解析與尾碼救回、非自指、RS1／RS2／RS3／RS8／RS9;可確定性修正者修正後納入)＋逐項鏈之合併規則;
+//   重評:verdictsOf;衝突核對:seatVotesOf＋checkVerdictOf;既有邊覆核:seatVotesOf＋reviewVerdictOf(型別改正之封閉清單)。量的是模型於
+//   正式提示詞與正式判準下之表現,不另立一套評分規則。詞彙經 opt.vocab／命令列 --vocab 注入即以之組提示詞;覆寫了提示詞者以
+//   opt.domain(或 opt.vocab＋opt.domainOf;核心只在有詞彙時用 domainOf)注入同一工廠之產物。
+// 【逐次呼叫選項與批合格判準同正式呼叫點】四角色皆為陣列輸出:逐次 acceptTruncated:true(截斷放行、部分接受)。交調度層之 check 取該呼叫點
+//   之正式判準——正向:至少一項合格(index 對應頁內之案、relations 為陣列,且為空或至少一條過納入閘);重評:至少一項帶整數 index 與
+//   verdicts 陣列;衝突核對、既有邊覆核:至少一項帶整數 index。不合者同正式交遞補,於評分記為該頁呼叫失敗(回覆不合)。
+// 【判準】逐案每回之類別皆＝應然才通過(核心之 judgeBenchCase;一回不符即不通過,不以比率放行);合契約率、耗時、呼叫失敗只列資訊。
+// 【分頁】預設取 RELATE_DEFAULT,--batch 可改:正向每頁 relate.notesPerCall 案(一案＝一篇目標與其候選清單);重評每頁 relate.reeval.pageSize 案
+//   (一案＝一篇內容已更新之目標與其一條既有關聯——正式重評之一次呼叫為一篇與其一頁既有關聯,提示詞函數相同、頁之形狀不同);
+//   衝突核對、既有邊覆核每頁 relate.standards.{conflictCheck,edgeReview}.pageSize 案,項編號同正式於一次評分內連續、跨頁不重來
+//   (核心於分頁後給定:promptOf／check 之 ctx.base、verdictOf 之 at.seq)。同頁之案須同一份詞彙(核心之規則):自帶詞彙(input.vocab)不同之案分頁。
+// 【類別】
+//   正向        match(過閘並依逐項鏈合併後之邊與應然逐項相符)／mismatch(回空清單、漏建、型別不在可接受之列、應判衝突而未判、誤建不得選之對象);
+//               同一 index 取第一個合格之項(同正式之部分接受);皆不合格者無裁決(同正式之未涵蓋)
+//   重評        keep／change(衝突型)／change(非衝突型)／retire／unsure;取該編號之第一項,其 verdicts 經 verdictsOf 無該條之合格裁決者為無裁決
+//   衝突核對    同重評之五類;票之驗證同正式(理由過短、型別無對映、同編號矛盾者為缺票＝無裁決;衝突型而理由同現行者視同 keep)
+//   既有邊覆核  keep／reason(同型改理由)／retype:<型別>／upgrade(升為衝突)／retire／unsure;不屬型別改正封閉清單之非衝突改型視為同型改理由
+// 【題組】內建通用題組 src/bench/cases/<角色 id>-generic.json(領域中立、合成材料、無外部連結)。重評、衝突核對、既有邊覆核與 RS5、RS4、RS6 之
+//   檢定標準題組同形(可以 --cases 原樣收);題組之型別須在詞彙表內(於任何呼叫之前驗;以其詞彙表 --vocab 跑)。
+// 【命令列】runRelateBenchCli:--role <角色 id|all>(預設 all:依序四角色)加核心之全部參數;--role 解析、--vocab-pick、全部角色之準備期
+//   (後面角色之錯誤不得在前面角色燒完額度後才拋)與停測帶過(前面角色已停測之模型不再於後續角色受測)皆為抓取套件之多角色命令列
+//   (defineBenchRoles;規則只在核心一份),本檔只給角色清單、pickRelateVocab 與子集檔名之主幹。各角色之列並存於同一評比表(--board)。
+//   bench/cli.mjs 為薄殼。
+
+import { fileURLToPath } from 'url'
+import isobj from 'wsemi/src/isobj.mjs'
+import isarr from 'wsemi/src/isarr.mjs'
+import isestr from 'wsemi/src/isestr.mjs'
+import {
+    oneline, textValueOf, unknownKeysProblem, slugSuffixOf, SLUG_SUFFIX_CHARS,
+    defineBenchRole, defineBenchRoles, DEFAULT_FREE_MODELS,
+    typeName, chunk, groupBy, vocabKeyOf, inputVocabProblemsOf, domainNeedsOf, noVerdict, benchPintOf, batchOption, benchVoteMissingOf,
+} from '../core/capturePackage.mjs'
+import { PANEL_UNSURE } from '../core/summarizePackage.mjs'
+import { RELATE_DEFAULT } from '../core/relateSettings.mjs'
+import { resolveRelateVocab, pickRelateVocab } from '../core/vocab/relateVocab.mjs'
+import { createRelateDomain } from '../domain/relateDomain.mjs'
+import { itemTargetOf, admitItemOf, pickRelationsOf, RELATE_MAX_RELATIONS_PER_NOTE } from '../stages/relateChain.mjs'
+import { makeSlugResolver } from '../stores/candidates.mjs'
+import { makeEdge } from '../stores/edgeStore.mjs'
+import { verdictsOf, verdictsByIndexOf, reevalPromptItemOf } from '../stores/reevalPolicy.mjs'
+import { RS4, checkVerdictOf } from '../stores/conflictCheckPolicy.mjs'
+import { RS6, reviewVerdictOf, retypeAllowed, rs6VoteActionOf } from '../stores/edgeReviewPolicy.mjs'
+import { EDGE_VERDICTS, seatVotesOf } from '../stores/edgeCheckKit.mjs'
+import { RS5 } from '../stores/relateHolds.mjs'
+import { pairCheckItemOf } from '../standards/edgeGate.mjs'
+
+/** 關聯設定之預設(分頁與受測名單取此;重評之頁量＝relate.reeval.pageSize) */
+const R = RELATE_DEFAULT
+
+/** 提案之時刻(評分不落地:時刻不進提示詞與判定) */
+const BENCH_NOW = '2000-01-01T00:00:00+00:00'
+
+
+/**
+ * 重評與衝突核對之 change 類別(依新型別是否為衝突型;非衝突型之間不限定是哪一種)
+ *
+ * @type {Object}
+ */
+export const RELATE_BENCH_CHANGE = Object.freeze({ conflict: 'change(衝突型)', other: 'change(非衝突型)' })
+
+/** 既有邊覆核之處置(應然 expect.kind;retype 另給 expect.type) */
+const REVIEW_KINDS = Object.freeze(['keep', 'reason', 'retype', 'upgrade', 'retire', PANEL_UNSURE])
+
+/**
+ * 內建通用題組之檔(模組所在資料夾之檔案,以 fileURLToPath 解析)
+ *
+ * @type {Object}
+ */
+export const RELATE_BENCH_CASES_FILES = Object.freeze(Object.fromEntries(['relate', 'reeval', 'conflict-check', 'edge-review']
+    .map((id) => [id, fileURLToPath(new URL(`./cases/${id}-generic.json`, import.meta.url))])))
+
+/**
+ * 預設受測名單:關聯之預設席位(relate.ai 之 use 與 fallback)在前,其餘依核心之免費名單(DEFAULT_FREE_MODELS)
+ *
+ * @type {Array}
+ */
+export const RELATE_BENCH_MODELS = Object.freeze([...new Set([R.ai.use, ...(isarr(R.ai.fallback) ? R.ai.fallback : []), ...DEFAULT_FREE_MODELS])])
+
+// ════════════════ 共用小件(角色作者之通用件——型別名、切塊、分組、詞彙鍵、案詞彙之檢核、domain 之形狀檢核、無裁決、正整數參數、每頁案數選項——
+//   取抓取套件之 benchKit;本檔只放關聯專屬者)════════════════
+
+/**
+ * 案自帶詞彙之檢核(以本套件詞彙表之規格驗;未帶不驗;抓取套件之 inputVocabProblemsOf)
+ *
+ * @param {Object} c 輸入案
+ * @returns {Array} 回傳問題說明陣列
+ */
+const inputVocabProblems = (c) => inputVocabProblemsOf(c, resolveRelateVocab)
+
+/**
+ * 筆記材料之檢核(提示詞所讀之欄位):標題與一句話重點非空、類別為字串、概念為字串陣列;證據等級、注意事項、核心知識、適用條件為選給
+ *
+ * @param {*} n 輸入筆記材料
+ * @param {String} where 輸入欄位路徑(錯誤訊息用)
+ * @param {Object} [opt={}] 輸入 { id:Boolean(須給 id;未設者給了亦須為非空字串) }
+ * @returns {Array} 回傳問題說明陣列
+ */
+function noteProblems(n, where, opt = {}) {
+    if (!isobj(n)) return [`缺 ${where}(筆記之標題、類別、概念與一句話重點)`]
+    const p = []
+    if (opt.id ? !isestr(n.id) : (n.id !== undefined && !isestr(n.id))) p.push(`${where}.id 須為非空字串(slug)`)
+    if (!isestr(n.title) || !n.title.trim()) p.push(`${where}.title 須為非空字串`)
+    if (typeof n.category !== 'string') p.push(`${where}.category 須為字串`)
+    if (!isarr(n.concepts) || !n.concepts.every((x) => typeof x === 'string')) p.push(`${where}.concepts 須為字串陣列`)
+    if (!isestr(n.summary) || !n.summary.trim()) p.push(`${where}.summary 須為非空字串(一句話重點)`)
+    if (n.evidenceLevel !== undefined && typeof n.evidenceLevel !== 'string') p.push(`${where}.evidenceLevel 須為字串`)
+    for (const k of ['caveats', 'keyPoints', 'conditions']) {
+        if (n[k] !== undefined && !(isarr(n[k]) && n[k].every((x) => typeof x === 'string'))) p.push(`${where}.${k} 須為字串陣列`)
+    }
+    return p
+}
+
+/**
+ * 現行邊之檢核(重評、衝突核對、既有邊覆核)
+ *
+ * @param {*} e 輸入 input.edge
+ * @param {Object} [opt={}] 輸入 { typeOptional:Boolean(型別可不給——衝突核對之提示詞以衝突型代之) }
+ * @returns {Array} 回傳問題說明陣列
+ */
+function edgeProblems(e, opt = {}) {
+    if (!isobj(e)) return ['缺 input.edge:{ type, reason }(現行之關聯)']
+    const p = []
+    if (opt.typeOptional ? (e.type !== undefined && !isestr(e.type)) : !isestr(e.type)) p.push('input.edge.type 須為非空字串(現行型別)')
+    if (!isestr(e.reason) || !e.reason.trim()) p.push('input.edge.reason 須為非空字串(現行理由)')
+    // 「現行理由須改寫」之附註由評分依正式規則計算(standards/edgeGate 之 pairCheckItemOf),題組自給即與正式之提示詞形式分歧
+    if (e.reasonProblem !== undefined) p.push('input.edge 不收 reasonProblem(由評分依正式規則計算——現行理由須改寫者自動附註,同正式管線)')
+    return p
+}
+
+/**
+ * 裁決應然之檢核(重評、衝突核對):verdict 在清單;change 須給 typeConflict(新型別是否為衝突型),其餘不給
+ *
+ * @param {*} e 輸入 expect
+ * @param {Array} verdicts 輸入合法裁決
+ * @returns {Array} 回傳問題說明陣列
+ */
+function verdictExpectProblems(e, verdicts) {
+    if (!isobj(e) || !verdicts.includes(e.verdict)) return [`expect.verdict 須為 ${verdicts.join('／')}`]
+    if (e.verdict === 'change' && typeof e.typeConflict !== 'boolean') return ['expect.typeConflict 須為布林(change 之新型別是否為衝突型)']
+    if (e.verdict !== 'change' && e.typeConflict !== undefined) return ['expect.typeConflict 只用於 change']
+    return []
+}
+
+/**
+ * 裁決之類別(重評、衝突核對之應然與票同一組類別)
+ *
+ * @param {Object} v 輸入 { verdict, typeConflict? }(應然)或 { verdict, type? }(票;以 conflictType 判)
+ * @param {String} [conflictType] 輸入衝突型之名(票用)
+ * @returns {String} 回傳類別
+ */
+function verdictClassOf(v, conflictType) {
+    if (v.verdict !== 'change') return v.verdict
+    const toConflict = conflictType === undefined ? v.typeConflict === true : v.type === conflictType
+    return toConflict ? RELATE_BENCH_CHANGE.conflict : RELATE_BENCH_CHANGE.other
+}
+
+/**
+ * 一席回覆中某項之原樣(顯示用):裁決值與型別
+ *
+ * @param {*} raw 輸入回覆之單項
+ * @returns {String} 回傳顯示字串
+ */
+const rawVerdictText = (raw) => (isobj(raw) ? oneline(`${textValueOf(raw.verdict)}${isestr(raw.type) ? `→${raw.type}` : ''}`, 40) : '')
+
+/**
+ * domain 之形狀檢核(角色之 domainProblem;抓取套件之 domainNeedsOf——須為物件、須具之函數):另讀型別清單與衝突型;納入閘另讀空泛片語,
+ *   型別改正之封閉清單另讀型別角色
+ *
+ * @param {Array} fns 輸入須具之函數名
+ * @param {Object} [opt={}] 輸入 { vague:Boolean(須具 vagueReasons), roles:Boolean(須具 relationTypeRoles) }
+ * @returns {Function} 回傳 (d) => String(問題說明;空字串＝合格)
+ */
+const domainNeeds = (fns, opt = {}) => domainNeedsOf(fns, (d) => {
+    if (!isarr(d.relationTypes) || !d.relationTypes.length || !d.relationTypes.every(isestr)) return '之 relationTypes 須為非空字串陣列（票之驗證與納入閘讀之）'
+    if (!isestr(d.conflictType) || !d.relationTypes.includes(d.conflictType)) return '之 conflictType 須為 relationTypes 之一'
+    if (opt.vague && !(isarr(d.vagueReasons) && d.vagueReasons.every((x) => typeof x === 'string'))) return '之 vagueReasons 須為字串陣列（納入閘之 RS2 讀之）'
+    if (opt.roles && !isobj(d.relationTypeRoles)) return '之 relationTypeRoles 須為物件（型別改正之封閉清單讀之）'
+    return ''
+})
+
+/**
+ * 同詞彙之案依序每頁 dflt 案(--batch 可改)之分頁(項編號由核心於分頁後給定)
+ *
+ * @param {Integer} dflt 輸入每頁案數之預設
+ * @returns {Function} 回傳 paginate (cases, ctx) => 頁陣列
+ */
+const paginateBy = (dflt) => (cases, ctx) => groupBy(cases, vocabKeyOf).flatMap((g) => chunk(g, benchPintOf(ctx.roleOpt?.batch, dflt, 'batch')))
+
+/**
+ * 該案之項編號(核心之 at.seq:一次評分內依分頁之序連續、跨頁不重來,同正式)
+ *
+ * @param {Object} at 輸入 verdictOf 之 at
+ * @returns {Integer} 回傳項編號
+ * @throws {Error} at 未帶 seq 時拋出
+ */
+function seqOf(at) {
+    if (!Number.isInteger(at?.seq)) throw new Error('評分之 at 未帶項編號 seq（核心於分頁後給定）')
+    return at.seq
+}
+
+/**
+ * 頁內第 i 案(0 起)之項編號(promptOf／check 之 ctx.base ＋ i ＋ 1)
+ *
+ * @param {Object} ctx 輸入 promptOf 之 ctx
+ * @param {Integer} i 輸入頁內序(0 起)
+ * @returns {Integer} 回傳項編號
+ */
+const seqAt = (ctx, i) => (Number.isInteger(ctx?.base) ? ctx.base : 0) + i + 1
+
+// ════════════════ 正向關聯(relate) ════════════════
+
+/** 正向之無回覆欄位 */
+const RELATE_BLANK = Object.freeze({ edges: '', problems: '', rejected: 0, rejectedWhy: '', fixed: 0, dropped: '' })
+
+/** 正向之應然之鍵 */
+const RELATE_EXPECT_KEYS = Object.freeze(['must', 'conflict', 'mustNot', 'allowEmpty'])
+
+/**
+ * 正向之題組層檢核:目標 id 不重複(同頁之候選清單以目標 id 對應)
+ *
+ * @param {Object} set 輸入題組
+ * @returns {Array} 回傳問題說明陣列
+ */
+function relateSuiteProblems(set) {
+    const ids = set.cases.map((c) => c?.input?.target?.id).filter(isestr)
+    const dup = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))]
+    return dup.length ? [`目標 id 重複：${dup.join('、')}（同頁之候選清單以目標 id 對應）`] : []
+}
+
+/**
+ * 正向之逐案檢核:目標與候選清單(與正式提示詞之輸入同形)、應然之四欄(每個候選必列於 must／conflict／mustNot 之一;
+ *   allowEmpty 與「無須選、無須判衝突」一致;須選與須判衝突之對象不逾單篇上限)
+ *
+ * @param {Object} c 輸入案
+ * @returns {Array} 回傳問題說明陣列
+ */
+function relateCaseProblems(c) {
+    const inp = isobj(c.input) ? c.input : {}
+    const p = [...noteProblems(inp.target, 'input.target', { id: true })]
+    const cands = isarr(inp.candidates) && inp.candidates.length ? inp.candidates : null
+    if (!cands) p.push('input.candidates 須為非空陣列(候選清單;與正式提示詞之候選同形)')
+    else cands.forEach((x, i) => p.push(...noteProblems(x, `input.candidates[${i}]`, { id: true })))
+    const ids = (cands || []).map((x) => x?.id).filter(isestr)
+    const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))]
+    if (dupIds.length) p.push(`候選 id 重複：${dupIds.join('、')}`)
+    if (isestr(inp.target?.id) && ids.includes(inp.target.id)) p.push('候選不得含目標自身(正式之候選排除自身)')
+    const sfx = ids.map((id) => slugSuffixOf(id)).filter(Boolean)
+    const dupSfx = [...new Set(sfx.filter((s, i) => sfx.indexOf(s) !== i))]
+    if (dupSfx.length) p.push(`候選 id 之 ${SLUG_SUFFIX_CHARS} 碼尾碼重複：${dupSfx.join('、')}(slug 之尾碼救回會指錯對象)`)
+    const e = c.expect
+    if (!isobj(e)) return [...p, '缺 expect:{ must, conflict, mustNot, allowEmpty }', ...inputVocabProblems(c)]
+    const extra = unknownKeysProblem(e, RELATE_EXPECT_KEYS, 'expect')
+    if (extra) p.push(extra)
+    for (const k of ['must', 'conflict', 'mustNot']) if (!isarr(e[k])) p.push(`expect.${k} 須為陣列(可為空)`)
+    if (typeof e.allowEmpty !== 'boolean') p.push('expect.allowEmpty 須為布林(是否允許空清單)')
+    if (p.length) return [...p, ...inputVocabProblems(c)]
+    const listed = []
+    e.must.forEach((m, i) => {
+        if (!isobj(m) || !isestr(m.to)) {
+            p.push(`expect.must[${i}] 須為 { to:候選 id, types:[可接受之型別] }`)
+            return
+        }
+        const bad = unknownKeysProblem(m, ['to', 'types'], `expect.must[${i}]`)
+        if (bad) p.push(bad)
+        if (!isarr(m.types) || !m.types.length || !m.types.every(isestr)) p.push(`expect.must[${i}].types 須為非空字串陣列(可接受之型別)`)
+        listed.push(m.to)
+    })
+    for (const k of ['conflict', 'mustNot']) {
+        e[k].forEach((to, i) => {
+            if (isestr(to)) listed.push(to)
+            else p.push(`expect.${k}[${i}] 須為候選 id`)
+        })
+    }
+    const unknown = [...new Set(listed.filter((to) => !ids.includes(to)))]
+    if (unknown.length) p.push(`應然之對象不在候選清單：${unknown.join('、')}`)
+    const twice = [...new Set(listed.filter((to, i) => listed.indexOf(to) !== i))]
+    if (twice.length) p.push(`對象重複列於應然：${twice.join('、')}(每個候選只列於 must／conflict／mustNot 之一)`)
+    const missing = ids.filter((id) => !listed.includes(id))
+    if (missing.length) p.push(`候選未列於應然：${missing.join('、')}(每個候選之應然皆須明定:must／conflict／mustNot)`)
+    const need = e.must.length + e.conflict.length
+    if (e.allowEmpty !== (need === 0)) p.push(need ? 'expect.allowEmpty 須為 false(有須選或須判衝突之對象者不允許空清單)' : 'expect.allowEmpty 須為 true(無須選與須判衝突之對象者,應然即空清單)')
+    if (need > RELATE_MAX_RELATIONS_PER_NOTE) p.push(`須選與須判衝突之對象共 ${need} 個，逾單篇上限 ${RELATE_MAX_RELATIONS_PER_NOTE}(正式逐項鏈只取 ${RELATE_MAX_RELATIONS_PER_NOTE} 條——恆不可達)`)
+    return [...p, ...inputVocabProblems(c)]
+}
+
+/**
+ * 同頁之案與詞彙之一致(於組提示詞時驗,詞彙可由 --vocab 換):可接受之型別須在型別清單且不含衝突型——不合者恆不通過,是題組之缺陷
+ *
+ * @param {Array} cases 輸入同頁之案
+ * @param {Object} domain 輸入關聯 domain
+ * @returns {Array} 回傳問題說明陣列
+ */
+function relatePageProblems(cases, domain) {
+    const p = []
+    for (const c of cases) {
+        for (const m of c.expect.must) {
+            const bad = m.types.filter((t) => !domain.relationTypes.includes(t))
+            if (bad.length) p.push(`案 ${c.id} 之可接受型別「${bad.join('、')}」不在型別清單（${domain.relationTypes.join('、')}）`)
+            if (m.types.includes(domain.conflictType)) p.push(`案 ${c.id} 之 must 含衝突型「${domain.conflictType}」(須判衝突者列於 expect.conflict)`)
+        }
+    }
+    return p
+}
+
+/**
+ * 一項回覆 → 正式管線會提出之邊:各條經正式之納入閘(admitRelation:slug 解析與尾碼救回、非自指、型別對映、理由之正規化與 RS1／RS2／RS3／
+ *   RS8;RS8 之材料＝模型所見之目標區塊與該候選列),再依逐項鏈之規則合併(pickRelationsOf:同一對象只取一條、單篇上限,皆衝突優先;
+ *   上限取正式之預設)。涵蓋判準同正式:relations 為陣列,且為空或至少一條過閘
+ *
+ * @param {*} item 輸入回覆之單項 { index, relations }
+ * @param {Object} o 輸入設定物件
+ * @param {Object} o.target 輸入目標筆記(與正式提示詞之目標同形,含 id)
+ * @param {Array} o.candidates 輸入該目標之候選清單(各項含 id)
+ * @param {Object} o.domain 輸入關聯 domain(createRelateDomain 之產物或相容者)
+ * @returns {Object} 回傳 { covered:Boolean(同正式之涵蓋判準), problem:String(未涵蓋之原因), edges:Array(提出之邊 { from, to, type, reason, … }),
+ *   rejected:Array(未過閘之原因,每條一筆), fixed:Integer(修正後納入之條數), rescued:Integer(slug 經尾碼救回之條數), dup:Array, cut:Array }
+ * @example
+ * let d = createRelateDomain()
+ * let t = { id: '甲-11111111', title: '甲', category: '', concepts: ['甲'], summary: '甲之重點' }
+ * let c = { id: '乙-22222222', title: '乙', category: '', concepts: ['甲'], summary: '乙之重點' }
+ * let r = benchRelateEdgesOf({ index: 1, relations: [{ to: '乙-22222222', type: '前置概念', reason: '甲之推導以乙所定義之量為前提而展開' }] }, { target: t, candidates: [c], domain: d })
+ * console.log(r.covered, r.edges.map((e) => `${e.to}:${e.type}`))
+ * // => true [ '乙-22222222:前置概念' ]
+ */
+export function benchRelateEdgesOf(item, o) {
+    const { target, candidates, domain } = o
+    const at = `index ${isobj(item) ? item.index : '?'} 之項`
+    const none = { edges: [], rejected: [], fixed: 0, rescued: 0, dup: [], cut: [] }
+    if (!isobj(item) || !isarr(item.relations)) return { ...none, covered: false, problem: `${at}之 relations 非陣列` }
+    const byId = new Map(candidates.map((x) => [x.id, x]))
+    const ao = { target, resolve: makeSlugResolver(candidates), candidates: byId, domain, hasNote: (id) => id === target.id || byId.has(id), nowIso: BENCH_NOW }
+    // 逐條納入與涵蓋判準同正式(stages/relateChain 之 admitItemOf,單一迴圈:relations 為空或至少一條過納入閘)
+    const { covered, admitted, results } = admitItemOf(item, ao)
+    const rejected = results.filter((a) => !a.ok).map((a) => a.reasons.join('、'))
+    const fixed = results.filter((a) => a.ok && a.fixes.length).length
+    const rescued = results.filter((a) => a.ok && a.rescued).length
+    if (!covered) {
+        return { ...none, rejected, covered: false, problem: `${at}之 ${item.relations.length} 條關聯皆未過納入閘（${oneline(rejected.slice(0, 2).join('｜'), 160)}）——同正式之未涵蓋` }
+    }
+    const m = pickRelationsOf(admitted, { conflictType: domain.conflictType })
+    return { covered: true, problem: '', edges: m.edges, rejected, fixed, rescued, dup: m.dup, cut: m.cut }
+}
+
+/**
+ * 案之正向材料(目標、候選清單、domain)
+ *
+ * @param {Object} c 輸入案
+ * @param {Object} domain 輸入關聯 domain
+ * @returns {Object} 回傳 { target, candidates, domain }
+ */
+const relateMaterialOf = (c, domain) => ({ target: c.input.target, candidates: c.input.candidates, domain })
+
+/**
+ * 候選之顯示名(標題;找不到回 id)
+ *
+ * @param {Object} c 輸入案
+ * @param {String} id 輸入候選 id
+ * @returns {String} 回傳顯示名
+ */
+const candidateNameOf = (c, id) => c.input.candidates.find((x) => x.id === id)?.title || id
+
+/**
+ * 提出之邊與應然之差異(空陣列＝符合):回空清單(不允許者)、漏建、型別不在可接受之列、應判衝突而未判、誤建不得選之對象
+ *
+ * @param {Array} edges 輸入提出之邊
+ * @param {Object} c 輸入案
+ * @param {Object} domain 輸入關聯 domain
+ * @returns {Array} 回傳差異說明陣列
+ */
+function relateProblemsOf(edges, c, domain) {
+    const e = c.expect
+    const byTo = new Map(edges.map((x) => [x.to, x.type]))
+    const name = (id) => candidateNameOf(c, id)
+    const p = []
+    if (!edges.length && !e.allowEmpty) p.push('回空清單（本案不允許）')
+    for (const m of e.must) {
+        const t = byTo.get(m.to)
+        if (t === undefined) p.push(`漏建「${name(m.to)}」`)
+        else if (!m.types.includes(t)) p.push(`「${name(m.to)}」之型別「${t}」不在可接受之列（${m.types.join('／')}）`)
+    }
+    for (const to of e.conflict) {
+        const t = byTo.get(to)
+        if (t === undefined) p.push(`漏判衝突「${name(to)}」`)
+        else if (t !== domain.conflictType) p.push(`「${name(to)}」應判「${domain.conflictType}」，判「${t}」`)
+    }
+    for (const to of e.mustNot) if (byTo.has(to)) p.push(`誤建「${name(to)}」（${byTo.get(to)}）`)
+    return p
+}
+
+/**
+ * 正向之逐案類別:同一 index 依序取第一個合格之項(同正式之部分接受)→ 提出之邊與應然逐項相符為 match,否則 mismatch;皆不合格者無裁決
+ *   (同正式之未涵蓋,下輪再判)
+ *
+ * @param {*} data 輸入該頁回覆
+ * @param {Object} c 輸入該案
+ * @param {Object} at 輸入 { index, domain }
+ * @returns {Object} 回傳 { cls, valid, problem, fields }
+ */
+function relateVerdictOf(data, c, at) {
+    if (!isarr(data)) return noVerdict(`回覆非 JSON 陣列（${typeName(data)}）`, RELATE_BLANK)
+    const its = data.filter((x) => isobj(x) && x.index === at.index)
+    if (!its.length) return noVerdict(data.length ? `回覆無 index ${at.index} 之項` : '回覆為空陣列', RELATE_BLANK)
+    let first = null
+    for (const it of its) {
+        const r = benchRelateEdgesOf(it, relateMaterialOf(c, at.domain))
+        if (!r.covered) {
+            if (!first) first = r
+            continue
+        }
+        const problems = relateProblemsOf(r.edges, c, at.domain)
+        return {
+            cls: problems.length ? 'mismatch' : 'match',
+            valid: r.rejected.length === 0,
+            problem: '',
+            fields: {
+                edges: oneline(r.edges.map((x) => `${candidateNameOf(c, x.to)}:${x.type}`).join('、'), 200),
+                problems: oneline(problems.join('；'), 200),
+                rejected: r.rejected.length,
+                rejectedWhy: oneline(r.rejected.slice(0, 3).join('｜'), 200),
+                fixed: r.fixed,
+                dropped: [r.dup.length ? `同一對象多條捨去 ${r.dup.length}` : '', r.cut.length ? `逾單篇上限截去 ${r.cut.length}` : ''].filter(Boolean).join('；'),
+            },
+        }
+    }
+    return noVerdict(first.problem, RELATE_BLANK)
+}
+
+/**
+ * 正向之批合格判準(同正式關聯段之 checkResult):回覆為陣列,且至少一項合格——index 對應頁內之案(itemTargetOf)、relations 為陣列,且為空或至少一條過納入閘(admitItemOf)
+ *
+ * @param {*} data 輸入該頁回覆
+ * @param {Array} cases 輸入同頁之案
+ * @param {Object} ctx 輸入核心之 check ctx(domain:該頁組提示詞之 domain)
+ * @returns {Boolean|String} 回傳 true 或不合之說明
+ */
+function relateCheck(data, cases, ctx) {
+    const domain = ctx?.domain
+    if (!isobj(domain)) return '評分之頁未備妥 domain(核心交 check 之 ctx.domain)'
+    if (!isarr(data)) return `回覆非 JSON 陣列（${typeName(data)}）`
+    const ok = data.some((it) => !!itemTargetOf(it, cases) && benchRelateEdgesOf(it, relateMaterialOf(itemTargetOf(it, cases), domain)).covered)
+    return ok ? true : '回覆無一項合格（index 須對應頁內之案、relations 為陣列，且為空或至少一條過納入閘；同正式之批合格判準）'
+}
+
+/**
+ * 正向關聯之評分角色:一頁多案(預設 6＝relate.notesPerCall);類別 match／mismatch(應然一律 match)
+ *
+ * @type {Object}
+ */
+export const relateBenchRole = defineBenchRole({
+    id: 'relate',
+    name: '正向關聯(relate)',
+    title: '正向關聯 AI 能力評分',
+    runnerName: 'runRelateBench(relate)',
+    v: 1,
+    casesFile: RELATE_BENCH_CASES_FILES.relate,
+    models: RELATE_BENCH_MODELS,
+    suiteProblems: relateSuiteProblems,
+    caseProblems: relateCaseProblems,
+    expectOf: () => 'match',
+    caseFieldsOf: (c) => ({ target: c.input.target.title, candidates: c.input.candidates.length }),
+    domainOf: (vocab) => createRelateDomain({ vocab }),
+    domainProblem: domainNeeds(['buildPrompt', 'seenTextOf', 'resolveType'], { vague: true }),
+    paginate: paginateBy(R.notesPerCall),
+    promptOf: (cases, domain) => {
+        const problems = relatePageProblems(cases, domain)
+        if (problems.length) throw new Error(`正向關聯之題組與詞彙不合（${problems.length} 項）：${problems.join('；')}`)
+        // 輸入之形狀同正式關聯段:待建立關聯之目標陣列＋各目標之候選清單(目標 id → 候選陣列)
+        return domain.buildPrompt(cases.map((c) => c.input.target), new Map(cases.map((c) => [c.input.target.id, c.input.candidates])))
+    },
+    check: relateCheck,
+    // 與正式關聯呼叫同一組選項:陣列輸出逐次截斷放行(部分接受)
+    callOpt: { acceptTruncated: true },
+    verdictOf: relateVerdictOf,
+    blankFields: RELATE_BLANK,
+    detailOf: (r) => (r.cls === 'mismatch' ? `（${r.problems}）` : (r.rejected ? `（剔除 ${r.rejected} 條）` : '')),
+    report: {
+        criteria: [
+            `判準：逐案各回之類別皆＝應然（match）才計通過（各回因而一致），不以比率放行。match＝該案之項（同一 index 取第一個合格者）之關聯經正式之納入閘逐條過濾（slug 解析與尾碼救回、非自指、RS1／RS2／RS3／RS8／RS9；可確定性修正者修正後納入），再依逐項鏈之規則合併（同一對象只取一條、衝突優先；單篇至多 ${RELATE_MAX_RELATIONS_PER_NOTE} 條、衝突優先保留），所得之邊與應然逐項相符：須選之對象皆在且型別屬可接受者、須判衝突者皆為衝突型、不得選之對象皆不在；不允許空清單者不得回空`,
+            `分頁：每頁 ${R.notesPerCall} 案共用一次呼叫（正式關聯之批量 relate.notesPerCall 之預設；--batch 可改）；提示詞＝正式 buildPrompt(各案之目標, 各案之候選清單)；一頁中無一項合格者同正式之批合格判準記為呼叫失敗（回覆不合）；項皆不合格之案無裁決（同正式之未涵蓋）`,
+            '合契約率：成功取得回覆之各回中，該案之項合格（同正式之涵蓋判準）且其每條關聯皆過納入閘（無剔除）者之比率；平均耗時取成功之呼叫',
+        ],
+        caseColumns: [{ name: '目標', key: 'target', md: true }, { name: '候選數', key: 'candidates' }],
+        runColumns: [{ name: '提出之關聯', key: 'edges' }, { name: '不符應然', key: 'problems' }, { name: '剔除條數', key: 'rejected' }, { name: '剔除原因', key: 'rejectedWhy' }, { name: '修正後納入', key: 'fixed' }, { name: '合併或截去', key: 'dropped' }],
+    },
+    cli: {
+        command: 'node src/bench/cli.mjs --role relate',
+        casesHelp: '題組檔({ input:{ target, candidates }, expect:{ must, conflict, mustNot, allowEmpty } });未給＝內建通用題組(src/bench/cases/relate-generic.json)',
+        options: [batchOption(R.notesPerCall, 'relate.notesPerCall 之預設')],
+    },
+})
+
+// ════════════════ 重評(reeval;RS5) ════════════════
+
+/** 重評之無回覆欄位 */
+const REEVAL_BLANK = Object.freeze({ replied: '', reason: '' })
+
+/**
+ * 重評之目標 id(案未給時為 t-<案 id>,同檢定標準題組之執行器)
+ *
+ * @param {Object} c 輸入案
+ * @returns {String} 回傳目標 id
+ */
+const reevalTargetIdOf = (c) => (isestr(c.input?.target?.id) ? c.input.target.id : `t-${c.id}`)
+
+/**
+ * 重評之逐案檢核(與 RS5 題組同形:一篇內容已更新之目標、一位鄰居、一條現行關聯)
+ *
+ * @param {Object} c 輸入案
+ * @returns {Array} 回傳問題說明陣列
+ */
+function reevalCaseProblems(c) {
+    const inp = isobj(c.input) ? c.input : {}
+    const p = [...noteProblems(inp.target, 'input.target'), ...noteProblems(inp.neighbor, 'input.neighbor', { id: true }), ...edgeProblems(inp.edge)]
+    if (isobj(inp.target) && isestr(inp.neighbor?.id) && reevalTargetIdOf(c) === inp.neighbor.id) p.push('目標與鄰居之 id 相同(自指)')
+    return [...p, ...verdictExpectProblems(c.expect, EDGE_VERDICTS), ...inputVocabProblems(c)]
+}
+
+/**
+ * 重評之題目:目標(含 id)、鄰居與現行邊(提示詞與判定共用;形狀同檢定標準題組之執行器)
+ *
+ * @param {Object} c 輸入案
+ * @returns {Object} 回傳 { target, nb, edge }
+ */
+function reevalPartsOf(c) {
+    const target = { id: reevalTargetIdOf(c), ...c.input.target }
+    const nb = c.input.neighbor
+    const edge = makeEdge({ from: target.id, to: nb.id, type: c.input.edge.type, reason: c.input.edge.reason, nowIso: BENCH_NOW })
+    return { target, nb, edge }
+}
+
+/**
+ * 現行型別須在型別清單(題組與詞彙之一致;衝突與否以詞彙之衝突型判,型別不在清單者應然無從對應)
+ *
+ * @param {Array} cases 輸入同頁之案
+ * @param {Object} domain 輸入關聯 domain
+ * @returns {Array} 回傳問題說明陣列
+ */
+const currentTypeProblems = (cases, domain) => cases.filter((c) => !domain.relationTypes.includes(c.input.edge.type))
+    .map((c) => `案 ${c.id} 之現行型別「${c.input.edge.type}」不在型別清單（${domain.relationTypes.join('、')}）`)
+
+/**
+ * 無裁決之原因(重評:該項之 verdicts 無指向該鄰居之合格裁決)
+ *
+ * @param {Object} raw 輸入該編號之第一項
+ * @param {Array} page 輸入 [{ edge, nb }]
+ * @param {Object} o 輸入 verdictsOf 之選項
+ * @returns {String} 回傳原因
+ */
+function reevalMissingOf(raw, page, o) {
+    if (!isarr(raw.verdicts)) return `index ${raw.index} 之項之 verdicts 非陣列`
+    if (!raw.verdicts.length) return `index ${raw.index} 之項之 verdicts 為空`
+    const nb = page[0].nb
+    const mine = raw.verdicts.filter((v) => isobj(v) && o.resolve(v.to) === nb)
+    if (!mine.length) return `無指向對象 ${nb} 之裁決（slug 不符）`
+    if (mine.some((v) => verdictsOf([v], page, o).byEdge.size)) return '同一對象之裁決互相矛盾（同正式規則作廢）'
+    return `裁決不合格（同正式之單評驗證）：${oneline(JSON.stringify(mine[0]), 100)}`
+}
+
+/**
+ * 重評之逐案類別:同一編號之項取第一個結構完整者(同正式重評之 verdictsByIndexOf),其 verdicts 以正式之單評驗證(verdictsOf)取該條之裁決
+ *
+ * @param {*} data 輸入該頁回覆
+ * @param {Object} c 輸入該案
+ * @param {Object} at 輸入 { index, domain }
+ * @returns {Object} 回傳 { cls, valid, problem, fields }
+ */
+function reevalVerdictOf(data, c, at) {
+    if (!isarr(data)) return noVerdict(`回覆非 JSON 陣列（${typeName(data)}）`, REEVAL_BLANK)
+    const x = reevalPartsOf(c)
+    const page = [{ edge: x.edge, nb: x.nb.id }]
+    const o = { resolve: makeSlugResolver([x.nb]), relationTypes: at.domain.relationTypes, resolveType: at.domain.resolveType, selfId: x.target.id }
+    const verdicts = verdictsByIndexOf(data).get(at.index)
+    if (verdicts === undefined) {
+        // 無結構完整之項:以該編號之第一項(若有)說明缺在哪
+        const first = data.find((it) => it?.index === at.index)
+        return noVerdict(first ? reevalMissingOf(first, page, o) : (data.length ? `回覆無 index ${at.index} 之項` : '回覆為空陣列'), REEVAL_BLANK)
+    }
+    const raw = { index: at.index, verdicts }
+    const r = verdictsOf(raw.verdicts, page, o)
+    const v = r.byEdge.get(x.edge.id)
+    if (v === undefined) return noVerdict(reevalMissingOf(raw, page, o), REEVAL_BLANK)
+    const said = (isarr(raw.verdicts) ? raw.verdicts : []).find((y) => isobj(y) && o.resolve(y.to) === x.nb.id)
+    if (v === PANEL_UNSURE) return { cls: PANEL_UNSURE, valid: r.invalid === 0, problem: '', fields: { replied: PANEL_UNSURE, reason: oneline(textValueOf(said?.reason), 120) } }
+    return { cls: verdictClassOf(v, at.domain.conflictType), valid: r.invalid === 0, problem: '', fields: { replied: rawVerdictText(said), reason: oneline(v.reason, 120) } }
+}
+
+/**
+ * 重評之評分角色:一頁多案(預設 10);類別 keep／change(衝突型)／change(非衝突型)／retire／unsure
+ *
+ * @type {Object}
+ */
+export const reevalBenchRole = defineBenchRole({
+    id: 'reeval',
+    name: '重評(reeval)',
+    title: '既有關聯重評 AI 能力評分',
+    runnerName: 'runRelateBench(reeval)',
+    std: RS5.std,
+    v: 2,
+    casesFile: RELATE_BENCH_CASES_FILES.reeval,
+    models: RELATE_BENCH_MODELS,
+    caseProblems: reevalCaseProblems,
+    expectOf: (c) => verdictClassOf(c.expect),
+    caseFieldsOf: (c) => ({ target: c.input.target.title, neighbor: c.input.neighbor.title, current: c.input.edge.type }),
+    domainOf: (vocab) => createRelateDomain({ vocab }),
+    domainProblem: domainNeeds(['buildReevalPrompt', 'resolveType']),
+    paginate: paginateBy(R.reeval.pageSize),
+    promptOf: (cases, domain) => {
+        const problems = currentTypeProblems(cases, domain)
+        if (problems.length) throw new Error(`重評之題組與詞彙不合（${problems.length} 項）：${problems.join('；')}`)
+        // 項之形狀同正式重評段與檢定標準題組之執行器(stores/reevalPolicy 之 reevalPromptItemOf):目標(id 未給為 t-<案 id>)、一句話重點取目標之 summary、鄰居一位與其現行邊
+        return domain.buildReevalPrompt(cases.map((c) => {
+            const x = reevalPartsOf(c)
+            return reevalPromptItemOf(x.target, x.target.summary, [{ note: x.nb, edge: x.edge }])
+        }))
+    },
+    // 同正式重評之單評 check:至少一項帶整數 index 與 verdicts 陣列
+    check: (data) => (isarr(data) && data.some((it) => Number.isInteger(it?.index) && isarr(it?.verdicts)) ? true : '回覆無帶整數 index 與 verdicts 陣列之項（同正式之單評 check）'),
+    // 與正式關聯呼叫同一組選項:陣列輸出逐次截斷放行(部分接受)
+    callOpt: { acceptTruncated: true },
+    verdictOf: reevalVerdictOf,
+    blankFields: REEVAL_BLANK,
+    detailOf: (r) => (r.reason ? `（${oneline(r.reason, 60)}）` : ''),
+    report: {
+        criteria: [
+            '判準：逐案各回之類別（keep／change(衝突型)／change(非衝突型)／retire／unsure）皆＝應然才計通過（各回因而一致），不以比率放行；change 只比新型別是否為衝突型（非衝突型之間不限定）；unsure 為合法裁決',
+            `分頁：每頁 ${R.reeval.pageSize} 案共用一次呼叫（relate.reeval.pageSize 之預設；--batch 可改）；一案＝一篇內容已更新之目標與其一條既有關聯，提示詞＝正式 buildReevalPrompt；取該編號之第一項，其 verdicts 經正式之單評驗證（verdictsOf：slug 須解析到該案之鄰居、裁決值合法、change 之型別經 resolveType 對映到清單且型別與理由不可皆同現行、change／retire 之理由至少 10 字、同一對象矛盾作廢）`,
+            '合契約率：成功取得回覆之各回中，該案有合格之裁決且該項無不合格之裁決者之比率；平均耗時取成功之呼叫',
+        ],
+        caseColumns: [{ name: '目標', key: 'target', md: true }, { name: '鄰居', key: 'neighbor', md: true }, { name: '現行型別', key: 'current', md: true }],
+        runColumns: [{ name: '回覆', key: 'replied' }, { name: '理由', key: 'reason' }],
+    },
+    cli: {
+        command: 'node src/bench/cli.mjs --role reeval',
+        casesHelp: '題組檔(與 RS5 題組同形);未給＝內建通用題組(src/bench/cases/reeval-generic.json)',
+        options: [batchOption(R.reeval.pageSize, 'relate.reeval.pageSize 之預設')],
+    },
+})
+
+// ════════════════ 衝突核對(conflict-check;RS4)與既有邊覆核(edge-review;RS6)共用 ════════════════
+
+/** 衝突核對與既有邊覆核之無回覆欄位 */
+const CHECK_BLANK = Object.freeze({ replied: '', reason: '', normalized: '' })
+
+/**
+ * 一對筆記之題目(提示詞之項):與正式兩段同一形式(standards/edgeGate 之 pairCheckItemOf→checkPromptItemOf)——兩方之筆記與材料取
+ *   同一物件,現行理由須改寫才能合格者依正式規則附 reasonProblem(材料以兩方於提示詞中之區塊代之)
+ *
+ * @param {Object} c 輸入案
+ * @param {Object} domain 輸入關聯 domain
+ * @param {Integer} k 輸入項編號(跨頁連續)
+ * @returns {Object} 回傳 { index, a:{ note, extra }, b:{ note, extra }, edge:{ type, reason, reasonProblem? } }
+ */
+const pairItemOf = (c, domain, k) => pairCheckItemOf(c.input, k, domain)
+
+/**
+ * 一對筆記之逐案檢核(與 RS4／RS6 題組同形)
+ *
+ * @param {Object} c 輸入案
+ * @param {Object} opt 輸入 edgeProblems 之選項
+ * @returns {Array} 回傳問題說明陣列
+ */
+const pairProblems = (c, opt) => {
+    const inp = isobj(c.input) ? c.input : {}
+    return [...noteProblems(inp.a, 'input.a'), ...noteProblems(inp.b, 'input.b'), ...edgeProblems(inp.edge, opt)]
+}
+
+/**
+ * 同頁之票(正式之 seatVotesOf;項編號限本頁、現行邊依編號取)
+ *
+ * @param {*} data 輸入該頁回覆
+ * @param {Object} at 輸入 verdictOf 之 at(cases:同頁之案;seq 與 index 推該頁之項編號基數)
+ * @param {Object} o 輸入單票驗證之選項(relationTypes、resolveType、conflictType;覆核另 roles、verdictOf)
+ * @returns {Map} 回傳 Map(項編號 → 票|PANEL_UNSURE|null)
+ */
+function pageVotesOf(data, at, o) {
+    const base = seqOf(at) - at.index
+    const bySeq = new Map(at.cases.map((x, i) => [base + i + 1, x]))
+    return seatVotesOf(data, { ...o, indices: new Set(bySeq.keys()), currentOf: (i) => bySeq.get(i)?.input.edge })
+}
+
+/**
+ * 缺票之原因(同編號之票皆不合格或互相矛盾;字樣取核心之 benchVoteMissingOf——各套件同一份)
+ *
+ * @param {Array} data 輸入該頁回覆
+ * @param {Integer} k 輸入項編號
+ * @param {Function} single 輸入單票驗證 (raw) => 票|PANEL_UNSURE|null
+ * @returns {String} 回傳原因
+ */
+const voteMissingOf = (data, k, single) => benchVoteMissingOf(data.filter((x) => Number.isInteger(x?.index) && x.index === k), k, single, { empty: data.length ? '' : '回覆為空陣列' })
+
+/**
+ * 交調度層之 check(同正式衝突核對與既有邊覆核:至少一項帶整數 index)
+ *
+ * @param {*} data 輸入該頁回覆
+ * @returns {Boolean|String} 回傳 true 或不合之說明
+ */
+const pairCheck = (data) => (isarr(data) && data.some((it) => Number.isInteger(it?.index)) ? true : '回覆無帶整數 index 之項（同正式之 check）')
+
+// ════════════════ 衝突核對(conflict-check;RS4) ════════════════
+
+/**
+ * 衝突核對之頁與詞彙之一致:現行型別(給了者)須為詞彙之衝突型(RS4 只核衝突型之邊)
+ *
+ * @param {Array} cases 輸入同頁之案
+ * @param {Object} domain 輸入關聯 domain
+ * @returns {Array} 回傳問題說明陣列
+ */
+const conflictPageProblems = (cases, domain) => cases.filter((c) => c.input.edge.type !== undefined && c.input.edge.type !== domain.conflictType)
+    .map((c) => `案 ${c.id} 之現行型別「${c.input.edge.type}」非衝突型「${domain.conflictType}」（衝突核對只核衝突型之關聯）`)
+
+/**
+ * 衝突核對之逐案類別:以正式之單票驗證(seatVotesOf＋checkVerdictOf)取該項之票;缺票為無裁決
+ *
+ * @param {*} data 輸入該頁回覆
+ * @param {Object} c 輸入該案
+ * @param {Object} at 輸入 { domain, cases }
+ * @returns {Object} 回傳 { cls, valid, problem, fields }
+ */
+function conflictVerdictOf(data, c, at) {
+    if (!isarr(data)) return noVerdict(`回覆非 JSON 陣列（${typeName(data)}）`, CHECK_BLANK)
+    const k = seqOf(at)
+    const d = at.domain
+    const o = { relationTypes: d.relationTypes, resolveType: d.resolveType, conflictType: d.conflictType, verdictOf: checkVerdictOf }
+    const votes = pageVotesOf(data, at, o)
+    const v = votes.has(k) ? votes.get(k) : null
+    if (v === null) return noVerdict(voteMissingOf(data, k, (x) => checkVerdictOf(x, { ...o, current: c.input.edge })), CHECK_BLANK)
+    const raw = data.find((x) => Number(x?.index) === k)
+    if (v === PANEL_UNSURE) return { cls: PANEL_UNSURE, valid: true, problem: '', fields: { ...CHECK_BLANK, replied: PANEL_UNSURE, reason: oneline(textValueOf(raw?.reason), 120) } }
+    return { cls: verdictClassOf(v, d.conflictType), valid: true, problem: '', fields: { ...CHECK_BLANK, replied: rawVerdictText(raw), reason: oneline(v.reason, 120) } }
+}
+
+/**
+ * 衝突核對之評分角色:一頁多案(預設 10＝relate.standards.conflictCheck.pageSize);類別 keep／change(衝突型)／change(非衝突型)／retire／unsure
+ *
+ * @type {Object}
+ */
+export const conflictCheckBenchRole = defineBenchRole({
+    id: 'conflict-check',
+    name: '衝突核對(conflict-check)',
+    title: '衝突核對 AI 能力評分',
+    runnerName: 'runRelateBench(conflict-check)',
+    std: RS4.std,
+    v: 1,
+    casesFile: RELATE_BENCH_CASES_FILES['conflict-check'],
+    models: RELATE_BENCH_MODELS,
+    caseProblems: (c) => [...pairProblems(c, { typeOptional: true }), ...verdictExpectProblems(c.expect, EDGE_VERDICTS), ...inputVocabProblems(c)],
+    expectOf: (c) => verdictClassOf(c.expect),
+    caseFieldsOf: (c) => ({ a: c.input.a.title, b: c.input.b.title }),
+    domainOf: (vocab) => createRelateDomain({ vocab }),
+    domainProblem: domainNeeds(['buildConflictCheckPrompt', 'seenTextOf', 'resolveType'], { vague: true }),
+    paginate: paginateBy(R.standards.conflictCheck.pageSize),
+    promptOf: (cases, domain, ctx) => {
+        const problems = conflictPageProblems(cases, domain)
+        if (problems.length) throw new Error(`衝突核對之題組與詞彙不合（${problems.length} 項）：${problems.join('；')}`)
+        return domain.buildConflictCheckPrompt(cases.map((c, i) => pairItemOf(c, domain, seqAt(ctx, i))))
+    },
+    check: pairCheck,
+    // 與正式關聯呼叫同一組選項:陣列輸出逐次截斷放行(部分接受)
+    callOpt: { acceptTruncated: true },
+    verdictOf: conflictVerdictOf,
+    blankFields: CHECK_BLANK,
+    detailOf: (r) => (r.reason ? `（${oneline(r.reason, 60)}）` : ''),
+    report: {
+        criteria: [
+            '判準：逐案各回之類別（keep／change(衝突型)／change(非衝突型)／retire／unsure）皆＝應然才計通過（各回因而一致），不以比率放行；change 只比新型別是否為衝突型（非衝突型之間不限定）；unsure 為合法裁決',
+            `分頁：每頁 ${R.standards.conflictCheck.pageSize} 案共用一次呼叫（relate.standards.conflictCheck.pageSize 之預設；--batch 可改），項編號於一次評分內連續、跨頁不重來（同正式）；提示詞＝正式 buildConflictCheckPrompt（項之形式同正式：現行理由須改寫才能合格者依正式規則附註，題組不自給）；票之驗證同正式（seatVotesOf＋checkVerdictOf：理由過短、型別無對映、同編號矛盾者為缺票＝無裁決；衝突型而理由同現行者視同 keep）`,
+            '合契約率：成功取得回覆之各回中，該案有合格之票者之比率；平均耗時取成功之呼叫',
+        ],
+        caseColumns: [{ name: '甲', key: 'a', md: true }, { name: '乙', key: 'b', md: true }],
+        runColumns: [{ name: '回覆', key: 'replied' }, { name: '理由', key: 'reason' }],
+    },
+    cli: {
+        command: 'node src/bench/cli.mjs --role conflict-check',
+        casesHelp: '題組檔(與 RS4 題組同形);未給＝內建通用題組(src/bench/cases/conflict-check-generic.json)',
+        options: [batchOption(R.standards.conflictCheck.pageSize, 'relate.standards.conflictCheck.pageSize 之預設')],
+    },
+})
+
+// ════════════════ 既有邊覆核(edge-review;RS6) ════════════════
+
+/**
+ * 既有邊覆核之逐案檢核(與 RS6 題組同形):處置 expect.kind;retype 須給 expect.type
+ *
+ * @param {Object} c 輸入案
+ * @returns {Array} 回傳問題說明陣列
+ */
+function reviewCaseProblems(c) {
+    const p = pairProblems(c)
+    const e = c.expect
+    if (!isobj(e) || !REVIEW_KINDS.includes(e.kind)) p.push(`expect.kind 須為 ${REVIEW_KINDS.join('／')}`)
+    else if (e.kind === 'retype' && !isestr(e.type)) p.push('expect.type 須為非空字串(retype 改正之型別)')
+    else if (e.kind !== 'retype' && e.type !== undefined) p.push('expect.type 只用於 retype')
+    return [...p, ...inputVocabProblems(c)]
+}
+
+/**
+ * 既有邊覆核之頁與詞彙之一致:現行型別在清單且非衝突型;retype 之應然型別在清單、非衝突型、異於現行,且在型別改正之封閉清單內
+ *   (不屬封閉清單之非衝突改型恆視為同型改理由——應然不可達)
+ *
+ * @param {Array} cases 輸入同頁之案
+ * @param {Object} domain 輸入關聯 domain
+ * @returns {Array} 回傳問題說明陣列
+ */
+function reviewPageProblems(cases, domain) {
+    const p = []
+    for (const c of cases) {
+        const cur = c.input.edge.type
+        if (domain.resolveType(cur) !== cur) p.push(`案 ${c.id} 之現行型別「${cur}」不在型別清單（${domain.relationTypes.join('、')}）`)
+        else if (cur === domain.conflictType) p.push(`案 ${c.id} 之現行型別為衝突型（既有邊覆核只核非衝突型之關聯）`)
+        if (c.expect.kind !== 'retype') continue
+        const t = c.expect.type
+        if (domain.resolveType(t) !== t) p.push(`案 ${c.id} 之應然型別「${t}」不在型別清單`)
+        else if (t === domain.conflictType) p.push(`案 ${c.id} 之應然改為衝突型（應寫 upgrade）`)
+        else if (t === cur) p.push(`案 ${c.id} 之應然型別與現行相同（應寫 reason 或 keep）`)
+        else if (!retypeAllowed(cur, t, domain.relationTypeRoles)) p.push(`案 ${c.id} 之應然改型「${cur}」→「${t}」不在型別改正之封閉清單（恆視為同型改理由，不可達）`)
+    }
+    return p
+}
+
+/**
+ * 既有邊覆核之逐案類別:以正式之單票驗證(seatVotesOf＋reviewVerdictOf,型別改正之封閉清單)取該項之票,處置之研判同檢定標準題組之執行器
+ *
+ * @param {*} data 輸入該頁回覆
+ * @param {Object} c 輸入該案
+ * @param {Object} at 輸入 { domain, cases }
+ * @returns {Object} 回傳 { cls, valid, problem, fields }
+ */
+function reviewVerdictOfCase(data, c, at) {
+    if (!isarr(data)) return noVerdict(`回覆非 JSON 陣列（${typeName(data)}）`, CHECK_BLANK)
+    const k = seqOf(at)
+    const d = at.domain
+    const o = { relationTypes: d.relationTypes, resolveType: d.resolveType, conflictType: d.conflictType, roles: d.relationTypeRoles }
+    const votes = pageVotesOf(data, at, { ...o, verdictOf: reviewVerdictOf })
+    const v = votes.has(k) ? votes.get(k) : null
+    if (v === null) return noVerdict(voteMissingOf(data, k, (x) => reviewVerdictOf(x, { ...o, current: c.input.edge })), CHECK_BLANK)
+    const raw = data.find((x) => Number(x?.index) === k)
+    if (v === PANEL_UNSURE) return { cls: PANEL_UNSURE, valid: true, problem: '', fields: { ...CHECK_BLANK, replied: PANEL_UNSURE, reason: oneline(textValueOf(raw?.reason), 120) } }
+    // 處置＝兩席皆投此票時正式兩層判定之處置(rs6VoteActionOf;與正式判定同一規則,不另寫對照)
+    const { action, type } = rs6VoteActionOf(v, { conflictType: d.conflictType, current: c.input.edge, relationTypes: d.relationTypes })
+    return { cls: action === 'retype' ? `retype:${type}` : action, valid: true, problem: '', fields: { replied: rawVerdictText(raw), reason: oneline(v.reason, 120), normalized: v.normalized ? '是' : '' } }
+}
+
+/**
+ * 既有邊覆核之評分角色:一頁多案(預設 10＝relate.standards.edgeReview.pageSize);類別 keep／reason／retype:<型別>／upgrade／retire／unsure
+ *
+ * @type {Object}
+ */
+export const edgeReviewBenchRole = defineBenchRole({
+    id: 'edge-review',
+    name: '既有邊覆核(edge-review)',
+    title: '既有關聯覆核 AI 能力評分',
+    runnerName: 'runRelateBench(edge-review)',
+    std: RS6.std,
+    v: 1,
+    casesFile: RELATE_BENCH_CASES_FILES['edge-review'],
+    models: RELATE_BENCH_MODELS,
+    caseProblems: reviewCaseProblems,
+    expectOf: (c) => (c.expect.kind === 'retype' ? `retype:${c.expect.type}` : c.expect.kind),
+    caseFieldsOf: (c) => ({ a: c.input.a.title, b: c.input.b.title, current: c.input.edge.type }),
+    domainOf: (vocab) => createRelateDomain({ vocab }),
+    domainProblem: domainNeeds(['buildEdgeReviewPrompt', 'seenTextOf', 'resolveType'], { roles: true, vague: true }),
+    paginate: paginateBy(R.standards.edgeReview.pageSize),
+    promptOf: (cases, domain, ctx) => {
+        const problems = reviewPageProblems(cases, domain)
+        if (problems.length) throw new Error(`既有邊覆核之題組與詞彙不合（${problems.length} 項）：${problems.join('；')}`)
+        return domain.buildEdgeReviewPrompt(cases.map((c, i) => pairItemOf(c, domain, seqAt(ctx, i))))
+    },
+    check: pairCheck,
+    // 與正式關聯呼叫同一組選項:陣列輸出逐次截斷放行(部分接受)
+    callOpt: { acceptTruncated: true },
+    verdictOf: reviewVerdictOfCase,
+    blankFields: CHECK_BLANK,
+    detailOf: (r) => (r.normalized ? `（回覆「${r.replied}」不在型別改正之封閉清單，視為同型改理由）` : (r.reason ? `（${oneline(r.reason, 60)}）` : '')),
+    report: {
+        criteria: [
+            '判準：逐案各回之處置（keep／reason 同型改理由／retype:<型別>／upgrade 升為衝突／retire／unsure）皆＝應然才計通過（各回因而一致），不以比率放行；retype 須改為應然之型別；unsure 為合法裁決',
+            `分頁：每頁 ${R.standards.edgeReview.pageSize} 案共用一次呼叫（relate.standards.edgeReview.pageSize 之預設；--batch 可改），項編號於一次評分內連續、跨頁不重來（同正式）；提示詞＝正式 buildEdgeReviewPrompt（項之形式同正式：現行理由須改寫才能合格者依正式規則附註，題組不自給）；票之驗證同正式（seatVotesOf＋reviewVerdictOf：理由過短、型別無對映、同編號矛盾者為缺票＝無裁決；同型同理由之 change 視同 keep；不屬型別改正封閉清單之非衝突改型視為同型改理由）`,
+            '合契約率：成功取得回覆之各回中，該案有合格之票者之比率；平均耗時取成功之呼叫',
+        ],
+        caseColumns: [{ name: '甲', key: 'a', md: true }, { name: '乙', key: 'b', md: true }, { name: '現行型別', key: 'current', md: true }],
+        runColumns: [{ name: '回覆', key: 'replied' }, { name: '理由', key: 'reason' }, { name: '改型視為改理由', key: 'normalized' }],
+    },
+    cli: {
+        command: 'node src/bench/cli.mjs --role edge-review',
+        casesHelp: '題組檔(與 RS6 題組同形);未給＝內建通用題組(src/bench/cases/edge-review-generic.json)',
+        options: [batchOption(R.standards.edgeReview.pageSize, 'relate.standards.edgeReview.pageSize 之預設')],
+    },
+})
+
+// ════════════════ 執行器與命令列 ════════════════
+
+/**
+ * 關聯之評分角色(依 --role all 之執行順序)
+ *
+ * @type {Array}
+ */
+export const RELATE_BENCH_ROLES = Object.freeze([relateBenchRole, reevalBenchRole, conflictCheckBenchRole, edgeReviewBenchRole])
+
+/** 多角色之命令列(抓取套件之 defineBenchRoles:--role 解析、--vocab-pick、準備期、停測帶過) */
+const CLI = defineBenchRoles({ roles: RELATE_BENCH_ROLES, pickVocab: pickRelateVocab, pickName: 'pickRelateVocab', vocabPrefix: 'relate' })
+
+/**
+ * 依 id 取角色
+ *
+ * @param {String} id 輸入角色 id(relate、reeval、conflict-check、edge-review)
+ * @returns {Object} 回傳角色(defineBenchRole 之產物)
+ * @throws {Error} 不認得之 id 時拋出(列出可用者)
+ * @example
+ * console.log(relateBenchRoleOf('edge-review').name)
+ * // => 既有邊覆核(edge-review)
+ */
+export function relateBenchRoleOf(id) {
+    return CLI.roleOf(id)
+}
+
+/**
+ * 關聯之 AI 能力評分(單一角色;判準、分頁、失敗與停測、回傳形狀見核心之 runBench)
+ *
+ * @param {String} roleId 輸入角色 id(relate、reeval、conflict-check、edge-review)
+ * @param {Object} opt 輸入核心 runBench 之設定物件(models、cases、runs、aiAdapter｜adapterOf、vocab｜domain、domainOf、roleOpt、timeoutMs、
+ *   concurrency、stopAfterFails、onProgress、clock、timeZone);roleOpt 之鍵為 batch(每頁案數)
+ * @returns {Promise} 回傳 Promise，resolve 回傳核心 runBench 之結果 { meta, models }
+ * @throws {Error} 角色 id 不認得,或核心於任何呼叫之前之檢核(題組、詞彙、分頁、提示詞)不合時拋出
+ * @example
+ * need test in nodejs.
+ *
+ * let r = await runRelateBench('conflict-check', { models: ['oc:opencode/mimo-v2.6-flash-free'], aiAdapter: ai })
+ * console.log(r.models[0].score)
+ */
+export async function runRelateBench(roleId, opt = {}) {
+    return CLI.run(roleId, opt)
+}
+
+/**
+ * 評分之準備(不呼叫 AI):驗題組、建 domain、分頁、組各頁提示詞並算指紋(核心之 planBench)
+ *
+ * @param {String} roleId 輸入角色 id
+ * @param {Object} [opt={}] 輸入設定物件(cases、vocab、domain、domainOf、roleOpt)
+ * @returns {Object} 回傳 { set, pages:[{ ids, prompt }], promptFp }
+ * @throws {Error} 角色 id 不認得,或題組、詞彙、分頁、提示詞不合時拋出
+ * @example
+ * console.log(planRelateBench('reeval').pages.length)
+ * // => 2
+ */
+export function planRelateBench(roleId, opt = {}) {
+    return CLI.plan(roleId, opt)
+}
+
+/**
+ * 命令列用法說明(--role 與各角色之參數;核心之多角色命令列所組)
+ *
+ * @type {String}
+ */
+export const RELATE_BENCH_USAGE = CLI.usage
+
+/**
+ * 解析 --role 並取出其餘參數(其餘參數交核心逐角色解析;--role 缺值、重複、不認得即拋;all 時給 --cases 或角色專屬參數即拋)
+ *
+ * @param {Array} argv 輸入參數陣列(不含 node 與腳本路徑);支援「--role 值」與「--role=值」
+ * @returns {Object} 回傳 { role:String(角色 id 或 'all'), roles:Array(依序之角色;help 時為 []), rest:Array(其餘參數), help:Boolean,
+ *   pick:Boolean(--vocab-pick;不留在 rest) }
+ * @throws {Error} --role 缺值、重複、不認得,all 時給 --cases 或角色專屬參數,或 --vocab-pick 帶值、重複或未配 --vocab 時拋出
+ * @example
+ * let a = parseRelateBenchArgs(['--role=reeval', '--runs', '1'])
+ * console.log(a.role, a.roles.length, a.rest, a.pick)
+ * // => reeval 1 [ '--runs', '1' ] false
+ */
+export function parseRelateBenchArgs(argv) {
+    return CLI.parseArgs(argv)
+}
+
+/**
+ * 命令列主流程:解析 --role → 各角色之準備期檢核(全部角色皆過才開始)→ 依序交核心之 runBenchCli(逐回進度檔、報表、--board 評比表)。
+ *   多角色時,前面角色已停測之模型(限流、連續呼叫失敗、條目不可用)不再於後續角色受測;受測模型皆已停測即略過其餘角色(核心之多角色命令列)
+ *
+ * @param {Array} argv 輸入參數陣列(不含 node 與腳本路徑;選項見 RELATE_BENCH_USAGE)
+ * @param {Object} [inject={}] 輸入注入物件
+ * @param {Object} [inject.aiAdapter] 輸入調度層(各角色共用),給了即不建內建調度層
+ * @param {Object} [inject.log] 輸入輸出物件 { info(msg), error(msg) }，預設 console
+ * @returns {Promise} 回傳 Promise，resolve 回傳 { role:String, runs:Array<{ role(角色 id), result, report, progressFile, board }>,
+ *   stopped:Array(本次停測之模型), skipped:Array(因受測模型皆已停測而未跑之角色 id) }；--help 時回 { help:true }
+ * @throws {Error} 參數不合、題組不合、詞彙檔不存在或不合、提示詞組不出,或核心之評分前檢核失敗時拋出(--role all 時皆在任何呼叫之前)
+ * @example
+ * need test in nodejs.
+ *
+ * let r = await runRelateBenchCli(['--role', 'all', '--models', 'oc:opencode/mimo-v2.6-flash-free', '--board', './模型評比.csv'])
+ * console.log(r.runs.map((x) => x.role))
+ */
+export async function runRelateBenchCli(argv, inject = {}) {
+    return CLI.runCli(argv, inject)
+}
+
+export default runRelateBench
