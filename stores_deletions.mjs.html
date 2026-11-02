@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>stores/deletions.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AI_ADAPTER_OPT">AI_ADAPTER_OPT</a></li><li><a href="global.html#BENCH_NOW">BENCH_NOW</a></li><li><a href="global.html#CALL_TIMEOUT_FALLBACK_MS">CALL_TIMEOUT_FALLBACK_MS</a></li><li><a href="global.html#CFG_KEYS">CFG_KEYS</a></li><li><a href="global.html#CHECKED_STDS">CHECKED_STDS</a></li><li><a href="global.html#CHECK_BLANK">CHECK_BLANK</a></li><li><a href="global.html#CHECK_STATES">CHECK_STATES</a></li><li><a href="global.html#CLI">CLI</a></li><li><a href="global.html#COLLECTION_KEYS">COLLECTION_KEYS</a></li><li><a href="global.html#CONFLICT_DEFINITION">CONFLICT_DEFINITION</a></li><li><a href="global.html#CONFLICT_EVENT_FILE">CONFLICT_EVENT_FILE</a></li><li><a href="global.html#DATA_KEYS">DATA_KEYS</a></li><li><a href="global.html#DELETION_FILES">DELETION_FILES</a></li><li><a href="global.html#DELETION_HALF_STATE_LABEL">DELETION_HALF_STATE_LABEL</a></li><li><a href="global.html#DOMAIN_FACTORY">DOMAIN_FACTORY</a></li><li><a href="global.html#E">E</a></li><li><a href="global.html#EDGE_AUDIT_FILE">EDGE_AUDIT_FILE</a></li><li><a href="global.html#EDGE_FIX_STDS">EDGE_FIX_STDS</a></li><li><a href="global.html#EDGE_INFO_LABELS">EDGE_INFO_LABELS</a></li><li><a href="global.html#EDGE_OBJECT">EDGE_OBJECT</a></li><li><a href="global.html#EDGE_REVIEW_STDS">EDGE_REVIEW_STDS</a></li><li><a href="global.html#EDGE_STANDARDS">EDGE_STANDARDS</a></li><li><a href="global.html#EDGE_VERDICTS">EDGE_VERDICTS</a></li><li><a href="global.html#EDGE_VERDICT_MIN_REASON">EDGE_VERDICT_MIN_REASON</a></li><li><a href="global.html#FIX_STD">FIX_STD</a></li><li><a href="global.html#INFO_STDS">INFO_STDS</a></li><li><a href="global.html#LEDGER_FILES">LEDGER_FILES</a></li><li><a href="global.html#MIN_SHARED_SCORE">MIN_SHARED_SCORE</a></li><li><a href="global.html#MUTEX_KEY">MUTEX_KEY</a></li><li><a href="global.html#NAMESPACES">NAMESPACES</a></li><li><a href="global.html#NO_MATERIAL_DETAIL">NO_MATERIAL_DETAIL</a></li><li><a href="global.html#OPTIONAL_DOMAIN_MEMBERS">OPTIONAL_DOMAIN_MEMBERS</a></li><li><a href="global.html#OWN_KEYS">OWN_KEYS</a></li><li><a href="global.html#PANEL_DEFS">PANEL_DEFS</a></li><li><a href="global.html#PIPELINE_NAME">PIPELINE_NAME</a></li><li><a href="global.html#PLACEHOLDER_REASONS">PLACEHOLDER_REASONS</a></li><li><a href="global.html#PROMPT_DOMAIN">PROMPT_DOMAIN</a></li><li><a href="global.html#PROMPT_KEYS">PROMPT_KEYS</a></li><li><a href="global.html#R">R</a></li><li><a href="global.html#REASON_MAX_CHARS">REASON_MAX_CHARS</a></li><li><a href="global.html#REASON_MIN_CHARS">REASON_MIN_CHARS</a></li><li><a href="global.html#REASON_PROBLEM_CHARS">REASON_PROBLEM_CHARS</a></li><li><a href="global.html#REASON_REWRITE_STDS">REASON_REWRITE_STDS</a></li><li><a href="global.html#REEVAL_BLANK">REEVAL_BLANK</a></li><li><a href="global.html#REEVAL_OPT_KEYS">REEVAL_OPT_KEYS</a></li><li><a href="global.html#REEVAL_REPROPOSE_DAYS">REEVAL_REPROPOSE_DAYS</a></li><li><a href="global.html#RELATE_AI_DEFAULT">RELATE_AI_DEFAULT</a></li><li><a href="global.html#RELATE_AI_SCHEMA">RELATE_AI_SCHEMA</a></li><li><a href="global.html#RELATE_AI_STANDARD_IDS">RELATE_AI_STANDARD_IDS</a></li><li><a href="global.html#RELATE_API_HINT">RELATE_API_HINT</a></li><li><a href="global.html#RELATE_AUDITED_STANDARD_IDS">RELATE_AUDITED_STANDARD_IDS</a></li><li><a href="global.html#RELATE_BASELINE_RULING_PREFIX">RELATE_BASELINE_RULING_PREFIX</a></li><li><a href="global.html#RELATE_BENCH_CASES_FILES">RELATE_BENCH_CASES_FILES</a></li><li><a href="global.html#RELATE_BENCH_CHANGE">RELATE_BENCH_CHANGE</a></li><li><a href="global.html#RELATE_BENCH_MODELS">RELATE_BENCH_MODELS</a></li><li><a href="global.html#RELATE_BENCH_ROLES">RELATE_BENCH_ROLES</a></li><li><a href="global.html#RELATE_BENCH_USAGE">RELATE_BENCH_USAGE</a></li><li><a href="global.html#RELATE_BLANK">RELATE_BLANK</a></li><li><a href="global.html#RELATE_CAPACITY_DESC">RELATE_CAPACITY_DESC</a></li><li><a href="global.html#RELATE_CTX_FLAGS">RELATE_CTX_FLAGS</a></li><li><a href="global.html#RELATE_DATA_KEYS">RELATE_DATA_KEYS</a></li><li><a href="global.html#RELATE_DEFAULT">RELATE_DEFAULT</a></li><li><a href="global.html#RELATE_DIRS">RELATE_DIRS</a></li><li><a href="global.html#RELATE_DOMAIN_KEYS">RELATE_DOMAIN_KEYS</a></li><li><a href="global.html#RELATE_EXPECT_KEYS">RELATE_EXPECT_KEYS</a></li><li><a href="global.html#RELATE_FEATURES">RELATE_FEATURES</a></li><li><a href="global.html#RELATE_GUIDE_FIELDS">RELATE_GUIDE_FIELDS</a></li><li><a href="global.html#RELATE_HOLD_DEADLINE_DAYS">RELATE_HOLD_DEADLINE_DAYS</a></li><li><a href="global.html#RELATE_HOLD_NEXT">RELATE_HOLD_NEXT</a></li><li><a href="global.html#RELATE_INDEX_TITLE">RELATE_INDEX_TITLE</a></li><li><a href="global.html#RELATE_INDEX_TOP_N">RELATE_INDEX_TOP_N</a></li><li><a href="global.html#RELATE_LOG_KNOWN">RELATE_LOG_KNOWN</a></li><li><a href="global.html#RELATE_LOG_MUST_SEE">RELATE_LOG_MUST_SEE</a></li><li><a href="global.html#RELATE_LOG_PARSE">RELATE_LOG_PARSE</a></li><li><a href="global.html#RELATE_MAX_RELATIONS_PER_NOTE">RELATE_MAX_RELATIONS_PER_NOTE</a></li><li><a href="global.html#RELATE_PROMPT_SIGS">RELATE_PROMPT_SIGS</a></li><li><a href="global.html#RELATE_REPORT_KEYS">RELATE_REPORT_KEYS</a></li><li><a href="global.html#RELATE_SCAN_OBJECT">RELATE_SCAN_OBJECT</a></li><li><a href="global.html#RELATE_SCHEMA">RELATE_SCHEMA</a></li><li><a href="global.html#RELATE_SEATS">RELATE_SEATS</a></li><li><a href="global.html#RELATE_SEAT_KEYS">RELATE_SEAT_KEYS</a></li><li><a href="global.html#RELATE_SEAT_LABELS">RELATE_SEAT_LABELS</a></li><li><a href="global.html#RELATE_SECTION_TITLES">RELATE_SECTION_TITLES</a></li><li><a href="global.html#RELATE_SETTING_TYPES">RELATE_SETTING_TYPES</a></li><li><a href="global.html#RELATE_STAGE_KEYS">RELATE_STAGE_KEYS</a></li><li><a href="global.html#RELATE_STANDARDS">RELATE_STANDARDS</a></li><li><a href="global.html#RELATE_STORE_KEYS">RELATE_STORE_KEYS</a></li><li><a href="global.html#RELATE_TAP_STAGE_KEYS">RELATE_TAP_STAGE_KEYS</a></li><li><a href="global.html#RELATE_UNGATED_WRITE_ENTRIES">RELATE_UNGATED_WRITE_ENTRIES</a></li><li><a href="global.html#RELATE_VOCAB_DEFAULT">RELATE_VOCAB_DEFAULT</a></li><li><a href="global.html#RELATE_VOCAB_KEYS">RELATE_VOCAB_KEYS</a></li><li><a href="global.html#RELATE_VOCAB_NULL_AS">RELATE_VOCAB_NULL_AS</a></li><li><a href="global.html#RELATE_VOCAB_OWN_KEYS">RELATE_VOCAB_OWN_KEYS</a></li><li><a href="global.html#RELATION_ROLE_NAMES">RELATION_ROLE_NAMES</a></li><li><a href="global.html#RESTORABLE_REASONS">RESTORABLE_REASONS</a></li><li><a href="global.html#RETIRE_REASONS">RETIRE_REASONS</a></li><li><a href="global.html#REVERTED_OUTCOME">REVERTED_OUTCOME</a></li><li><a href="global.html#REVIEW_KINDS">REVIEW_KINDS</a></li><li><a href="global.html#REVIEW_SOURCE_STDS">REVIEW_SOURCE_STDS</a></li><li><a href="global.html#REVISION_LEDGERS">REVISION_LEDGERS</a></li><li><a href="global.html#ROTATION_RESET">ROTATION_RESET</a></li><li><a href="global.html#ROW_KEYS">ROW_KEYS</a></li><li><a href="global.html#RS4">RS4</a></li><li><a href="global.html#RS5">RS5</a></li><li><a href="global.html#RS6">RS6</a></li><li><a href="global.html#RULING_STD">RULING_STD</a></li><li><a href="global.html#SECTIONS">SECTIONS</a></li><li><a href="global.html#SETTLED_RE">SETTLED_RE</a></li><li><a href="global.html#WKnowledgeRelate">WKnowledgeRelate</a></li><li><a href="global.html#WRITE_ENTRIES">WRITE_ENTRIES</a></li><li><a href="global.html#addToAdjacency">addToAdjacency</a></li><li><a href="global.html#admitItemOf">admitItemOf</a></li><li><a href="global.html#admitRelation">admitRelation</a></li><li><a href="global.html#aiStandardRowOf">aiStandardRowOf</a></li><li><a href="global.html#appendAudit">appendAudit</a></li><li><a href="global.html#appendConflictEvent">appendConflictEvent</a></li><li><a href="global.html#applyEdgeStockFix">applyEdgeStockFix</a></li><li><a href="global.html#archiveFilesOf">archiveFilesOf</a></li><li><a href="global.html#assertGeneration">assertGeneration</a></li><li><a href="global.html#auditDomainOf">auditDomainOf</a></li><li><a href="global.html#auditRelateStandards">auditRelateStandards</a></li><li><a href="global.html#baseVerdictOf">baseVerdictOf</a></li><li><a href="global.html#benchRelateEdgesOf">benchRelateEdgesOf</a></li><li><a href="global.html#bestByIdentity">bestByIdentity</a></li><li><a href="global.html#buildAdjacency">buildAdjacency</a></li><li><a href="global.html#callTimeoutMsOf">callTimeoutMsOf</a></li><li><a href="global.html#candidateNameOf">candidateNameOf</a></li><li><a href="global.html#candidateScoreOf">candidateScoreOf</a></li><li><a href="global.html#canon">canon</a></li><li><a href="global.html#checkEdge">checkEdge</a></li><li><a href="global.html#checkKey">checkKey</a></li><li><a href="global.html#checkPromptItemOf">checkPromptItemOf</a></li><li><a href="global.html#checkSingle">checkSingle</a></li><li><a href="global.html#checkSyncOf">checkSyncOf</a></li><li><a href="global.html#checkVerdictOf">checkVerdictOf</a></li><li><a href="global.html#classDecisionOf">classDecisionOf</a></li><li><a href="global.html#clearStaleReview">clearStaleReview</a></li><li><a href="global.html#closeNoteHold">closeNoteHold</a></li><li><a href="global.html#compareProposals">compareProposals</a></li><li><a href="global.html#conceptKeysOf">conceptKeysOf</a></li><li><a href="global.html#conflictCheckBenchRole">conflictCheckBenchRole</a></li><li><a href="global.html#conflictCheckOf">conflictCheckOf</a></li><li><a href="global.html#conflictNeighborsOf">conflictNeighborsOf</a></li><li><a href="global.html#conflictPageProblems">conflictPageProblems</a></li><li><a href="global.html#conflictVerdictOf">conflictVerdictOf</a></li><li><a href="global.html#coresCiting">coresCiting</a></li><li><a href="global.html#coveredItemOf">coveredItemOf</a></li><li><a href="global.html#createCheckHasher">createCheckHasher</a></li><li><a href="global.html#createDirtyLedger">createDirtyLedger</a></li><li><a href="global.html#createKnowledgeRelate">createKnowledgeRelate</a></li><li><a href="global.html#createMaterialReader">createMaterialReader</a></li><li><a href="global.html#createMutex">createMutex</a></li><li><a href="global.html#createRelateDomain">createRelateDomain</a></li><li><a href="global.html#createRelateObject">createRelateObject</a></li><li><a href="global.html#createRelateQueueRunner">createRelateQueueRunner</a></li><li><a href="global.html#createRelateRuntime">createRelateRuntime</a></li><li><a href="global.html#createRelateState">createRelateState</a></li><li><a href="global.html#createReverseIndex">createReverseIndex</a></li><li><a href="global.html#createReverseLedger">createReverseLedger</a></li><li><a href="global.html#createSideReader">createSideReader</a></li><li><a href="global.html#createTombstones">createTombstones</a></li><li><a href="global.html#currentTypeProblems">currentTypeProblems</a></li><li><a href="global.html#cutOf">cutOf</a></li><li><a href="global.html#cutReason">cutReason</a></li><li><a href="global.html#decideOf">decideOf</a></li><li><a href="global.html#deleteNote">deleteNote</a></li><li><a href="global.html#deletionHalfStatesOf">deletionHalfStatesOf</a></li><li><a href="global.html#deletionStatusOf">deletionStatusOf</a></li><li><a href="global.html#domainNeeds">domainNeeds</a></li><li><a href="global.html#domainOf">domainOf</a></li><li><a href="global.html#domainShapeProblems">domainShapeProblems</a></li><li><a href="global.html#domainTypeRenamerOf">domainTypeRenamerOf</a></li><li><a href="global.html#dropAll">dropAll</a></li><li><a href="global.html#edgeCheckHashOf">edgeCheckHashOf</a></li><li><a href="global.html#edgeCheckScanOf">edgeCheckScanOf</a></li><li><a href="global.html#edgeFixOf">edgeFixOf</a></li><li><a href="global.html#edgeId">edgeId</a></li><li><a href="global.html#edgeInfoOf">edgeInfoOf</a></li><li><a href="global.html#edgeLedgersOf">edgeLedgersOf</a></li><li><a href="global.html#edgePlanOf">edgePlanOf</a></li><li><a href="global.html#edgeProblems">edgeProblems</a></li><li><a href="global.html#edgeRestoredOf">edgeRestoredOf</a></li><li><a href="global.html#edgeReviewBenchRole">edgeReviewBenchRole</a></li><li><a href="global.html#edgeRowUnitsOf">edgeRowUnitsOf</a></li><li><a href="global.html#edgeStd">edgeStd</a></li><li><a href="global.html#edgeTimeOf">edgeTimeOf</a></li><li><a href="global.html#edgeUnitsOf">edgeUnitsOf</a></li><li><a href="global.html#edgesReviewedOf">edgesReviewedOf</a></li><li><a href="global.html#escalatedHoldNextOf">escalatedHoldNextOf</a></li><li><a href="global.html#gateAllows">gateAllows</a></li><li><a href="global.html#gateCtxOf">gateCtxOf</a></li><li><a href="global.html#gateEdgeProposal">gateEdgeProposal</a></li><li><a href="global.html#gateRestore">gateRestore</a></li><li><a href="global.html#generationMismatchOf">generationMismatchOf</a></li><li><a href="global.html#historyOf">historyOf</a></li><li><a href="global.html#historyScriptHoldOf">historyScriptHoldOf</a></li><li><a href="global.html#inRelatePool">inRelatePool</a></li><li><a href="global.html#indexDirtyOf">indexDirtyOf</a></li><li><a href="global.html#info">info</a></li><li><a href="global.html#inputVocabProblems">inputVocabProblems</a></li><li><a href="global.html#isEdgeRow">isEdgeRow</a></li><li><a href="global.html#isRelated">isRelated</a></li><li><a href="global.html#itemTargetOf">itemTargetOf</a></li><li><a href="global.html#lastRevisionOf">lastRevisionOf</a></li><li><a href="global.html#later">later</a></li><li><a href="global.html#ledgerCorruptTextOf">ledgerCorruptTextOf</a></li><li><a href="global.html#levelOf">levelOf</a></li><li><a href="global.html#loadLedgerJson">loadLedgerJson</a></li><li><a href="global.html#maintainRelations">maintainRelations</a></li><li><a href="global.html#makeEdge">makeEdge</a></li><li><a href="global.html#makeSlugResolver">makeSlugResolver</a></li><li><a href="global.html#markNoteProgress">markNoteProgress</a></li><li><a href="global.html#materialOfNote">materialOfNote</a></li><li><a href="global.html#mergeEdge">mergeEdge</a></li><li><a href="global.html#mwBuildEdges">mwBuildEdges</a></li><li><a href="global.html#mwMarkDirty">mwMarkDirty</a></li><li><a href="global.html#mwMarkRelated">mwMarkRelated</a></li><li><a href="global.html#mwPersistEdges">mwPersistEdges</a></li><li><a href="global.html#mwProjectDirty">mwProjectDirty</a></li><li><a href="global.html#mwQueueReverse">mwQueueReverse</a></li><li><a href="global.html#mwRebuildRelationIndex">mwRebuildRelationIndex</a></li><li><a href="global.html#mwReevalAgree">mwReevalAgree</a></li><li><a href="global.html#mwReevalApply">mwReevalApply</a></li><li><a href="global.html#mwReevalMarkReviewed">mwReevalMarkReviewed</a></li><li><a href="global.html#mwReevalVerdict">mwReevalVerdict</a></li><li><a href="global.html#needsCheck">needsCheck</a></li><li><a href="global.html#needsEdgeReview">needsEdgeReview</a></li><li><a href="global.html#needsReeval">needsReeval</a></li><li><a href="global.html#neighborsOf">neighborsOf</a></li><li><a href="global.html#normalizeEdgeProposal">normalizeEdgeProposal</a></li><li><a href="global.html#noteProblems">noteProblems</a></li><li><a href="global.html#noteReader">noteReader</a></li><li><a href="global.html#openChecked">openChecked</a></li><li><a href="global.html#openDeletions">openDeletions</a></li><li><a href="global.html#openRelateLedgers">openRelateLedgers</a></li><li><a href="global.html#openStores">openStores</a></li><li><a href="global.html#packIds">packIds</a></li><li><a href="global.html#pageVotesOf">pageVotesOf</a></li><li><a href="global.html#pagesOf">pagesOf</a></li><li><a href="global.html#paginateBy">paginateBy</a></li><li><a href="global.html#pairCheck">pairCheck</a></li><li><a href="global.html#pairCheckItemOf">pairCheckItemOf</a></li><li><a href="global.html#pairItemOf">pairItemOf</a></li><li><a href="global.html#pairProblems">pairProblems</a></li><li><a href="global.html#parseRelateBenchArgs">parseRelateBenchArgs</a></li><li><a href="global.html#persistEdge">persistEdge</a></li><li><a href="global.html#pickCandidates">pickCandidates</a></li><li><a href="global.html#pickRelateVocab">pickRelateVocab</a></li><li><a href="global.html#pickRelationsOf">pickRelationsOf</a></li><li><a href="global.html#planEdgeStockFix">planEdgeStockFix</a></li><li><a href="global.html#planRelateBench">planRelateBench</a></li><li><a href="global.html#presentOthersOf">presentOthersOf</a></li><li><a href="global.html#projectAffected">projectAffected</a></li><li><a href="global.html#projectAll">projectAll</a></li><li><a href="global.html#projectNote">projectNote</a></li><li><a href="global.html#projectNotes">projectNotes</a></li><li><a href="global.html#projectText">projectText</a></li><li><a href="global.html#proposalOf">proposalOf</a></li><li><a href="global.html#pruneDangling">pruneDangling</a></li><li><a href="global.html#qualityTag">qualityTag</a></li><li><a href="global.html#quarantineHoldNextOf">quarantineHoldNextOf</a></li><li><a href="global.html#queueConflictCheck">queueConflictCheck</a></li><li><a href="global.html#queueConflictProposal">queueConflictProposal</a></li><li><a href="global.html#queueEdgeReview">queueEdgeReview</a></li><li><a href="global.html#queueRewrite">queueRewrite</a></li><li><a href="global.html#rawVerdictText">rawVerdictText</a></li><li><a href="global.html#readArchive">readArchive</a></li><li><a href="global.html#readAuditRows">readAuditRows</a></li><li><a href="global.html#readConflictEvents">readConflictEvents</a></li><li><a href="global.html#readEdgeAudit">readEdgeAudit</a></li><li><a href="global.html#readEdgeStockLedger">readEdgeStockLedger</a></li><li><a href="global.html#reasonFormProblem">reasonFormProblem</a></li><li><a href="global.html#reasonRewriteProblemsOf">reasonRewriteProblemsOf</a></li><li><a href="global.html#rebuildRelationIndex">rebuildRelationIndex</a></li><li><a href="global.html#recentReevalRetiredIds">recentReevalRetiredIds</a></li><li><a href="global.html#recordCheck">recordCheck</a></li><li><a href="global.html#reevalBaseline">reevalBaseline</a></li><li><a href="global.html#reevalBenchRole">reevalBenchRole</a></li><li><a href="global.html#reevalCaseProblems">reevalCaseProblems</a></li><li><a href="global.html#reevalChainOf">reevalChainOf</a></li><li><a href="global.html#reevalMissingOf">reevalMissingOf</a></li><li><a href="global.html#reevalPartsOf">reevalPartsOf</a></li><li><a href="global.html#reevalPromptItemOf">reevalPromptItemOf</a></li><li><a href="global.html#reevalRequeue">reevalRequeue</a></li><li><a href="global.html#reevalTargetIdOf">reevalTargetIdOf</a></li><li><a href="global.html#reevalVerdictOf">reevalVerdictOf</a></li><li><a href="global.html#relateAiCallOf">relateAiCallOf</a></li><li><a href="global.html#relateBenchRole">relateBenchRole</a></li><li><a href="global.html#relateBenchRoleOf">relateBenchRoleOf</a></li><li><a href="global.html#relateCapacityOf">relateCapacityOf</a></li><li><a href="global.html#relateCaseProblems">relateCaseProblems</a></li><li><a href="global.html#relateCheck">relateCheck</a></li><li><a href="global.html#relateDomainNeedsOf">relateDomainNeedsOf</a></li><li><a href="global.html#relateFeatureProblems">relateFeatureProblems</a></li><li><a href="global.html#relateGuideDefaultOf">relateGuideDefaultOf</a></li><li><a href="global.html#relateHoldDeadlineOf">relateHoldDeadlineOf</a></li><li><a href="global.html#relateMaterialOf">relateMaterialOf</a></li><li><a href="global.html#relateOptOf">relateOptOf</a></li><li><a href="global.html#relatePageProblems">relatePageProblems</a></li><li><a href="global.html#relatePanelsOf">relatePanelsOf</a></li><li><a href="global.html#relatePendingOf">relatePendingOf</a></li><li><a href="global.html#relateProblemsOf">relateProblemsOf</a></li><li><a href="global.html#relateScanOf">relateScanOf</a></li><li><a href="global.html#relateSeatOf">relateSeatOf</a></li><li><a href="global.html#relateSeatsOf">relateSeatsOf</a></li><li><a href="global.html#relateSuiteProblems">relateSuiteProblems</a></li><li><a href="global.html#relateSummaryOf">relateSummaryOf</a></li><li><a href="global.html#relateVerdictOf">relateVerdictOf</a></li><li><a href="global.html#relateWarningsOf">relateWarningsOf</a></li><li><a href="global.html#relationTypesVersionOf">relationTypesVersionOf</a></li><li><a href="global.html#removeFromAdjacency">removeFromAdjacency</a></li><li><a href="global.html#renameEdgeTypes">renameEdgeTypes</a></li><li><a href="global.html#renderRelationSections">renderRelationSections</a></li><li><a href="global.html#resolveRelateData">resolveRelateData</a></li><li><a href="global.html#resolveRelateSettings">resolveRelateSettings</a></li><li><a href="global.html#resolveRelateVocab">resolveRelateVocab</a></li><li><a href="global.html#restoreEdge">restoreEdge</a></li><li><a href="global.html#restoreNote">restoreNote</a></li><li><a href="global.html#restoredStandards">restoredStandards</a></li><li><a href="global.html#retireEdge">retireEdge</a></li><li><a href="global.html#retiredEdgesOf">retiredEdgesOf</a></li><li><a href="global.html#retypeAllowed">retypeAllowed</a></li><li><a href="global.html#reversePairsBackOf">reversePairsBackOf</a></li><li><a href="global.html#revertEdgeRevision">revertEdgeRevision</a></li><li><a href="global.html#revertedStandards">revertedStandards</a></li><li><a href="global.html#reviewCaseProblems">reviewCaseProblems</a></li><li><a href="global.html#reviewEdgesOf">reviewEdgesOf</a></li><li><a href="global.html#reviewPageProblems">reviewPageProblems</a></li><li><a href="global.html#reviewQueueOf">reviewQueueOf</a></li><li><a href="global.html#reviewVerdictOf">reviewVerdictOf</a></li><li><a href="global.html#reviewVerdictOfCase">reviewVerdictOfCase</a></li><li><a href="global.html#reviseEdge">reviseEdge</a></li><li><a href="global.html#rewriteEdge">rewriteEdge</a></li><li><a href="global.html#rollbackEdgeStockFix">rollbackEdgeStockFix</a></li><li><a href="global.html#rotationBumpOf">rotationBumpOf</a></li><li><a href="global.html#rotationCursorOf">rotationCursorOf</a></li><li><a href="global.html#rotationPageOf">rotationPageOf</a></li><li><a href="global.html#rotationProgressOf">rotationProgressOf</a></li><li><a href="global.html#rotationQueueOf">rotationQueueOf</a></li><li><a href="global.html#rs4ClassOf">rs4ClassOf</a></li><li><a href="global.html#rs4DecisionOf">rs4DecisionOf</a></li><li><a href="global.html#rs6ClassOf">rs6ClassOf</a></li><li><a href="global.html#rs6DecisionOf">rs6DecisionOf</a></li><li><a href="global.html#rs6VoteActionOf">rs6VoteActionOf</a></li><li><a href="global.html#runCheckPanelPages">runCheckPanelPages</a></li><li><a href="global.html#runConflictCheckSegment">runConflictCheckSegment</a></li><li><a href="global.html#runEdgeReviewSegment">runEdgeReviewSegment</a></li><li><a href="global.html#runReevalSegment">runReevalSegment</a></li><li><a href="global.html#runRelateBench">runRelateBench</a></li><li><a href="global.html#runRelateBenchCli">runRelateBenchCli</a></li><li><a href="global.html#sameEdge">sameEdge</a></li><li><a href="global.html#sameEdgeVerdict">sameEdgeVerdict</a></li><li><a href="global.html#sameVisible">sameVisible</a></li><li><a href="global.html#saveLedgerJson">saveLedgerJson</a></li><li><a href="global.html#scanConflictEdges">scanConflictEdges</a></li><li><a href="global.html#scriptFixHistory">scriptFixHistory</a></li><li><a href="global.html#seatVotesOf">seatVotesOf</a></li><li><a href="global.html#sectionsHashOf">sectionsHashOf</a></li><li><a href="global.html#seqAt">seqAt</a></li><li><a href="global.html#seqOf">seqOf</a></li><li><a href="global.html#settleArchive">settleArchive</a></li><li><a href="global.html#shuffleStable">shuffleStable</a></li><li><a href="global.html#stageRelate">stageRelate</a></li><li><a href="global.html#stageRelateProject">stageRelateProject</a></li><li><a href="global.html#stageRelationIndex">stageRelationIndex</a></li><li><a href="global.html#stdRetiredHowOf">stdRetiredHowOf</a></li><li><a href="global.html#stockDomainOf">stockDomainOf</a></li><li><a href="global.html#stockOrderOf">stockOrderOf</a></li><li><a href="global.html#stockProgressOf">stockProgressOf</a></li><li><a href="global.html#stockQueueOf">stockQueueOf</a></li><li><a href="global.html#stockSourceResolvedOf">stockSourceResolvedOf</a></li><li><a href="global.html#stockWaiverKeyOf">stockWaiverKeyOf</a></li><li><a href="global.html#typeRankOf">typeRankOf</a></li><li><a href="global.html#undoDeleteNote">undoDeleteNote</a></li><li><a href="global.html#unfixableRouteOf">unfixableRouteOf</a></li><li><a href="global.html#uniqIds">uniqIds</a></li><li><a href="global.html#unpackIds">unpackIds</a></li><li><a href="global.html#verdictClassOf">verdictClassOf</a></li><li><a href="global.html#verdictExpectProblems">verdictExpectProblems</a></li><li><a href="global.html#verdictsByIndexOf">verdictsByIndexOf</a></li><li><a href="global.html#verdictsOf">verdictsOf</a></li><li><a href="global.html#verifyEdgeStockChain">verifyEdgeStockChain</a></li><li><a href="global.html#voteMissingOf">voteMissingOf</a></li><li><a href="global.html#waivedSameProblem">waivedSameProblem</a></li><li><a href="global.html#waiverCoversEdge">waiverCoversEdge</a></li><li><a href="global.html#withCut">withCut</a></li><li><a href="global.html#writeEdge">writeEdge</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">stores/deletions.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// deletions.mjs — 筆記明示刪除之紀錄(墓碑與封存)之檔名與唯讀讀取:寫入者為明示刪除與其還原、撤銷(ops/noteOps),讀者為關聯段與
+//   讀關聯之下游(如撤出以已刪筆記為出處之產物)
+//
+// 【檔名只定義一次】刪除墓碑是「筆記已被明示刪除」之系統紀錄,寫者與讀者皆依它判定——檔名只定義一次(關聯段之 LEDGER_FILES 取自此處),
+//   讀不到不等於刪除(墓碑是正面證據)。
+// 【封存】&lt;id>.json＝{ deletedAt, reason, record(刪除前之記錄), edges(刪除前之邊值), reverse(刪除前涉及該篇之反向待處理對) }、&lt;id>.md(md 副本);
+//   還原或撤銷完成即改名歸檔(&lt;id>.restored-&lt;時戳>.*、&lt;id>.undone-&lt;時戳>.*)。封存是還原與撤銷之唯一依據:讀到壞檔或形狀不符即拋(不當沒有)。
+// 【半狀態】刪除、還原、撤銷皆分步且可續作;中途中斷而未續作者每輪由關聯段偵測(deletionHalfStatesOf),發必看字樣——
+//   ①墓碑在而記錄在(刪除停在刪記錄之前,或還原／撤銷停在移除墓碑之前;關聯段不以之為對象)②封存未歸檔而無墓碑(還原／撤銷停在歸檔之前;
+//   再刪除會誤併舊封存,故 deleteNote 拒做)③記錄已刪而 md 仍在且與封存副本相同(刪除停在刪 md 之前)。
+
+import fs from 'fs'
+import path from 'path'
+import isobj from 'wsemi/src/isobj.mjs'
+import isarr from 'wsemi/src/isarr.mjs'
+import isestr from 'wsemi/src/isestr.mjs'
+import { readJson } from '../core/capturePackage.mjs'
+
+/** 刪除紀錄之檔名(dirs.state 下):墓碑 { ids:{ 筆記 id: { at, reason } } }、封存目錄(見檔頭【封存】) */
+export const DELETION_FILES = { tombstones: 'relate-tombstones.json', archive: 'deleted-notes' }
+
+/** 半狀態之說明(檔頭【半狀態】;日誌與回報用) */
+export const DELETION_HALF_STATE_LABEL = Object.freeze({ 'tombstone-with-record': '墓碑在而記錄在', 'archive-without-tombstone': '封存未歸檔', 'md-left': '記錄已刪而 md 仍在' })
+
+/** 已歸檔之封存之檔名(還原、撤銷完成後改名;不是待處理之封存) */
+const SETTLED_RE = /\.(restored|undone)-\d+$/
+
+/**
+ * 某篇之封存檔路徑
+ *
+ * @param {String} stateDir 輸入 dirs.state
+ * @param {String} slug 輸入筆記 id
+ * @returns {Object} 回傳 { dir(封存目錄), json, md }
+ * @example
+ * console.log(archiveFilesOf('/kb/state', 'n1').json.replace(/\\/g, '/'))
+ * // => /kb/state/deleted-notes/n1.json
+ */
+export function archiveFilesOf(stateDir, slug) {
+    const dir = path.join(stateDir, DELETION_FILES.archive)
+    return { dir, json: path.join(dir, `${slug}.json`), md: path.join(dir, `${slug}.md`) }
+}
+
+/**
+ * 讀封存(缺檔回 null;壞檔、形狀不符、讀取失敗即拋——封存是還原與撤銷之唯一依據,見檔頭【封存】)
+ *
+ * @param {String} file 輸入封存 JSON 之路徑
+ * @returns {Object|null} 回傳 { deletedAt, reason, record, edges, reverse(舊封存無此鍵即 []) }
+ * @throws {Error} 讀取失敗(非缺檔)、JSON 解析失敗、非 { record:物件, edges:陣列 } 時拋出
+ * @example
+ * const fs = process.getBuiltinModule('fs')
+ * const dir = fs.mkdtempSync('ex-')
+ * const f = archiveFilesOf(dir, 'n1')
+ * console.log(readArchive(f.json))
+ * // => null
+ *
+ * fs.mkdirSync(f.dir, { recursive: true })
+ * fs.writeFileSync(f.json, JSON.stringify({ deletedAt: 'T1', reason: '重複', record: { id: 'n1', title: '太陽黑子' }, edges: [{ id: 'e1' }, 'x'] }))
+ * const arc = readArchive(f.json)
+ * console.log(arc.record.title, arc.edges, arc.reverse)
+ * // => 太陽黑子 [ { id: 'e1' } ] []
+ *
+ * fs.writeFileSync(f.json, '{壞')
+ * try { readArchive(f.json) } catch (e) { console.log(e.message.startsWith('封存損壞')) }
+ * // => true
+ * fs.rmSync(dir, { recursive: true, force: true })
+ */
+export function readArchive(file) {
+    let text
+    try {
+        text = fs.readFileSync(file, 'utf8')
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') return null
+        throw new Error(`封存讀取失敗（${path.basename(file)}）：${e.message}`)
+    }
+    let arc
+    try {
+        arc = JSON.parse(text)
+    }
+    catch (e) {
+        throw new Error(`封存損壞（${path.basename(file)}）：${e.message}`)
+    }
+    if (!isobj(arc) || !isobj(arc.record) || !isarr(arc.edges)) throw new Error(`封存形狀不符（${path.basename(file)}）：須為 { record:物件, edges:陣列, … }`)
+    return { ...arc, edges: arc.edges.filter(isobj), reverse: isarr(arc.reverse) ? arc.reverse.filter((p) => isobj(p) &amp;&amp; isestr(p.o) &amp;&amp; isestr(p.n)) : [] }
+}
+
+/**
+ * 刪除、還原、撤銷之半狀態(檔頭【半狀態】;唯讀:不寫、不隔離壞檔——壞墓碑由開帳者告警)
+ *
+ * @param {String} stateDir 輸入 dirs.state
+ * @param {Function} hasRecord 輸入 (筆記 id) => Boolean(記錄是否在)
+ * @returns {Array} 回傳 [{ id, state:'tombstone-with-record'|'archive-without-tombstone'|'md-left' }](依 id 排序)
+ * @example
+ * const fs = process.getBuiltinModule('fs')
+ * const dir = fs.mkdtempSync('ex-')
+ * console.log(deletionHalfStatesOf(dir, () => false))
+ * // => []
+ *
+ * fs.writeFileSync(`${dir}/${DELETION_FILES.tombstones}`, JSON.stringify({ ids: { n1: { at: 'T1', reason: '重複' } } }))
+ * console.log(deletionHalfStatesOf(dir, (id) => id === 'n1'))
+ * // => [ { id: 'n1', state: 'tombstone-with-record' } ]
+ * console.log(deletionHalfStatesOf(dir, () => false))
+ * // => []
+ *
+ * fs.mkdirSync(`${dir}/${DELETION_FILES.archive}`)
+ * fs.writeFileSync(`${dir}/${DELETION_FILES.archive}/n2.json`, JSON.stringify({ record: { id: 'n2' }, edges: [] }))
+ * console.log(deletionHalfStatesOf(dir, () => false))
+ * // => [ { id: 'n2', state: 'archive-without-tombstone' } ]
+ * fs.rmSync(dir, { recursive: true, force: true })
+ */
+export function deletionHalfStatesOf(stateDir, hasRecord) {
+    const raw = readJson(path.join(stateDir, DELETION_FILES.tombstones), null)
+    const tomb = new Set(Object.keys(isobj(raw?.ids) ? raw.ids : {}))
+    const dir = path.join(stateDir, DELETION_FILES.archive)
+    const pending = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)).filter((b) => !SETTLED_RE.test(b)) : []
+    const out = new Map()
+    for (const id of tomb) if (hasRecord(id)) out.set(id, 'tombstone-with-record')
+    for (const id of pending) {
+        if (out.has(id)) continue
+        if (!tomb.has(id)) {
+            out.set(id, 'archive-without-tombstone')
+            continue
+        }
+        if (hasRecord(id)) continue
+        // 記錄已刪:md 仍在且與封存副本相同 → 刪 md 之前中斷(不同者非本次刪除之物,不列)
+        let arc = null
+        try {
+            arc = readArchive(path.join(dir, `${id}.json`))
+        }
+        catch { /* 壞封存由還原或撤銷時報錯;此處不列 */ }
+        const file = arc?.record?.file
+        const copy = path.join(dir, `${id}.md`)
+        if (isestr(file) &amp;&amp; fs.existsSync(file) &amp;&amp; fs.existsSync(copy) &amp;&amp; fs.readFileSync(file).equals(fs.readFileSync(copy))) out.set(id, 'md-left')
+    }
+    return [...out].map(([id, state]) => ({ id, state })).sort((a, b) => (a.id &lt; b.id ? -1 : a.id > b.id ? 1 : 0))
+}
+
+/**
+ * 唯讀開啟刪除紀錄(不寫入、不隔離壞檔;壞檔或缺檔視為無墓碑)
+ *
+ * @param {String} stateDir 輸入 dirs.state
+ * @returns {Object} 回傳 { has(id):Boolean, reasonOf(id):String(墓碑所記之刪除理由,無則 ''), titleOf(id):String(封存之記錄標題,無則 id) }
+ * @example
+ * const fs = process.getBuiltinModule('fs')
+ * const dir = fs.mkdtempSync('ex-')
+ * console.log(openDeletions(dir).has('n1'))
+ * // => false
+ *
+ * fs.writeFileSync(`${dir}/${DELETION_FILES.tombstones}`, JSON.stringify({ ids: { n1: { at: 'T1', reason: '重複' } } }))
+ * fs.mkdirSync(`${dir}/${DELETION_FILES.archive}`)
+ * fs.writeFileSync(`${dir}/${DELETION_FILES.archive}/n1.json`, JSON.stringify({ record: { id: 'n1', title: '太陽黑子' }, edges: [] }))
+ * const d = openDeletions(dir)
+ * console.log(d.has('n1'), d.has('n2'), d.reasonOf('n1'), d.titleOf('n1'), d.titleOf('n2'))
+ * // => true false 重複 太陽黑子 n2
+ * fs.rmSync(dir, { recursive: true, force: true })
+ */
+export function openDeletions(stateDir) {
+    const raw = readJson(path.join(stateDir, DELETION_FILES.tombstones), null)
+    const ids = isobj(raw?.ids) ? raw.ids : {}
+    const archive = path.join(stateDir, DELETION_FILES.archive)
+    const has = (id) => Object.prototype.hasOwnProperty.call(ids, id)
+    return {
+        has,
+        reasonOf: (id) => (has(id) ? String(ids[id]?.reason || '') : ''),
+        titleOf: (id) => String(readJson(path.join(archive, `${id}.json`), null)?.record?.title || '').trim() || id,
+    }
+}
+
+export default { DELETION_FILES, DELETION_HALF_STATE_LABEL, archiveFilesOf, readArchive, deletionHalfStatesOf, openDeletions }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Nov 02 2026 13:25:06 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

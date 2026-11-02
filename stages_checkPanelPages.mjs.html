@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>stages/checkPanelPages.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AI_ADAPTER_OPT">AI_ADAPTER_OPT</a></li><li><a href="global.html#BENCH_NOW">BENCH_NOW</a></li><li><a href="global.html#CALL_TIMEOUT_FALLBACK_MS">CALL_TIMEOUT_FALLBACK_MS</a></li><li><a href="global.html#CFG_KEYS">CFG_KEYS</a></li><li><a href="global.html#CHECKED_STDS">CHECKED_STDS</a></li><li><a href="global.html#CHECK_BLANK">CHECK_BLANK</a></li><li><a href="global.html#CHECK_STATES">CHECK_STATES</a></li><li><a href="global.html#CLI">CLI</a></li><li><a href="global.html#COLLECTION_KEYS">COLLECTION_KEYS</a></li><li><a href="global.html#CONFLICT_DEFINITION">CONFLICT_DEFINITION</a></li><li><a href="global.html#CONFLICT_EVENT_FILE">CONFLICT_EVENT_FILE</a></li><li><a href="global.html#DATA_KEYS">DATA_KEYS</a></li><li><a href="global.html#DELETION_FILES">DELETION_FILES</a></li><li><a href="global.html#DELETION_HALF_STATE_LABEL">DELETION_HALF_STATE_LABEL</a></li><li><a href="global.html#DOMAIN_FACTORY">DOMAIN_FACTORY</a></li><li><a href="global.html#E">E</a></li><li><a href="global.html#EDGE_AUDIT_FILE">EDGE_AUDIT_FILE</a></li><li><a href="global.html#EDGE_FIX_STDS">EDGE_FIX_STDS</a></li><li><a href="global.html#EDGE_INFO_LABELS">EDGE_INFO_LABELS</a></li><li><a href="global.html#EDGE_OBJECT">EDGE_OBJECT</a></li><li><a href="global.html#EDGE_REVIEW_STDS">EDGE_REVIEW_STDS</a></li><li><a href="global.html#EDGE_STANDARDS">EDGE_STANDARDS</a></li><li><a href="global.html#EDGE_VERDICTS">EDGE_VERDICTS</a></li><li><a href="global.html#EDGE_VERDICT_MIN_REASON">EDGE_VERDICT_MIN_REASON</a></li><li><a href="global.html#FIX_STD">FIX_STD</a></li><li><a href="global.html#INFO_STDS">INFO_STDS</a></li><li><a href="global.html#LEDGER_FILES">LEDGER_FILES</a></li><li><a href="global.html#MIN_SHARED_SCORE">MIN_SHARED_SCORE</a></li><li><a href="global.html#MUTEX_KEY">MUTEX_KEY</a></li><li><a href="global.html#NAMESPACES">NAMESPACES</a></li><li><a href="global.html#NO_MATERIAL_DETAIL">NO_MATERIAL_DETAIL</a></li><li><a href="global.html#OPTIONAL_DOMAIN_MEMBERS">OPTIONAL_DOMAIN_MEMBERS</a></li><li><a href="global.html#OWN_KEYS">OWN_KEYS</a></li><li><a href="global.html#PANEL_DEFS">PANEL_DEFS</a></li><li><a href="global.html#PIPELINE_NAME">PIPELINE_NAME</a></li><li><a href="global.html#PLACEHOLDER_REASONS">PLACEHOLDER_REASONS</a></li><li><a href="global.html#PROMPT_DOMAIN">PROMPT_DOMAIN</a></li><li><a href="global.html#PROMPT_KEYS">PROMPT_KEYS</a></li><li><a href="global.html#R">R</a></li><li><a href="global.html#REASON_MAX_CHARS">REASON_MAX_CHARS</a></li><li><a href="global.html#REASON_MIN_CHARS">REASON_MIN_CHARS</a></li><li><a href="global.html#REASON_PROBLEM_CHARS">REASON_PROBLEM_CHARS</a></li><li><a href="global.html#REASON_REWRITE_STDS">REASON_REWRITE_STDS</a></li><li><a href="global.html#REEVAL_BLANK">REEVAL_BLANK</a></li><li><a href="global.html#REEVAL_OPT_KEYS">REEVAL_OPT_KEYS</a></li><li><a href="global.html#REEVAL_REPROPOSE_DAYS">REEVAL_REPROPOSE_DAYS</a></li><li><a href="global.html#RELATE_AI_DEFAULT">RELATE_AI_DEFAULT</a></li><li><a href="global.html#RELATE_AI_SCHEMA">RELATE_AI_SCHEMA</a></li><li><a href="global.html#RELATE_AI_STANDARD_IDS">RELATE_AI_STANDARD_IDS</a></li><li><a href="global.html#RELATE_API_HINT">RELATE_API_HINT</a></li><li><a href="global.html#RELATE_AUDITED_STANDARD_IDS">RELATE_AUDITED_STANDARD_IDS</a></li><li><a href="global.html#RELATE_BASELINE_RULING_PREFIX">RELATE_BASELINE_RULING_PREFIX</a></li><li><a href="global.html#RELATE_BENCH_CASES_FILES">RELATE_BENCH_CASES_FILES</a></li><li><a href="global.html#RELATE_BENCH_CHANGE">RELATE_BENCH_CHANGE</a></li><li><a href="global.html#RELATE_BENCH_MODELS">RELATE_BENCH_MODELS</a></li><li><a href="global.html#RELATE_BENCH_ROLES">RELATE_BENCH_ROLES</a></li><li><a href="global.html#RELATE_BENCH_USAGE">RELATE_BENCH_USAGE</a></li><li><a href="global.html#RELATE_BLANK">RELATE_BLANK</a></li><li><a href="global.html#RELATE_CAPACITY_DESC">RELATE_CAPACITY_DESC</a></li><li><a href="global.html#RELATE_CTX_FLAGS">RELATE_CTX_FLAGS</a></li><li><a href="global.html#RELATE_DATA_KEYS">RELATE_DATA_KEYS</a></li><li><a href="global.html#RELATE_DEFAULT">RELATE_DEFAULT</a></li><li><a href="global.html#RELATE_DIRS">RELATE_DIRS</a></li><li><a href="global.html#RELATE_DOMAIN_KEYS">RELATE_DOMAIN_KEYS</a></li><li><a href="global.html#RELATE_EXPECT_KEYS">RELATE_EXPECT_KEYS</a></li><li><a href="global.html#RELATE_FEATURES">RELATE_FEATURES</a></li><li><a href="global.html#RELATE_GUIDE_FIELDS">RELATE_GUIDE_FIELDS</a></li><li><a href="global.html#RELATE_HOLD_DEADLINE_DAYS">RELATE_HOLD_DEADLINE_DAYS</a></li><li><a href="global.html#RELATE_HOLD_NEXT">RELATE_HOLD_NEXT</a></li><li><a href="global.html#RELATE_INDEX_TITLE">RELATE_INDEX_TITLE</a></li><li><a href="global.html#RELATE_INDEX_TOP_N">RELATE_INDEX_TOP_N</a></li><li><a href="global.html#RELATE_LOG_KNOWN">RELATE_LOG_KNOWN</a></li><li><a href="global.html#RELATE_LOG_MUST_SEE">RELATE_LOG_MUST_SEE</a></li><li><a href="global.html#RELATE_LOG_PARSE">RELATE_LOG_PARSE</a></li><li><a href="global.html#RELATE_MAX_RELATIONS_PER_NOTE">RELATE_MAX_RELATIONS_PER_NOTE</a></li><li><a href="global.html#RELATE_PROMPT_SIGS">RELATE_PROMPT_SIGS</a></li><li><a href="global.html#RELATE_REPORT_KEYS">RELATE_REPORT_KEYS</a></li><li><a href="global.html#RELATE_SCAN_OBJECT">RELATE_SCAN_OBJECT</a></li><li><a href="global.html#RELATE_SCHEMA">RELATE_SCHEMA</a></li><li><a href="global.html#RELATE_SEATS">RELATE_SEATS</a></li><li><a href="global.html#RELATE_SEAT_KEYS">RELATE_SEAT_KEYS</a></li><li><a href="global.html#RELATE_SEAT_LABELS">RELATE_SEAT_LABELS</a></li><li><a href="global.html#RELATE_SECTION_TITLES">RELATE_SECTION_TITLES</a></li><li><a href="global.html#RELATE_SETTING_TYPES">RELATE_SETTING_TYPES</a></li><li><a href="global.html#RELATE_STAGE_KEYS">RELATE_STAGE_KEYS</a></li><li><a href="global.html#RELATE_STANDARDS">RELATE_STANDARDS</a></li><li><a href="global.html#RELATE_STORE_KEYS">RELATE_STORE_KEYS</a></li><li><a href="global.html#RELATE_TAP_STAGE_KEYS">RELATE_TAP_STAGE_KEYS</a></li><li><a href="global.html#RELATE_UNGATED_WRITE_ENTRIES">RELATE_UNGATED_WRITE_ENTRIES</a></li><li><a href="global.html#RELATE_VOCAB_DEFAULT">RELATE_VOCAB_DEFAULT</a></li><li><a href="global.html#RELATE_VOCAB_KEYS">RELATE_VOCAB_KEYS</a></li><li><a href="global.html#RELATE_VOCAB_NULL_AS">RELATE_VOCAB_NULL_AS</a></li><li><a href="global.html#RELATE_VOCAB_OWN_KEYS">RELATE_VOCAB_OWN_KEYS</a></li><li><a href="global.html#RELATION_ROLE_NAMES">RELATION_ROLE_NAMES</a></li><li><a href="global.html#RESTORABLE_REASONS">RESTORABLE_REASONS</a></li><li><a href="global.html#RETIRE_REASONS">RETIRE_REASONS</a></li><li><a href="global.html#REVERTED_OUTCOME">REVERTED_OUTCOME</a></li><li><a href="global.html#REVIEW_KINDS">REVIEW_KINDS</a></li><li><a href="global.html#REVIEW_SOURCE_STDS">REVIEW_SOURCE_STDS</a></li><li><a href="global.html#REVISION_LEDGERS">REVISION_LEDGERS</a></li><li><a href="global.html#ROTATION_RESET">ROTATION_RESET</a></li><li><a href="global.html#ROW_KEYS">ROW_KEYS</a></li><li><a href="global.html#RS4">RS4</a></li><li><a href="global.html#RS5">RS5</a></li><li><a href="global.html#RS6">RS6</a></li><li><a href="global.html#RULING_STD">RULING_STD</a></li><li><a href="global.html#SECTIONS">SECTIONS</a></li><li><a href="global.html#SETTLED_RE">SETTLED_RE</a></li><li><a href="global.html#WKnowledgeRelate">WKnowledgeRelate</a></li><li><a href="global.html#WRITE_ENTRIES">WRITE_ENTRIES</a></li><li><a href="global.html#addToAdjacency">addToAdjacency</a></li><li><a href="global.html#admitItemOf">admitItemOf</a></li><li><a href="global.html#admitRelation">admitRelation</a></li><li><a href="global.html#aiStandardRowOf">aiStandardRowOf</a></li><li><a href="global.html#appendAudit">appendAudit</a></li><li><a href="global.html#appendConflictEvent">appendConflictEvent</a></li><li><a href="global.html#applyEdgeStockFix">applyEdgeStockFix</a></li><li><a href="global.html#archiveFilesOf">archiveFilesOf</a></li><li><a href="global.html#assertGeneration">assertGeneration</a></li><li><a href="global.html#auditDomainOf">auditDomainOf</a></li><li><a href="global.html#auditRelateStandards">auditRelateStandards</a></li><li><a href="global.html#baseVerdictOf">baseVerdictOf</a></li><li><a href="global.html#benchRelateEdgesOf">benchRelateEdgesOf</a></li><li><a href="global.html#bestByIdentity">bestByIdentity</a></li><li><a href="global.html#buildAdjacency">buildAdjacency</a></li><li><a href="global.html#callTimeoutMsOf">callTimeoutMsOf</a></li><li><a href="global.html#candidateNameOf">candidateNameOf</a></li><li><a href="global.html#candidateScoreOf">candidateScoreOf</a></li><li><a href="global.html#canon">canon</a></li><li><a href="global.html#checkEdge">checkEdge</a></li><li><a href="global.html#checkKey">checkKey</a></li><li><a href="global.html#checkPromptItemOf">checkPromptItemOf</a></li><li><a href="global.html#checkSingle">checkSingle</a></li><li><a href="global.html#checkSyncOf">checkSyncOf</a></li><li><a href="global.html#checkVerdictOf">checkVerdictOf</a></li><li><a href="global.html#classDecisionOf">classDecisionOf</a></li><li><a href="global.html#clearStaleReview">clearStaleReview</a></li><li><a href="global.html#closeNoteHold">closeNoteHold</a></li><li><a href="global.html#compareProposals">compareProposals</a></li><li><a href="global.html#conceptKeysOf">conceptKeysOf</a></li><li><a href="global.html#conflictCheckBenchRole">conflictCheckBenchRole</a></li><li><a href="global.html#conflictCheckOf">conflictCheckOf</a></li><li><a href="global.html#conflictNeighborsOf">conflictNeighborsOf</a></li><li><a href="global.html#conflictPageProblems">conflictPageProblems</a></li><li><a href="global.html#conflictVerdictOf">conflictVerdictOf</a></li><li><a href="global.html#coresCiting">coresCiting</a></li><li><a href="global.html#coveredItemOf">coveredItemOf</a></li><li><a href="global.html#createCheckHasher">createCheckHasher</a></li><li><a href="global.html#createDirtyLedger">createDirtyLedger</a></li><li><a href="global.html#createKnowledgeRelate">createKnowledgeRelate</a></li><li><a href="global.html#createMaterialReader">createMaterialReader</a></li><li><a href="global.html#createMutex">createMutex</a></li><li><a href="global.html#createRelateDomain">createRelateDomain</a></li><li><a href="global.html#createRelateObject">createRelateObject</a></li><li><a href="global.html#createRelateQueueRunner">createRelateQueueRunner</a></li><li><a href="global.html#createRelateRuntime">createRelateRuntime</a></li><li><a href="global.html#createRelateState">createRelateState</a></li><li><a href="global.html#createReverseIndex">createReverseIndex</a></li><li><a href="global.html#createReverseLedger">createReverseLedger</a></li><li><a href="global.html#createSideReader">createSideReader</a></li><li><a href="global.html#createTombstones">createTombstones</a></li><li><a href="global.html#currentTypeProblems">currentTypeProblems</a></li><li><a href="global.html#cutOf">cutOf</a></li><li><a href="global.html#cutReason">cutReason</a></li><li><a href="global.html#decideOf">decideOf</a></li><li><a href="global.html#deleteNote">deleteNote</a></li><li><a href="global.html#deletionHalfStatesOf">deletionHalfStatesOf</a></li><li><a href="global.html#deletionStatusOf">deletionStatusOf</a></li><li><a href="global.html#domainNeeds">domainNeeds</a></li><li><a href="global.html#domainOf">domainOf</a></li><li><a href="global.html#domainShapeProblems">domainShapeProblems</a></li><li><a href="global.html#domainTypeRenamerOf">domainTypeRenamerOf</a></li><li><a href="global.html#dropAll">dropAll</a></li><li><a href="global.html#edgeCheckHashOf">edgeCheckHashOf</a></li><li><a href="global.html#edgeCheckScanOf">edgeCheckScanOf</a></li><li><a href="global.html#edgeFixOf">edgeFixOf</a></li><li><a href="global.html#edgeId">edgeId</a></li><li><a href="global.html#edgeInfoOf">edgeInfoOf</a></li><li><a href="global.html#edgeLedgersOf">edgeLedgersOf</a></li><li><a href="global.html#edgePlanOf">edgePlanOf</a></li><li><a href="global.html#edgeProblems">edgeProblems</a></li><li><a href="global.html#edgeRestoredOf">edgeRestoredOf</a></li><li><a href="global.html#edgeReviewBenchRole">edgeReviewBenchRole</a></li><li><a href="global.html#edgeRowUnitsOf">edgeRowUnitsOf</a></li><li><a href="global.html#edgeStd">edgeStd</a></li><li><a href="global.html#edgeTimeOf">edgeTimeOf</a></li><li><a href="global.html#edgeUnitsOf">edgeUnitsOf</a></li><li><a href="global.html#edgesReviewedOf">edgesReviewedOf</a></li><li><a href="global.html#escalatedHoldNextOf">escalatedHoldNextOf</a></li><li><a href="global.html#gateAllows">gateAllows</a></li><li><a href="global.html#gateCtxOf">gateCtxOf</a></li><li><a href="global.html#gateEdgeProposal">gateEdgeProposal</a></li><li><a href="global.html#gateRestore">gateRestore</a></li><li><a href="global.html#generationMismatchOf">generationMismatchOf</a></li><li><a href="global.html#historyOf">historyOf</a></li><li><a href="global.html#historyScriptHoldOf">historyScriptHoldOf</a></li><li><a href="global.html#inRelatePool">inRelatePool</a></li><li><a href="global.html#indexDirtyOf">indexDirtyOf</a></li><li><a href="global.html#info">info</a></li><li><a href="global.html#inputVocabProblems">inputVocabProblems</a></li><li><a href="global.html#isEdgeRow">isEdgeRow</a></li><li><a href="global.html#isRelated">isRelated</a></li><li><a href="global.html#itemTargetOf">itemTargetOf</a></li><li><a href="global.html#lastRevisionOf">lastRevisionOf</a></li><li><a href="global.html#later">later</a></li><li><a href="global.html#ledgerCorruptTextOf">ledgerCorruptTextOf</a></li><li><a href="global.html#levelOf">levelOf</a></li><li><a href="global.html#loadLedgerJson">loadLedgerJson</a></li><li><a href="global.html#maintainRelations">maintainRelations</a></li><li><a href="global.html#makeEdge">makeEdge</a></li><li><a href="global.html#makeSlugResolver">makeSlugResolver</a></li><li><a href="global.html#markNoteProgress">markNoteProgress</a></li><li><a href="global.html#materialOfNote">materialOfNote</a></li><li><a href="global.html#mergeEdge">mergeEdge</a></li><li><a href="global.html#mwBuildEdges">mwBuildEdges</a></li><li><a href="global.html#mwMarkDirty">mwMarkDirty</a></li><li><a href="global.html#mwMarkRelated">mwMarkRelated</a></li><li><a href="global.html#mwPersistEdges">mwPersistEdges</a></li><li><a href="global.html#mwProjectDirty">mwProjectDirty</a></li><li><a href="global.html#mwQueueReverse">mwQueueReverse</a></li><li><a href="global.html#mwRebuildRelationIndex">mwRebuildRelationIndex</a></li><li><a href="global.html#mwReevalAgree">mwReevalAgree</a></li><li><a href="global.html#mwReevalApply">mwReevalApply</a></li><li><a href="global.html#mwReevalMarkReviewed">mwReevalMarkReviewed</a></li><li><a href="global.html#mwReevalVerdict">mwReevalVerdict</a></li><li><a href="global.html#needsCheck">needsCheck</a></li><li><a href="global.html#needsEdgeReview">needsEdgeReview</a></li><li><a href="global.html#needsReeval">needsReeval</a></li><li><a href="global.html#neighborsOf">neighborsOf</a></li><li><a href="global.html#normalizeEdgeProposal">normalizeEdgeProposal</a></li><li><a href="global.html#noteProblems">noteProblems</a></li><li><a href="global.html#noteReader">noteReader</a></li><li><a href="global.html#openChecked">openChecked</a></li><li><a href="global.html#openDeletions">openDeletions</a></li><li><a href="global.html#openRelateLedgers">openRelateLedgers</a></li><li><a href="global.html#openStores">openStores</a></li><li><a href="global.html#packIds">packIds</a></li><li><a href="global.html#pageVotesOf">pageVotesOf</a></li><li><a href="global.html#pagesOf">pagesOf</a></li><li><a href="global.html#paginateBy">paginateBy</a></li><li><a href="global.html#pairCheck">pairCheck</a></li><li><a href="global.html#pairCheckItemOf">pairCheckItemOf</a></li><li><a href="global.html#pairItemOf">pairItemOf</a></li><li><a href="global.html#pairProblems">pairProblems</a></li><li><a href="global.html#parseRelateBenchArgs">parseRelateBenchArgs</a></li><li><a href="global.html#persistEdge">persistEdge</a></li><li><a href="global.html#pickCandidates">pickCandidates</a></li><li><a href="global.html#pickRelateVocab">pickRelateVocab</a></li><li><a href="global.html#pickRelationsOf">pickRelationsOf</a></li><li><a href="global.html#planEdgeStockFix">planEdgeStockFix</a></li><li><a href="global.html#planRelateBench">planRelateBench</a></li><li><a href="global.html#presentOthersOf">presentOthersOf</a></li><li><a href="global.html#projectAffected">projectAffected</a></li><li><a href="global.html#projectAll">projectAll</a></li><li><a href="global.html#projectNote">projectNote</a></li><li><a href="global.html#projectNotes">projectNotes</a></li><li><a href="global.html#projectText">projectText</a></li><li><a href="global.html#proposalOf">proposalOf</a></li><li><a href="global.html#pruneDangling">pruneDangling</a></li><li><a href="global.html#qualityTag">qualityTag</a></li><li><a href="global.html#quarantineHoldNextOf">quarantineHoldNextOf</a></li><li><a href="global.html#queueConflictCheck">queueConflictCheck</a></li><li><a href="global.html#queueConflictProposal">queueConflictProposal</a></li><li><a href="global.html#queueEdgeReview">queueEdgeReview</a></li><li><a href="global.html#queueRewrite">queueRewrite</a></li><li><a href="global.html#rawVerdictText">rawVerdictText</a></li><li><a href="global.html#readArchive">readArchive</a></li><li><a href="global.html#readAuditRows">readAuditRows</a></li><li><a href="global.html#readConflictEvents">readConflictEvents</a></li><li><a href="global.html#readEdgeAudit">readEdgeAudit</a></li><li><a href="global.html#readEdgeStockLedger">readEdgeStockLedger</a></li><li><a href="global.html#reasonFormProblem">reasonFormProblem</a></li><li><a href="global.html#reasonRewriteProblemsOf">reasonRewriteProblemsOf</a></li><li><a href="global.html#rebuildRelationIndex">rebuildRelationIndex</a></li><li><a href="global.html#recentReevalRetiredIds">recentReevalRetiredIds</a></li><li><a href="global.html#recordCheck">recordCheck</a></li><li><a href="global.html#reevalBaseline">reevalBaseline</a></li><li><a href="global.html#reevalBenchRole">reevalBenchRole</a></li><li><a href="global.html#reevalCaseProblems">reevalCaseProblems</a></li><li><a href="global.html#reevalChainOf">reevalChainOf</a></li><li><a href="global.html#reevalMissingOf">reevalMissingOf</a></li><li><a href="global.html#reevalPartsOf">reevalPartsOf</a></li><li><a href="global.html#reevalPromptItemOf">reevalPromptItemOf</a></li><li><a href="global.html#reevalRequeue">reevalRequeue</a></li><li><a href="global.html#reevalTargetIdOf">reevalTargetIdOf</a></li><li><a href="global.html#reevalVerdictOf">reevalVerdictOf</a></li><li><a href="global.html#relateAiCallOf">relateAiCallOf</a></li><li><a href="global.html#relateBenchRole">relateBenchRole</a></li><li><a href="global.html#relateBenchRoleOf">relateBenchRoleOf</a></li><li><a href="global.html#relateCapacityOf">relateCapacityOf</a></li><li><a href="global.html#relateCaseProblems">relateCaseProblems</a></li><li><a href="global.html#relateCheck">relateCheck</a></li><li><a href="global.html#relateDomainNeedsOf">relateDomainNeedsOf</a></li><li><a href="global.html#relateFeatureProblems">relateFeatureProblems</a></li><li><a href="global.html#relateGuideDefaultOf">relateGuideDefaultOf</a></li><li><a href="global.html#relateHoldDeadlineOf">relateHoldDeadlineOf</a></li><li><a href="global.html#relateMaterialOf">relateMaterialOf</a></li><li><a href="global.html#relateOptOf">relateOptOf</a></li><li><a href="global.html#relatePageProblems">relatePageProblems</a></li><li><a href="global.html#relatePanelsOf">relatePanelsOf</a></li><li><a href="global.html#relatePendingOf">relatePendingOf</a></li><li><a href="global.html#relateProblemsOf">relateProblemsOf</a></li><li><a href="global.html#relateScanOf">relateScanOf</a></li><li><a href="global.html#relateSeatOf">relateSeatOf</a></li><li><a href="global.html#relateSeatsOf">relateSeatsOf</a></li><li><a href="global.html#relateSuiteProblems">relateSuiteProblems</a></li><li><a href="global.html#relateSummaryOf">relateSummaryOf</a></li><li><a href="global.html#relateVerdictOf">relateVerdictOf</a></li><li><a href="global.html#relateWarningsOf">relateWarningsOf</a></li><li><a href="global.html#relationTypesVersionOf">relationTypesVersionOf</a></li><li><a href="global.html#removeFromAdjacency">removeFromAdjacency</a></li><li><a href="global.html#renameEdgeTypes">renameEdgeTypes</a></li><li><a href="global.html#renderRelationSections">renderRelationSections</a></li><li><a href="global.html#resolveRelateData">resolveRelateData</a></li><li><a href="global.html#resolveRelateSettings">resolveRelateSettings</a></li><li><a href="global.html#resolveRelateVocab">resolveRelateVocab</a></li><li><a href="global.html#restoreEdge">restoreEdge</a></li><li><a href="global.html#restoreNote">restoreNote</a></li><li><a href="global.html#restoredStandards">restoredStandards</a></li><li><a href="global.html#retireEdge">retireEdge</a></li><li><a href="global.html#retiredEdgesOf">retiredEdgesOf</a></li><li><a href="global.html#retypeAllowed">retypeAllowed</a></li><li><a href="global.html#reversePairsBackOf">reversePairsBackOf</a></li><li><a href="global.html#revertEdgeRevision">revertEdgeRevision</a></li><li><a href="global.html#revertedStandards">revertedStandards</a></li><li><a href="global.html#reviewCaseProblems">reviewCaseProblems</a></li><li><a href="global.html#reviewEdgesOf">reviewEdgesOf</a></li><li><a href="global.html#reviewPageProblems">reviewPageProblems</a></li><li><a href="global.html#reviewQueueOf">reviewQueueOf</a></li><li><a href="global.html#reviewVerdictOf">reviewVerdictOf</a></li><li><a href="global.html#reviewVerdictOfCase">reviewVerdictOfCase</a></li><li><a href="global.html#reviseEdge">reviseEdge</a></li><li><a href="global.html#rewriteEdge">rewriteEdge</a></li><li><a href="global.html#rollbackEdgeStockFix">rollbackEdgeStockFix</a></li><li><a href="global.html#rotationBumpOf">rotationBumpOf</a></li><li><a href="global.html#rotationCursorOf">rotationCursorOf</a></li><li><a href="global.html#rotationPageOf">rotationPageOf</a></li><li><a href="global.html#rotationProgressOf">rotationProgressOf</a></li><li><a href="global.html#rotationQueueOf">rotationQueueOf</a></li><li><a href="global.html#rs4ClassOf">rs4ClassOf</a></li><li><a href="global.html#rs4DecisionOf">rs4DecisionOf</a></li><li><a href="global.html#rs6ClassOf">rs6ClassOf</a></li><li><a href="global.html#rs6DecisionOf">rs6DecisionOf</a></li><li><a href="global.html#rs6VoteActionOf">rs6VoteActionOf</a></li><li><a href="global.html#runCheckPanelPages">runCheckPanelPages</a></li><li><a href="global.html#runConflictCheckSegment">runConflictCheckSegment</a></li><li><a href="global.html#runEdgeReviewSegment">runEdgeReviewSegment</a></li><li><a href="global.html#runReevalSegment">runReevalSegment</a></li><li><a href="global.html#runRelateBench">runRelateBench</a></li><li><a href="global.html#runRelateBenchCli">runRelateBenchCli</a></li><li><a href="global.html#sameEdge">sameEdge</a></li><li><a href="global.html#sameEdgeVerdict">sameEdgeVerdict</a></li><li><a href="global.html#sameVisible">sameVisible</a></li><li><a href="global.html#saveLedgerJson">saveLedgerJson</a></li><li><a href="global.html#scanConflictEdges">scanConflictEdges</a></li><li><a href="global.html#scriptFixHistory">scriptFixHistory</a></li><li><a href="global.html#seatVotesOf">seatVotesOf</a></li><li><a href="global.html#sectionsHashOf">sectionsHashOf</a></li><li><a href="global.html#seqAt">seqAt</a></li><li><a href="global.html#seqOf">seqOf</a></li><li><a href="global.html#settleArchive">settleArchive</a></li><li><a href="global.html#shuffleStable">shuffleStable</a></li><li><a href="global.html#stageRelate">stageRelate</a></li><li><a href="global.html#stageRelateProject">stageRelateProject</a></li><li><a href="global.html#stageRelationIndex">stageRelationIndex</a></li><li><a href="global.html#stdRetiredHowOf">stdRetiredHowOf</a></li><li><a href="global.html#stockDomainOf">stockDomainOf</a></li><li><a href="global.html#stockOrderOf">stockOrderOf</a></li><li><a href="global.html#stockProgressOf">stockProgressOf</a></li><li><a href="global.html#stockQueueOf">stockQueueOf</a></li><li><a href="global.html#stockSourceResolvedOf">stockSourceResolvedOf</a></li><li><a href="global.html#stockWaiverKeyOf">stockWaiverKeyOf</a></li><li><a href="global.html#typeRankOf">typeRankOf</a></li><li><a href="global.html#undoDeleteNote">undoDeleteNote</a></li><li><a href="global.html#unfixableRouteOf">unfixableRouteOf</a></li><li><a href="global.html#uniqIds">uniqIds</a></li><li><a href="global.html#unpackIds">unpackIds</a></li><li><a href="global.html#verdictClassOf">verdictClassOf</a></li><li><a href="global.html#verdictExpectProblems">verdictExpectProblems</a></li><li><a href="global.html#verdictsByIndexOf">verdictsByIndexOf</a></li><li><a href="global.html#verdictsOf">verdictsOf</a></li><li><a href="global.html#verifyEdgeStockChain">verifyEdgeStockChain</a></li><li><a href="global.html#voteMissingOf">voteMissingOf</a></li><li><a href="global.html#waivedSameProblem">waivedSameProblem</a></li><li><a href="global.html#waiverCoversEdge">waiverCoversEdge</a></li><li><a href="global.html#withCut">withCut</a></li><li><a href="global.html#writeEdge">writeEdge</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">stages/checkPanelPages.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// checkPanelPages.mjs — 核對類判定小組之分頁迴圈(衝突核對 RS4、既有邊覆核 RS6 共用;兩層判定之純函數在 stores/conflictCheckPolicy、
+//   stores/edgeReviewPolicy):逐頁開工前之時間守門 → 每頁交摘要套件之判定小組單頁執行器 runPanelPage(core/standards/panelRun;第一、二席並行、
+//   第二席項序打亂而編號不變、未成立而可成立者只送第三席)→ 把裁定寫回各項 → 中止之收尾
+//
+// 【為何獨立成檔】兩段之分頁、時間守門、呼叫結果之正規化、中止之語意同一份(同一規則手寫兩份必然漂移),兩段只給差異。
+// 【單頁骨架取摘要套件】判定小組之單頁執行(兩席並行、第二席打亂、第三席只送需要之項)一律 runPanelPage;本檔以其 opt-in 參數給核對類之差異:
+//   secondOf(頁)＝第二席所見之項(衝突核對只送既有邊與兩席類提案——單席提案之另一票是提案席;既有邊覆核為整頁)、ballotOf(項, 第一席票, 第二席票)＝
+//   該項之前兩票、decideOf(項, 票)＝兩層判定(既有邊覆核之型別層須見該項之現行型別,故以項為參數)、needThirdOf＝兩層判定之 needThird、
+//   thirdStop:'items'(第三席中止只使送第三席之項不判)。第二席之項序依 runPanelPage 之打亂(sha1(`&lt;前綴>|&lt;邊 id>`) 逐項)。
+// 【失敗語意(與重評同一規則:中止不計、失敗計)】中止＝結果 skipped(額度用盡、整輪截止、斷網)——不是該項之失敗,不記 tries:前兩席中止 →
+//   本頁與其後之頁不判;第三席中止 → 送第三席之項本輪不判(decision 為 null,呼叫端照「未判」處置:待判原樣、新提案入待判、存量下輪再排)、
+//   本頁其餘項照判、**其後之頁仍以前兩席判、只不再叫第三席**(需第三席之項同不判;與重評同一規則)。失敗＝第三席呼叫失敗、未涵蓋或該項之票
+//   不合格 → 該項 retry(呼叫端記待判之 tries,逾次轉使用者):第三席本可改變結果,不以前兩票之未決結果處置。前兩席之失敗(缺票)由兩層判定判 retry。
+// 【呼叫與計數在呼叫端】call 由各段給(段名、席別、時間預算與 AI 呼叫數之計數皆在段內);本函數只把調度層之結果正規化為執行器之形狀
+//   ({ ok, data, providerId, skipped, error } → { ok, data, providerId, stop }),回傳是否中止與送第三席之項數,由段記入其報告。
+
+import isobj from 'wsemi/src/isobj.mjs'
+import { oneline } from '../core/capturePackage.mjs'
+import { PANEL_WHY, PANEL_THIRD_STOP, runPanelPage } from '../core/summarizePackage.mjs'
+
+/**
+ * 核對類判定小組之分頁迴圈(見檔頭):逐頁裁定 list 之各項(各項寫入 votes 與 decision;未判之項——時間守門或前兩席中止而未到之頁、
+ *   第三席中止而送第三席之項、第三席已中止後需第三席之項——decision 不設或為 null)
+ *
+ * @param {Object} o 輸入 {
+ *   list:Array(受檢項 [{ index:頁內外皆唯一之項編號, key:邊 id(打亂與裁定之鍵), edge:{ id, … }, … }];依序每 pageSize 項一頁),
+ *   pageSize:Integer(正整數),
+ *   seats:{ first, second?, third? }(第一席恆叫;第二席於 secondOf 非空時叫;third 為物件才叫),
+ *   call:(spec, prompt, seat)=>Promise(調度層之結果 { ok, data, providerId, skipped, error };seat 為 'first'|'second'|'third'),
+ *   buildPrompt:(items)=>String(組字拋錯即原樣拋出,本頁不呼叫),
+ *   votesOf:(data, items)=>Map(項編號 → 票|PANEL_UNSURE|null;items 為該席所見之項),
+ *   secondOf:(page)=>Array(第二席所見之項;依 sha1(`&lt;shufflePrefix>|&lt;各項邊 id>`) 打亂、編號不變),
+ *   ballotOf:(x, a, b)=>Array(該項之前兩票;a、b 為第一、二席之票 { seat, provider, verdict }),
+ *   decide:(x)=>Object(依 x.votes 之兩層判定 { action, why, needThird, … }),
+ *   shufflePrefix:String, shouldStop:()=>Boolean(每頁開工前詢問;真即停), log:{ info }, label:String(日誌之段名) }
+ * @returns {Promise&lt;Object>} 回傳 { stopped:Boolean(時間守門或前兩席中止而未判完), aborted:Boolean(有席中止), third:Integer(送第三席之項數) };
+ *   call 或 buildPrompt 拋錯則原樣拒絕
+ * @example
+ * let list = [{ index: 1, key: 'e1', edge: { id: 'e1' } }, { index: 2, key: 'e2', edge: { id: 'e2' } }]
+ * let r = await runCheckPanelPages({
+ *     list,
+ *     pageSize: 10,
+ *     seats: { first: { use: 'p1' }, second: { use: 'p2' } },
+ *     call: async (spec, prompt, seat) => ({ ok: true, providerId: spec.use, data: [{ index: 1, verdict: 'keep' }, { index: 2, verdict: 'retire' }] }),
+ *     buildPrompt: (items) => items.map((x) => x.index).join(','),
+ *     votesOf: (data, items) => new Map(data.map((d) => [d.index, d.verdict])),
+ *     secondOf: (page) => page,
+ *     ballotOf: (x, a, b) => [a, b],
+ *     decide: (x) => ({ action: x.votes[0].verdict === x.votes[1].verdict ? x.votes[0].verdict : 'retry', needThird: false }),
+ *     shufflePrefix: 'demo',
+ *     shouldStop: () => false,
+ *     log: { info: () => {} },
+ *     label: '示範',
+ * })
+ * console.log(r)
+ * console.log(list.map((x) => `${x.key}:${x.decision.action}:${x.votes.map((v) => v.provider).join('+')}`))
+ * // => { stopped: false, aborted: false, third: 0 }
+ * // => [ 'e1:keep:p1+p2', 'e2:retire:p1+p2' ]
+ */
+export async function runCheckPanelPages(o) {
+    const { list, pageSize, seats, call, buildPrompt, votesOf, secondOf, ballotOf, decide, shufflePrefix, shouldStop, log, label } = o
+    let stopped = false
+    let aborted = false
+    let third = 0
+    let thirdOn = isobj(seats.third)
+    let thirdExhausted = false
+    for (let i = 0; i &lt; list.length &amp;&amp; !stopped; i += pageSize) {
+        const page = list.slice(i, i + pageSize)
+        if (shouldStop()) {
+            stopped = true
+            break
+        }
+        const byIndex = new Map(page.map((x) => [x.index, x]))
+        let stopErr = ''
+        const r = await runPanelPage({
+            local: page,
+            buildPrompt,
+            shufflePrefix,
+            seats: thirdOn ? seats : { first: seats.first, second: seats.second },
+            // 調度層之結果 → 執行器之形狀(skipped＝中止,其錯誤字樣留給日誌);不包成 async:同步拋出者原樣拋出,第二席不被呼叫
+            call: (stage, seat, prompt) => Promise.resolve(call(seat, prompt, stage)).then((x) => {
+                if (x?.skipped) stopErr = stopErr || oneline(x?.error, 80)
+                return { ok: x?.ok, data: x?.data, providerId: x?.providerId, stop: x?.skipped }
+            }),
+            votesOf: (data, idx) => votesOf(data, [...idx].map((k) => byIndex.get(k))),
+            secondOf,
+            ballotOf,
+            // 兩層判定以項為參數(依 x.votes);第三席失敗、未涵蓋或該項之票不合格 → 重試(記 tries;第三席本可改變結果,不以前兩票之未決結果處置)
+            decideOf: (x, vs) => {
+                x.votes = vs
+                if (vs.length === 3 &amp;&amp; vs[2].verdict === null) {
+                    x.votes = vs.slice(0, 2)
+                    const d = { ...decide(x), action: 'retry', why: PANEL_WHY.MISSING, needThird: false }
+                    x.votes = vs
+                    return d
+                }
+                return decide(x)
+            },
+            needThirdOf: (x, vs) => {
+                x.votes = vs
+                return decide(x).needThird
+            },
+            thirdStop: PANEL_THIRD_STOP.ITEMS,
+        })
+        // 前兩席中止(未取票、整頁未判):本頁與其後之頁不判
+        if (r.stopped &amp;&amp; page.every((x) => !x.votes)) {
+            stopped = true
+            aborted = true
+            log.info(`${label}：額度或截止中止（${stopErr}），未核之項留待下輪`)
+            break
+        }
+        // 送第三席之項:已有第三票者、第三席中止而未判者、第三席本輪已中止後需第三席者(同不判)
+        for (const x of page) {
+            const d = r.byIndex.has(x.index) ? r.byIndex.get(x.index) : null
+            const needs = x.votes?.length === 3 || r.undecided.includes(x.index) || (thirdExhausted &amp;&amp; d?.needThird === true)
+            if (needs) third++
+            x.decision = thirdExhausted &amp;&amp; d?.needThird === true ? null : d
+        }
+        if (r.stopped) {
+            // 第三席中止:送第三席之項本輪不判(不記 tries);其後之頁仍以前兩席判、只不再叫第三席(需第三席之項同不判)
+            aborted = true
+            thirdOn = false
+            thirdExhausted = true
+            log.info(`${label}：第三席額度或截止中止（${stopErr}），該些項留待下輪；本輪其後不再叫第三席`)
+        }
+    }
+    return { stopped, aborted, third }
+}
+
+export default { runCheckPanelPages }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Nov 02 2026 13:25:06 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>standards/edgeQueue.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AI_ADAPTER_OPT">AI_ADAPTER_OPT</a></li><li><a href="global.html#BENCH_NOW">BENCH_NOW</a></li><li><a href="global.html#CALL_TIMEOUT_FALLBACK_MS">CALL_TIMEOUT_FALLBACK_MS</a></li><li><a href="global.html#CFG_KEYS">CFG_KEYS</a></li><li><a href="global.html#CHECKED_STDS">CHECKED_STDS</a></li><li><a href="global.html#CHECK_BLANK">CHECK_BLANK</a></li><li><a href="global.html#CHECK_STATES">CHECK_STATES</a></li><li><a href="global.html#CLI">CLI</a></li><li><a href="global.html#COLLECTION_KEYS">COLLECTION_KEYS</a></li><li><a href="global.html#CONFLICT_DEFINITION">CONFLICT_DEFINITION</a></li><li><a href="global.html#CONFLICT_EVENT_FILE">CONFLICT_EVENT_FILE</a></li><li><a href="global.html#DATA_KEYS">DATA_KEYS</a></li><li><a href="global.html#DELETION_FILES">DELETION_FILES</a></li><li><a href="global.html#DELETION_HALF_STATE_LABEL">DELETION_HALF_STATE_LABEL</a></li><li><a href="global.html#DOMAIN_FACTORY">DOMAIN_FACTORY</a></li><li><a href="global.html#E">E</a></li><li><a href="global.html#EDGE_AUDIT_FILE">EDGE_AUDIT_FILE</a></li><li><a href="global.html#EDGE_FIX_STDS">EDGE_FIX_STDS</a></li><li><a href="global.html#EDGE_INFO_LABELS">EDGE_INFO_LABELS</a></li><li><a href="global.html#EDGE_OBJECT">EDGE_OBJECT</a></li><li><a href="global.html#EDGE_REVIEW_STDS">EDGE_REVIEW_STDS</a></li><li><a href="global.html#EDGE_STANDARDS">EDGE_STANDARDS</a></li><li><a href="global.html#EDGE_VERDICTS">EDGE_VERDICTS</a></li><li><a href="global.html#EDGE_VERDICT_MIN_REASON">EDGE_VERDICT_MIN_REASON</a></li><li><a href="global.html#FIX_STD">FIX_STD</a></li><li><a href="global.html#INFO_STDS">INFO_STDS</a></li><li><a href="global.html#LEDGER_FILES">LEDGER_FILES</a></li><li><a href="global.html#MIN_SHARED_SCORE">MIN_SHARED_SCORE</a></li><li><a href="global.html#MUTEX_KEY">MUTEX_KEY</a></li><li><a href="global.html#NAMESPACES">NAMESPACES</a></li><li><a href="global.html#NO_MATERIAL_DETAIL">NO_MATERIAL_DETAIL</a></li><li><a href="global.html#OPTIONAL_DOMAIN_MEMBERS">OPTIONAL_DOMAIN_MEMBERS</a></li><li><a href="global.html#OWN_KEYS">OWN_KEYS</a></li><li><a href="global.html#PANEL_DEFS">PANEL_DEFS</a></li><li><a href="global.html#PIPELINE_NAME">PIPELINE_NAME</a></li><li><a href="global.html#PLACEHOLDER_REASONS">PLACEHOLDER_REASONS</a></li><li><a href="global.html#PROMPT_DOMAIN">PROMPT_DOMAIN</a></li><li><a href="global.html#PROMPT_KEYS">PROMPT_KEYS</a></li><li><a href="global.html#R">R</a></li><li><a href="global.html#REASON_MAX_CHARS">REASON_MAX_CHARS</a></li><li><a href="global.html#REASON_MIN_CHARS">REASON_MIN_CHARS</a></li><li><a href="global.html#REASON_PROBLEM_CHARS">REASON_PROBLEM_CHARS</a></li><li><a href="global.html#REASON_REWRITE_STDS">REASON_REWRITE_STDS</a></li><li><a href="global.html#REEVAL_BLANK">REEVAL_BLANK</a></li><li><a href="global.html#REEVAL_OPT_KEYS">REEVAL_OPT_KEYS</a></li><li><a href="global.html#REEVAL_REPROPOSE_DAYS">REEVAL_REPROPOSE_DAYS</a></li><li><a href="global.html#RELATE_AI_DEFAULT">RELATE_AI_DEFAULT</a></li><li><a href="global.html#RELATE_AI_SCHEMA">RELATE_AI_SCHEMA</a></li><li><a href="global.html#RELATE_AI_STANDARD_IDS">RELATE_AI_STANDARD_IDS</a></li><li><a href="global.html#RELATE_API_HINT">RELATE_API_HINT</a></li><li><a href="global.html#RELATE_AUDITED_STANDARD_IDS">RELATE_AUDITED_STANDARD_IDS</a></li><li><a href="global.html#RELATE_BASELINE_RULING_PREFIX">RELATE_BASELINE_RULING_PREFIX</a></li><li><a href="global.html#RELATE_BENCH_CASES_FILES">RELATE_BENCH_CASES_FILES</a></li><li><a href="global.html#RELATE_BENCH_CHANGE">RELATE_BENCH_CHANGE</a></li><li><a href="global.html#RELATE_BENCH_MODELS">RELATE_BENCH_MODELS</a></li><li><a href="global.html#RELATE_BENCH_ROLES">RELATE_BENCH_ROLES</a></li><li><a href="global.html#RELATE_BENCH_USAGE">RELATE_BENCH_USAGE</a></li><li><a href="global.html#RELATE_BLANK">RELATE_BLANK</a></li><li><a href="global.html#RELATE_CAPACITY_DESC">RELATE_CAPACITY_DESC</a></li><li><a href="global.html#RELATE_CTX_FLAGS">RELATE_CTX_FLAGS</a></li><li><a href="global.html#RELATE_DATA_KEYS">RELATE_DATA_KEYS</a></li><li><a href="global.html#RELATE_DEFAULT">RELATE_DEFAULT</a></li><li><a href="global.html#RELATE_DIRS">RELATE_DIRS</a></li><li><a href="global.html#RELATE_DOMAIN_KEYS">RELATE_DOMAIN_KEYS</a></li><li><a href="global.html#RELATE_EXPECT_KEYS">RELATE_EXPECT_KEYS</a></li><li><a href="global.html#RELATE_FEATURES">RELATE_FEATURES</a></li><li><a href="global.html#RELATE_GUIDE_FIELDS">RELATE_GUIDE_FIELDS</a></li><li><a href="global.html#RELATE_HOLD_DEADLINE_DAYS">RELATE_HOLD_DEADLINE_DAYS</a></li><li><a href="global.html#RELATE_HOLD_NEXT">RELATE_HOLD_NEXT</a></li><li><a href="global.html#RELATE_INDEX_TITLE">RELATE_INDEX_TITLE</a></li><li><a href="global.html#RELATE_INDEX_TOP_N">RELATE_INDEX_TOP_N</a></li><li><a href="global.html#RELATE_LOG_KNOWN">RELATE_LOG_KNOWN</a></li><li><a href="global.html#RELATE_LOG_MUST_SEE">RELATE_LOG_MUST_SEE</a></li><li><a href="global.html#RELATE_LOG_PARSE">RELATE_LOG_PARSE</a></li><li><a href="global.html#RELATE_MAX_RELATIONS_PER_NOTE">RELATE_MAX_RELATIONS_PER_NOTE</a></li><li><a href="global.html#RELATE_PROMPT_SIGS">RELATE_PROMPT_SIGS</a></li><li><a href="global.html#RELATE_REPORT_KEYS">RELATE_REPORT_KEYS</a></li><li><a href="global.html#RELATE_SCAN_OBJECT">RELATE_SCAN_OBJECT</a></li><li><a href="global.html#RELATE_SCHEMA">RELATE_SCHEMA</a></li><li><a href="global.html#RELATE_SEATS">RELATE_SEATS</a></li><li><a href="global.html#RELATE_SEAT_KEYS">RELATE_SEAT_KEYS</a></li><li><a href="global.html#RELATE_SEAT_LABELS">RELATE_SEAT_LABELS</a></li><li><a href="global.html#RELATE_SECTION_TITLES">RELATE_SECTION_TITLES</a></li><li><a href="global.html#RELATE_SETTING_TYPES">RELATE_SETTING_TYPES</a></li><li><a href="global.html#RELATE_STAGE_KEYS">RELATE_STAGE_KEYS</a></li><li><a href="global.html#RELATE_STANDARDS">RELATE_STANDARDS</a></li><li><a href="global.html#RELATE_STORE_KEYS">RELATE_STORE_KEYS</a></li><li><a href="global.html#RELATE_TAP_STAGE_KEYS">RELATE_TAP_STAGE_KEYS</a></li><li><a href="global.html#RELATE_UNGATED_WRITE_ENTRIES">RELATE_UNGATED_WRITE_ENTRIES</a></li><li><a href="global.html#RELATE_VOCAB_DEFAULT">RELATE_VOCAB_DEFAULT</a></li><li><a href="global.html#RELATE_VOCAB_KEYS">RELATE_VOCAB_KEYS</a></li><li><a href="global.html#RELATE_VOCAB_NULL_AS">RELATE_VOCAB_NULL_AS</a></li><li><a href="global.html#RELATE_VOCAB_OWN_KEYS">RELATE_VOCAB_OWN_KEYS</a></li><li><a href="global.html#RELATION_ROLE_NAMES">RELATION_ROLE_NAMES</a></li><li><a href="global.html#RESTORABLE_REASONS">RESTORABLE_REASONS</a></li><li><a href="global.html#RETIRE_REASONS">RETIRE_REASONS</a></li><li><a href="global.html#REVERTED_OUTCOME">REVERTED_OUTCOME</a></li><li><a href="global.html#REVIEW_KINDS">REVIEW_KINDS</a></li><li><a href="global.html#REVIEW_SOURCE_STDS">REVIEW_SOURCE_STDS</a></li><li><a href="global.html#REVISION_LEDGERS">REVISION_LEDGERS</a></li><li><a href="global.html#ROTATION_RESET">ROTATION_RESET</a></li><li><a href="global.html#ROW_KEYS">ROW_KEYS</a></li><li><a href="global.html#RS4">RS4</a></li><li><a href="global.html#RS5">RS5</a></li><li><a href="global.html#RS6">RS6</a></li><li><a href="global.html#RULING_STD">RULING_STD</a></li><li><a href="global.html#SECTIONS">SECTIONS</a></li><li><a href="global.html#SETTLED_RE">SETTLED_RE</a></li><li><a href="global.html#WKnowledgeRelate">WKnowledgeRelate</a></li><li><a href="global.html#WRITE_ENTRIES">WRITE_ENTRIES</a></li><li><a href="global.html#addToAdjacency">addToAdjacency</a></li><li><a href="global.html#admitItemOf">admitItemOf</a></li><li><a href="global.html#admitRelation">admitRelation</a></li><li><a href="global.html#aiStandardRowOf">aiStandardRowOf</a></li><li><a href="global.html#appendAudit">appendAudit</a></li><li><a href="global.html#appendConflictEvent">appendConflictEvent</a></li><li><a href="global.html#applyEdgeStockFix">applyEdgeStockFix</a></li><li><a href="global.html#archiveFilesOf">archiveFilesOf</a></li><li><a href="global.html#assertGeneration">assertGeneration</a></li><li><a href="global.html#auditDomainOf">auditDomainOf</a></li><li><a href="global.html#auditRelateStandards">auditRelateStandards</a></li><li><a href="global.html#baseVerdictOf">baseVerdictOf</a></li><li><a href="global.html#benchRelateEdgesOf">benchRelateEdgesOf</a></li><li><a href="global.html#bestByIdentity">bestByIdentity</a></li><li><a href="global.html#buildAdjacency">buildAdjacency</a></li><li><a href="global.html#callTimeoutMsOf">callTimeoutMsOf</a></li><li><a href="global.html#candidateNameOf">candidateNameOf</a></li><li><a href="global.html#candidateScoreOf">candidateScoreOf</a></li><li><a href="global.html#canon">canon</a></li><li><a href="global.html#checkEdge">checkEdge</a></li><li><a href="global.html#checkKey">checkKey</a></li><li><a href="global.html#checkPromptItemOf">checkPromptItemOf</a></li><li><a href="global.html#checkSingle">checkSingle</a></li><li><a href="global.html#checkSyncOf">checkSyncOf</a></li><li><a href="global.html#checkVerdictOf">checkVerdictOf</a></li><li><a href="global.html#classDecisionOf">classDecisionOf</a></li><li><a href="global.html#clearStaleReview">clearStaleReview</a></li><li><a href="global.html#closeNoteHold">closeNoteHold</a></li><li><a href="global.html#compareProposals">compareProposals</a></li><li><a href="global.html#conceptKeysOf">conceptKeysOf</a></li><li><a href="global.html#conflictCheckBenchRole">conflictCheckBenchRole</a></li><li><a href="global.html#conflictCheckOf">conflictCheckOf</a></li><li><a href="global.html#conflictNeighborsOf">conflictNeighborsOf</a></li><li><a href="global.html#conflictPageProblems">conflictPageProblems</a></li><li><a href="global.html#conflictVerdictOf">conflictVerdictOf</a></li><li><a href="global.html#coresCiting">coresCiting</a></li><li><a href="global.html#coveredItemOf">coveredItemOf</a></li><li><a href="global.html#createCheckHasher">createCheckHasher</a></li><li><a href="global.html#createDirtyLedger">createDirtyLedger</a></li><li><a href="global.html#createKnowledgeRelate">createKnowledgeRelate</a></li><li><a href="global.html#createMaterialReader">createMaterialReader</a></li><li><a href="global.html#createMutex">createMutex</a></li><li><a href="global.html#createRelateDomain">createRelateDomain</a></li><li><a href="global.html#createRelateObject">createRelateObject</a></li><li><a href="global.html#createRelateQueueRunner">createRelateQueueRunner</a></li><li><a href="global.html#createRelateRuntime">createRelateRuntime</a></li><li><a href="global.html#createRelateState">createRelateState</a></li><li><a href="global.html#createReverseIndex">createReverseIndex</a></li><li><a href="global.html#createReverseLedger">createReverseLedger</a></li><li><a href="global.html#createSideReader">createSideReader</a></li><li><a href="global.html#createTombstones">createTombstones</a></li><li><a href="global.html#currentTypeProblems">currentTypeProblems</a></li><li><a href="global.html#cutOf">cutOf</a></li><li><a href="global.html#cutReason">cutReason</a></li><li><a href="global.html#decideOf">decideOf</a></li><li><a href="global.html#deleteNote">deleteNote</a></li><li><a href="global.html#deletionHalfStatesOf">deletionHalfStatesOf</a></li><li><a href="global.html#deletionStatusOf">deletionStatusOf</a></li><li><a href="global.html#domainNeeds">domainNeeds</a></li><li><a href="global.html#domainOf">domainOf</a></li><li><a href="global.html#domainShapeProblems">domainShapeProblems</a></li><li><a href="global.html#domainTypeRenamerOf">domainTypeRenamerOf</a></li><li><a href="global.html#dropAll">dropAll</a></li><li><a href="global.html#edgeCheckHashOf">edgeCheckHashOf</a></li><li><a href="global.html#edgeCheckScanOf">edgeCheckScanOf</a></li><li><a href="global.html#edgeFixOf">edgeFixOf</a></li><li><a href="global.html#edgeId">edgeId</a></li><li><a href="global.html#edgeInfoOf">edgeInfoOf</a></li><li><a href="global.html#edgeLedgersOf">edgeLedgersOf</a></li><li><a href="global.html#edgePlanOf">edgePlanOf</a></li><li><a href="global.html#edgeProblems">edgeProblems</a></li><li><a href="global.html#edgeRestoredOf">edgeRestoredOf</a></li><li><a href="global.html#edgeReviewBenchRole">edgeReviewBenchRole</a></li><li><a href="global.html#edgeRowUnitsOf">edgeRowUnitsOf</a></li><li><a href="global.html#edgeStd">edgeStd</a></li><li><a href="global.html#edgeTimeOf">edgeTimeOf</a></li><li><a href="global.html#edgeUnitsOf">edgeUnitsOf</a></li><li><a href="global.html#edgesReviewedOf">edgesReviewedOf</a></li><li><a href="global.html#escalatedHoldNextOf">escalatedHoldNextOf</a></li><li><a href="global.html#gateAllows">gateAllows</a></li><li><a href="global.html#gateCtxOf">gateCtxOf</a></li><li><a href="global.html#gateEdgeProposal">gateEdgeProposal</a></li><li><a href="global.html#gateRestore">gateRestore</a></li><li><a href="global.html#generationMismatchOf">generationMismatchOf</a></li><li><a href="global.html#historyOf">historyOf</a></li><li><a href="global.html#historyScriptHoldOf">historyScriptHoldOf</a></li><li><a href="global.html#inRelatePool">inRelatePool</a></li><li><a href="global.html#indexDirtyOf">indexDirtyOf</a></li><li><a href="global.html#info">info</a></li><li><a href="global.html#inputVocabProblems">inputVocabProblems</a></li><li><a href="global.html#isEdgeRow">isEdgeRow</a></li><li><a href="global.html#isRelated">isRelated</a></li><li><a href="global.html#itemTargetOf">itemTargetOf</a></li><li><a href="global.html#lastRevisionOf">lastRevisionOf</a></li><li><a href="global.html#later">later</a></li><li><a href="global.html#ledgerCorruptTextOf">ledgerCorruptTextOf</a></li><li><a href="global.html#levelOf">levelOf</a></li><li><a href="global.html#loadLedgerJson">loadLedgerJson</a></li><li><a href="global.html#maintainRelations">maintainRelations</a></li><li><a href="global.html#makeEdge">makeEdge</a></li><li><a href="global.html#makeSlugResolver">makeSlugResolver</a></li><li><a href="global.html#markNoteProgress">markNoteProgress</a></li><li><a href="global.html#materialOfNote">materialOfNote</a></li><li><a href="global.html#mergeEdge">mergeEdge</a></li><li><a href="global.html#mwBuildEdges">mwBuildEdges</a></li><li><a href="global.html#mwMarkDirty">mwMarkDirty</a></li><li><a href="global.html#mwMarkRelated">mwMarkRelated</a></li><li><a href="global.html#mwPersistEdges">mwPersistEdges</a></li><li><a href="global.html#mwProjectDirty">mwProjectDirty</a></li><li><a href="global.html#mwQueueReverse">mwQueueReverse</a></li><li><a href="global.html#mwRebuildRelationIndex">mwRebuildRelationIndex</a></li><li><a href="global.html#mwReevalAgree">mwReevalAgree</a></li><li><a href="global.html#mwReevalApply">mwReevalApply</a></li><li><a href="global.html#mwReevalMarkReviewed">mwReevalMarkReviewed</a></li><li><a href="global.html#mwReevalVerdict">mwReevalVerdict</a></li><li><a href="global.html#needsCheck">needsCheck</a></li><li><a href="global.html#needsEdgeReview">needsEdgeReview</a></li><li><a href="global.html#needsReeval">needsReeval</a></li><li><a href="global.html#neighborsOf">neighborsOf</a></li><li><a href="global.html#normalizeEdgeProposal">normalizeEdgeProposal</a></li><li><a href="global.html#noteProblems">noteProblems</a></li><li><a href="global.html#noteReader">noteReader</a></li><li><a href="global.html#openChecked">openChecked</a></li><li><a href="global.html#openDeletions">openDeletions</a></li><li><a href="global.html#openRelateLedgers">openRelateLedgers</a></li><li><a href="global.html#openStores">openStores</a></li><li><a href="global.html#packIds">packIds</a></li><li><a href="global.html#pageVotesOf">pageVotesOf</a></li><li><a href="global.html#pagesOf">pagesOf</a></li><li><a href="global.html#paginateBy">paginateBy</a></li><li><a href="global.html#pairCheck">pairCheck</a></li><li><a href="global.html#pairCheckItemOf">pairCheckItemOf</a></li><li><a href="global.html#pairItemOf">pairItemOf</a></li><li><a href="global.html#pairProblems">pairProblems</a></li><li><a href="global.html#parseRelateBenchArgs">parseRelateBenchArgs</a></li><li><a href="global.html#persistEdge">persistEdge</a></li><li><a href="global.html#pickCandidates">pickCandidates</a></li><li><a href="global.html#pickRelateVocab">pickRelateVocab</a></li><li><a href="global.html#pickRelationsOf">pickRelationsOf</a></li><li><a href="global.html#planEdgeStockFix">planEdgeStockFix</a></li><li><a href="global.html#planRelateBench">planRelateBench</a></li><li><a href="global.html#presentOthersOf">presentOthersOf</a></li><li><a href="global.html#projectAffected">projectAffected</a></li><li><a href="global.html#projectAll">projectAll</a></li><li><a href="global.html#projectNote">projectNote</a></li><li><a href="global.html#projectNotes">projectNotes</a></li><li><a href="global.html#projectText">projectText</a></li><li><a href="global.html#proposalOf">proposalOf</a></li><li><a href="global.html#pruneDangling">pruneDangling</a></li><li><a href="global.html#qualityTag">qualityTag</a></li><li><a href="global.html#quarantineHoldNextOf">quarantineHoldNextOf</a></li><li><a href="global.html#queueConflictCheck">queueConflictCheck</a></li><li><a href="global.html#queueConflictProposal">queueConflictProposal</a></li><li><a href="global.html#queueEdgeReview">queueEdgeReview</a></li><li><a href="global.html#queueRewrite">queueRewrite</a></li><li><a href="global.html#rawVerdictText">rawVerdictText</a></li><li><a href="global.html#readArchive">readArchive</a></li><li><a href="global.html#readAuditRows">readAuditRows</a></li><li><a href="global.html#readConflictEvents">readConflictEvents</a></li><li><a href="global.html#readEdgeAudit">readEdgeAudit</a></li><li><a href="global.html#readEdgeStockLedger">readEdgeStockLedger</a></li><li><a href="global.html#reasonFormProblem">reasonFormProblem</a></li><li><a href="global.html#reasonRewriteProblemsOf">reasonRewriteProblemsOf</a></li><li><a href="global.html#rebuildRelationIndex">rebuildRelationIndex</a></li><li><a href="global.html#recentReevalRetiredIds">recentReevalRetiredIds</a></li><li><a href="global.html#recordCheck">recordCheck</a></li><li><a href="global.html#reevalBaseline">reevalBaseline</a></li><li><a href="global.html#reevalBenchRole">reevalBenchRole</a></li><li><a href="global.html#reevalCaseProblems">reevalCaseProblems</a></li><li><a href="global.html#reevalChainOf">reevalChainOf</a></li><li><a href="global.html#reevalMissingOf">reevalMissingOf</a></li><li><a href="global.html#reevalPartsOf">reevalPartsOf</a></li><li><a href="global.html#reevalPromptItemOf">reevalPromptItemOf</a></li><li><a href="global.html#reevalRequeue">reevalRequeue</a></li><li><a href="global.html#reevalTargetIdOf">reevalTargetIdOf</a></li><li><a href="global.html#reevalVerdictOf">reevalVerdictOf</a></li><li><a href="global.html#relateAiCallOf">relateAiCallOf</a></li><li><a href="global.html#relateBenchRole">relateBenchRole</a></li><li><a href="global.html#relateBenchRoleOf">relateBenchRoleOf</a></li><li><a href="global.html#relateCapacityOf">relateCapacityOf</a></li><li><a href="global.html#relateCaseProblems">relateCaseProblems</a></li><li><a href="global.html#relateCheck">relateCheck</a></li><li><a href="global.html#relateDomainNeedsOf">relateDomainNeedsOf</a></li><li><a href="global.html#relateFeatureProblems">relateFeatureProblems</a></li><li><a href="global.html#relateGuideDefaultOf">relateGuideDefaultOf</a></li><li><a href="global.html#relateHoldDeadlineOf">relateHoldDeadlineOf</a></li><li><a href="global.html#relateMaterialOf">relateMaterialOf</a></li><li><a href="global.html#relateOptOf">relateOptOf</a></li><li><a href="global.html#relatePageProblems">relatePageProblems</a></li><li><a href="global.html#relatePanelsOf">relatePanelsOf</a></li><li><a href="global.html#relatePendingOf">relatePendingOf</a></li><li><a href="global.html#relateProblemsOf">relateProblemsOf</a></li><li><a href="global.html#relateScanOf">relateScanOf</a></li><li><a href="global.html#relateSeatOf">relateSeatOf</a></li><li><a href="global.html#relateSeatsOf">relateSeatsOf</a></li><li><a href="global.html#relateSuiteProblems">relateSuiteProblems</a></li><li><a href="global.html#relateSummaryOf">relateSummaryOf</a></li><li><a href="global.html#relateVerdictOf">relateVerdictOf</a></li><li><a href="global.html#relateWarningsOf">relateWarningsOf</a></li><li><a href="global.html#relationTypesVersionOf">relationTypesVersionOf</a></li><li><a href="global.html#removeFromAdjacency">removeFromAdjacency</a></li><li><a href="global.html#renameEdgeTypes">renameEdgeTypes</a></li><li><a href="global.html#renderRelationSections">renderRelationSections</a></li><li><a href="global.html#resolveRelateData">resolveRelateData</a></li><li><a href="global.html#resolveRelateSettings">resolveRelateSettings</a></li><li><a href="global.html#resolveRelateVocab">resolveRelateVocab</a></li><li><a href="global.html#restoreEdge">restoreEdge</a></li><li><a href="global.html#restoreNote">restoreNote</a></li><li><a href="global.html#restoredStandards">restoredStandards</a></li><li><a href="global.html#retireEdge">retireEdge</a></li><li><a href="global.html#retiredEdgesOf">retiredEdgesOf</a></li><li><a href="global.html#retypeAllowed">retypeAllowed</a></li><li><a href="global.html#reversePairsBackOf">reversePairsBackOf</a></li><li><a href="global.html#revertEdgeRevision">revertEdgeRevision</a></li><li><a href="global.html#revertedStandards">revertedStandards</a></li><li><a href="global.html#reviewCaseProblems">reviewCaseProblems</a></li><li><a href="global.html#reviewEdgesOf">reviewEdgesOf</a></li><li><a href="global.html#reviewPageProblems">reviewPageProblems</a></li><li><a href="global.html#reviewQueueOf">reviewQueueOf</a></li><li><a href="global.html#reviewVerdictOf">reviewVerdictOf</a></li><li><a href="global.html#reviewVerdictOfCase">reviewVerdictOfCase</a></li><li><a href="global.html#reviseEdge">reviseEdge</a></li><li><a href="global.html#rewriteEdge">rewriteEdge</a></li><li><a href="global.html#rollbackEdgeStockFix">rollbackEdgeStockFix</a></li><li><a href="global.html#rotationBumpOf">rotationBumpOf</a></li><li><a href="global.html#rotationCursorOf">rotationCursorOf</a></li><li><a href="global.html#rotationPageOf">rotationPageOf</a></li><li><a href="global.html#rotationProgressOf">rotationProgressOf</a></li><li><a href="global.html#rotationQueueOf">rotationQueueOf</a></li><li><a href="global.html#rs4ClassOf">rs4ClassOf</a></li><li><a href="global.html#rs4DecisionOf">rs4DecisionOf</a></li><li><a href="global.html#rs6ClassOf">rs6ClassOf</a></li><li><a href="global.html#rs6DecisionOf">rs6DecisionOf</a></li><li><a href="global.html#rs6VoteActionOf">rs6VoteActionOf</a></li><li><a href="global.html#runCheckPanelPages">runCheckPanelPages</a></li><li><a href="global.html#runConflictCheckSegment">runConflictCheckSegment</a></li><li><a href="global.html#runEdgeReviewSegment">runEdgeReviewSegment</a></li><li><a href="global.html#runReevalSegment">runReevalSegment</a></li><li><a href="global.html#runRelateBench">runRelateBench</a></li><li><a href="global.html#runRelateBenchCli">runRelateBenchCli</a></li><li><a href="global.html#sameEdge">sameEdge</a></li><li><a href="global.html#sameEdgeVerdict">sameEdgeVerdict</a></li><li><a href="global.html#sameVisible">sameVisible</a></li><li><a href="global.html#saveLedgerJson">saveLedgerJson</a></li><li><a href="global.html#scanConflictEdges">scanConflictEdges</a></li><li><a href="global.html#scriptFixHistory">scriptFixHistory</a></li><li><a href="global.html#seatVotesOf">seatVotesOf</a></li><li><a href="global.html#sectionsHashOf">sectionsHashOf</a></li><li><a href="global.html#seqAt">seqAt</a></li><li><a href="global.html#seqOf">seqOf</a></li><li><a href="global.html#settleArchive">settleArchive</a></li><li><a href="global.html#shuffleStable">shuffleStable</a></li><li><a href="global.html#stageRelate">stageRelate</a></li><li><a href="global.html#stageRelateProject">stageRelateProject</a></li><li><a href="global.html#stageRelationIndex">stageRelationIndex</a></li><li><a href="global.html#stdRetiredHowOf">stdRetiredHowOf</a></li><li><a href="global.html#stockDomainOf">stockDomainOf</a></li><li><a href="global.html#stockOrderOf">stockOrderOf</a></li><li><a href="global.html#stockProgressOf">stockProgressOf</a></li><li><a href="global.html#stockQueueOf">stockQueueOf</a></li><li><a href="global.html#stockSourceResolvedOf">stockSourceResolvedOf</a></li><li><a href="global.html#stockWaiverKeyOf">stockWaiverKeyOf</a></li><li><a href="global.html#typeRankOf">typeRankOf</a></li><li><a href="global.html#undoDeleteNote">undoDeleteNote</a></li><li><a href="global.html#unfixableRouteOf">unfixableRouteOf</a></li><li><a href="global.html#uniqIds">uniqIds</a></li><li><a href="global.html#unpackIds">unpackIds</a></li><li><a href="global.html#verdictClassOf">verdictClassOf</a></li><li><a href="global.html#verdictExpectProblems">verdictExpectProblems</a></li><li><a href="global.html#verdictsByIndexOf">verdictsByIndexOf</a></li><li><a href="global.html#verdictsOf">verdictsOf</a></li><li><a href="global.html#verifyEdgeStockChain">verifyEdgeStockChain</a></li><li><a href="global.html#voteMissingOf">voteMissingOf</a></li><li><a href="global.html#waivedSameProblem">waivedSameProblem</a></li><li><a href="global.html#waiverCoversEdge">waiverCoversEdge</a></li><li><a href="global.html#withCut">withCut</a></li><li><a href="global.html#writeEdge">writeEdge</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">standards/edgeQueue.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// edgeQueue.mjs — 邊交判定小組之排入(待判之登錄件):RS2／RS3／RS8 等須重寫理由者與清單外型別排入既有邊覆核(RS6)之待判;既有衝突邊須經
+//   衝突核對者排入 RS4 之待判;新衝突之提案於暫緩當下持久為 RS4 提案待判;存量之豁免之判定
+//
+// 【為何在 standards 層】排入是「標準判不合格 → 交兩席」之登錄,stages(各段、維護)、standards(存量處置、符合度掃描)、ops(還原)皆取用——
+//   層序 stores ← standards ← { stages, ops },故落在 standards(不在 ops,否則 stages 與 standards 得反向依賴維運層)。
+// 【RS2／RS3／RS8】理由佔位／過短、含兩端皆無之數字、或正體之確定性修正做不到:修正須重寫理由(AI),不在此猜——登錄 RS6 待判(owner pipeline,
+//   ctx.stockStd 標來源),既有邊覆核開啟時待判優先(兩席判成立／改理由／改型／撤出)。兩席判「成立」而現行理由仍確定不合格者,RS6 段
+//   無可用之改寫理由即撤出(std-retire,可以 restoreEdge 之 opt.reason 給新理由還原)——修不了即移除,不以「未能判定」讓違反之邊留在庫內。
+// 【RS4 之排入(queueConflictCheck)】既有衝突邊須經兩席核對者(還原帶回、他段轉交、讀關聯之下游判其非對立而交回)一律經此登錄:
+//   物件與標準取 RS4 常數、期限依 relateHoldDeadlineOf、下一步依 RELATE_HOLD_NEXT;已有未結者不重登(否則每次重登累加 tries)。
+// 【提案之持久(queueConflictProposal)】衝突核對開啟時,正向／反向／輪巡、重評升級、既有邊覆核升級之新衝突不直接落地而交核對——提案於暫緩當下即登錄
+//   RS4 提案待判(物件 edge-proposal;ctx 存提案之理由、截短原字數、提案席、來源段),來源記完成前已持久(中途被砍不遺失);已有未結者不重登
+//   (同邊多提案由衝突核對之入口依提案全序取最優);使用者已豁免(提案不落地)而理由未變者不重提(值變了才重提)。
+// 【豁免之守門(登錄件同一規則)】queueEdgeReview、queueConflictCheck 遇已豁免之同一登錄,其豁免之來源(stockWaiverKeyOf)即本次之問題
+//   (`edge:&lt;邊 id>:&lt;來源標準>`)者不重開——使用者之裁示不被自動流程推翻;不同問題(或無來源)照登錄,前段之裁示留於待判之 history。
+// 【存量之豁免(stockWaiverKeyOf)】既有違反經覆核待判(RS6;衝突型為 RS4,ctx.stockStd 標來源)處理者——存量處置之 RS2／RS3／RS8、
+//   關聯段維護之清單外型別 RS1——使用者豁免該待判,即是對「該邊之該標準問題」之裁示:存量處置之登錄不重開同一問題之豁免(不同問題
+//   ——如型別判不了之豁免——照登錄,前段之裁示由待判之 history 留存),符合度掃描把它記為該標準之已豁免。單一判定,存量處置、
+//   既有邊覆核之轉交與掃描同讀此處。
+// 【已不再違反之預檢(stockSourceResolvedOf)】經覆核待判處理之既有違反,其來源標準之違反已不在者(現值以 checkEdge 判合格——他途改寫了理由、
+//   型別回到清單等)不送兩席:兩席段(RS4／RS6)於入項前對本輪會送兩席之待判(負責者 pipeline)判之,合格即結案(how 一處)、不呼叫 AI、不記檢核
+//   (未經判定不記合格;存量佇列日後照核)。未能判定(RS8 材料不可得)、不適用、仍違反 → 照送;負責者 user(型別判不了、隔離、逾次改使用者——
+//   其 ctx 仍帶 stockStd 而現行問題已非存量之來源)不預檢,使用者之要求重試照送兩席。判定用落庫原值(不正規化):RS3 可確定性修正者不算合格,
+//   照送(兩席 keep 即記合格;字形交存量處置)。
+
+import isobj from 'wsemi/src/isobj.mjs'
+import isestr from 'wsemi/src/isestr.mjs'
+import { strOf, STATUS } from '../core/capturePackage.mjs'
+import { putHold, holdKey } from '../core/capturePackage.mjs'
+import { RS4 } from '../stores/conflictCheckPolicy.mjs'
+import { RS6 } from '../stores/edgeReviewPolicy.mjs'
+import { edgeId } from '../stores/edgeStore.mjs'
+import { relateHoldDeadlineOf, RELATE_HOLD_NEXT } from '../stores/relateHolds.mjs'
+import { REASON_REWRITE_STDS } from './edgeGate.mjs'
+import { checkEdge } from './edgeStandards.mjs'
+
+/** 排入 RS6 之存量標準 */
+export const EDGE_REVIEW_STDS = Object.freeze(['RS2', 'RS8'])
+
+/** 經覆核待判處理之既有違反之來源標準(ctx.stockStd 之值域):維護段之清單外型別 RS1、存量處置之須改寫理由者 */
+export const REVIEW_SOURCE_STDS = Object.freeze(['RS1', ...REASON_REWRITE_STDS])
+
+/**
+ * 存量之豁免鍵(檔頭【存量之豁免】):已豁免之覆核待判(RS6;衝突型為 RS4)而其來源(ctx.stockStd)為 RS1／RS2／RS3／RS8 者,回
+ *   `edge:&lt;邊 id>:&lt;該標準>`——即使用者對該邊之該標準問題之裁示;其餘(未豁免、他標準、無來源、提案之待判)回 null
+ *
+ * @param {Object|null} hold 輸入待判登錄
+ * @returns {String|null} 回傳豁免鍵或 null
+ * @example
+ * console.log(stockWaiverKeyOf({ object: 'edge', oid: 'e1', std: 'RS6', status: 'waived', ctx: { stockStd: 'RS2' } }))
+ * // => edge:e1:RS2
+ *
+ * console.log(stockWaiverKeyOf({ object: 'edge', oid: 'e1', std: 'RS6', status: 'waived', ctx: {} }))
+ * // => null
+ */
+export function stockWaiverKeyOf(hold) {
+    if (!isobj(hold) || hold.status !== 'waived' || hold.object !== RS6.objectEdge || ![RS4.std, RS6.std].includes(hold.std)) return null
+    const s = hold.ctx?.stockStd
+    return REVIEW_SOURCE_STDS.includes(s) ? holdKey(RS6.objectEdge, hold.oid, s) : null
+}
+
+/**
+ * 經覆核待判處理之既有違反,其來源標準之違反是否已不在(檔頭【已不再違反之預檢】):待判為物件 edge 之 RS4／RS6 登錄、負責者 pipeline、
+ *   ctx.stockStd 為 REVIEW_SOURCE_STDS 之一,且邊之現值以 checkEdge 判該標準合格(PASS;未能判定、不適用、違反皆不算)→ 回 { std, how };否則 null
+ *
+ * @param {Object|null} hold 輸入待判登錄
+ * @param {Object|null} edge 輸入邊之現值
+ * @param {Object} [ctx={}] 輸入 checkEdge 之 ctx(relationTypes、vague、hasNote、materialOf、locale;與兩席段送審之判定同一組)
+ * @returns {Object|null} 回傳 { std:來源標準, how:結案方式 } 或 null
+ * @example
+ * console.log(stockSourceResolvedOf({ object: 'edge', std: 'RS6', owner: 'pipeline', ctx: { stockStd: 'RS2' } }, { from: 'a', to: 'b', type: '互補搭配', reason: '兩篇皆以近日點距離之量測方法比較軌道' }))
+ * // => { std: 'RS2', how: '存量 RS2 之違反已不在（現值已合格），不送兩席' }
+ *
+ * console.log(stockSourceResolvedOf({ object: 'edge', std: 'RS6', owner: 'pipeline', ctx: { stockStd: 'RS2' } }, { from: 'a', to: 'b', type: '互補搭配', reason: 'placeholder' }))
+ * // => null
+ */
+export function stockSourceResolvedOf(hold, edge, ctx = {}) {
+    if (!isobj(hold) || !isobj(edge) || hold.object !== RS6.objectEdge || ![RS4.std, RS6.std].includes(hold.std) || hold.owner !== 'pipeline') return null
+    const std = hold.ctx?.stockStd
+    if (!REVIEW_SOURCE_STDS.includes(std)) return null
+    const r = checkEdge(edge, isobj(ctx) ? ctx : {}).find((x) => x.std === std)
+    if (r?.status !== STATUS.PASS) return null
+    return { std, how: `存量 ${std} 之違反已不在（現值已合格），不送兩席` }
+}
+
+/**
+ * 已豁免之登錄是否即本次問題之裁示(檔頭【豁免之守門】):豁免之來源鍵＝`edge:&lt;邊 id>:&lt;本次來源標準>`
+ *
+ * @param {Object|null} cur 輸入現有之登錄
+ * @param {String} edgeIdOf 輸入邊 id
+ * @param {String} std 輸入本次問題之來源標準(無則不守)
+ * @returns {Boolean} 回傳是否已豁免同一問題
+ */
+const waivedSameProblem = (cur, edgeIdOf, std) => isestr(std) &amp;&amp; stockWaiverKeyOf(cur) === holdKey(RS6.objectEdge, edgeIdOf, std)
+
+/**
+ * 登錄一條邊之 RS6 待判(存量 RS2／RS3／RS8 之修正入口;關聯段維護亦以之登錄清單外型別 RS1——型別退役而未宣告改名者交覆核重判;已有未結者不重登;
+ *   使用者已豁免同一問題者不重開)
+ *
+ * @param {Object} holds 輸入 holds 集合
+ * @param {Object} edge 輸入邊
+ * @param {Object} o 輸入 { std:'RS1'|'RS2'|'RS3'|'RS8', why:String, at:ISO, next?:String(下一步;未給用存量改寫理由之說明) }
+ * @returns {Promise} 回傳 Promise，resolve 回傳 'queued'｜'exists'｜'waived'(同一問題使用者已豁免)
+ * @example
+ * const rows = new Map()
+ * const holds = { get: async (id) => rows.get(id) ?? null, replace: async (r) => { rows.set(r.id, r) }, select: async () => [...rows.values()] }
+ * const edge = { id: 'e1', from: 'a', to: 'b', type: '互補搭配' }
+ * const o = { std: 'RS2', why: '理由為佔位字', at: '2026-10-05T10:00:00+08:00' }
+ * console.log(await queueEdgeReview(holds, edge, o), await queueEdgeReview(holds, edge, o))
+ * // => queued exists
+ * const h = rows.get('edge:e1:RS6')
+ * console.log(h.owner, h.status, h.reason, h.deadline)
+ * // => pipeline open 存量 RS2：理由為佔位字 2026-11-04T02:00:00.000Z
+ *
+ * rows.set(h.id, { ...h, status: 'waived' })
+ * console.log(await queueEdgeReview(holds, edge, o))
+ * // => waived
+ */
+export async function queueEdgeReview(holds, edge, o) {
+    const cur = await holds.get(holdKey(RS6.objectEdge, edge.id, RS6.std))
+    if (cur?.status === 'open') return 'exists'
+    if (waivedSameProblem(cur, edge.id, o.std)) return 'waived'
+    await putHold(holds, {
+        object: RS6.objectEdge, oid: edge.id, std: RS6.std,
+        reason: `存量 ${o.std}：${String(o.why || '').slice(0, 160)}`,
+        next: o.next || RELATE_HOLD_NEXT.edgeReviewStock,
+        owner: 'pipeline',
+        deadline: relateHoldDeadlineOf(o.at),
+        ctx: { from: edge.from, to: edge.to, type: edge.type, stockStd: o.std },
+    }, o.at)
+    return 'queued'
+}
+
+/**
+ * 登錄一條既有衝突邊之 RS4 待判(須經衝突核對兩席核對者之單一入口;已有未結者不重登;ctx.stockStd 給了而使用者已豁免同一問題者不重開)
+ *
+ * @param {Object} holds 輸入 holds 集合
+ * @param {Object} o 輸入 { edgeId:String, from:String, to:String, reason:String(登錄原因), next?:String(下一步;未給為 RELATE_HOLD_NEXT.conflictCheck),
+ *   ctx?:Object(附帶之脈絡;值為字串;stockStd 為來源標準), owner?:'pipeline'|'user'(預設 'pipeline'), at:ISO(登錄時刻) }
+ * @returns {Promise} 回傳 Promise，resolve 回傳 'queued'｜'exists'(已有未結者)｜'waived'(同一問題使用者已豁免)
+ * @throws {Error} edgeId、from、to、reason 非非空字串,或 holds 集合缺方法時拋出
+ * @example
+ * const rows = new Map()
+ * const holds = { get: async (id) => rows.get(id) ?? null, replace: async (r) => { rows.set(r.id, r) }, select: async () => [...rows.values()] }
+ * const o = { edgeId: 'e1', from: 'a', to: 'b', reason: '既有衝突邊須兩席核對', at: '2026-10-05T10:00:00+08:00' }
+ * console.log(await queueConflictCheck(holds, o), await queueConflictCheck(holds, o))
+ * // => queued exists
+ * console.log([...rows.keys()], rows.get('edge:e1:RS4').owner)
+ * // => [ 'edge:e1:RS4' ] pipeline
+ *
+ * await queueConflictCheck(holds, { ...o, reason: '' }).catch((e) => console.log(e.message))
+ * // => queueConflictCheck 需要 reason（非空字串）
+ */
+export async function queueConflictCheck(holds, o = {}) {
+    for (const k of ['edgeId', 'from', 'to', 'reason']) {
+        if (!isestr(o?.[k])) throw new Error(`queueConflictCheck 需要 ${k}（非空字串）`)
+    }
+    const cur = await holds.get(holdKey(RS4.objectEdge, o.edgeId, RS4.std))
+    if (cur?.status === 'open') return 'exists'
+    if (waivedSameProblem(cur, o.edgeId, o.ctx?.stockStd)) return 'waived'
+    await putHold(holds, {
+        object: RS4.objectEdge, oid: o.edgeId, std: RS4.std,
+        reason: o.reason,
+        next: isestr(o.next) ? o.next : RELATE_HOLD_NEXT.conflictCheck,
+        owner: o.owner || 'pipeline',
+        deadline: relateHoldDeadlineOf(o.at),
+        ctx: { from: o.from, to: o.to, ...(isobj(o.ctx) ? o.ctx : {}) },
+    }, o.at)
+    return 'queued'
+}
+
+/**
+ * 新衝突之提案於暫緩當下持久為 RS4 提案待判(檔頭【提案之持久】;物件 edge-proposal、負責者 pipeline、下一步「下輪衝突核對」)
+ *
+ * @param {Object} holds 輸入 holds 集合
+ * @param {Object} p 輸入 { from:String, to:String, reason:String(提案之理由), reasonCut?:Integer(納入閘截短之原字數), proposer?:String(提案之實際成交者),
+ *   segment?:String(來源段:forward｜reverse｜rotation｜reeval｜edgeReview), proposedAt?:ISO(提案時刻), at:ISO(登錄時刻), holdReason?:String(登錄原因) }
+ * @returns {Promise} 回傳 Promise，resolve 回傳 'queued'｜'exists'(已有未結者)｜'waived'(使用者已豁免而提案理由未變)
+ * @throws {Error} from、to、reason、at 非非空字串,或 holds 集合缺方法時拋出
+ * @example
+ * const rows = new Map()
+ * const holds = { get: async (id) => rows.get(id) ?? null, replace: async (r) => { rows.set(r.id, r) }, select: async () => [...rows.values()] }
+ * const p = { from: 'a', to: 'b', reason: '甲說此條件下成立；乙說同一條件下結論相反', at: '2026-10-05T10:00:00+08:00' }
+ * console.log(await queueConflictProposal(holds, p), await queueConflictProposal(holds, p))
+ * // => queued exists
+ * const [h] = rows.values()
+ * console.log(h.object, h.std, h.owner, h.ctx.segment, h.ctx.proposedAt)
+ * // => edge-proposal RS4 pipeline forward 2026-10-05T10:00:00+08:00
+ */
+export async function queueConflictProposal(holds, p = {}) {
+    for (const k of ['from', 'to', 'reason', 'at']) {
+        if (!isestr(p?.[k])) throw new Error(`queueConflictProposal 需要 ${k}（非空字串）`)
+    }
+    const id = edgeId(p.from, p.to)
+    const cur = await holds.get(holdKey(RS4.objectProposal, id, RS4.std))
+    if (cur?.status === 'open') return 'exists'
+    if (cur?.status === 'waived' &amp;&amp; strOf(cur.ctx?.reason) === strOf(p.reason)) return 'waived'
+    await putHold(holds, {
+        object: RS4.objectProposal, oid: id, std: RS4.std,
+        reason: isestr(p.holdReason) ? p.holdReason : '新衝突之提案待兩席核對（衝突核對開啟）',
+        next: RELATE_HOLD_NEXT.proposalPending,
+        owner: 'pipeline',
+        deadline: relateHoldDeadlineOf(p.at),
+        ctx: {
+            from: p.from, to: p.to, reason: p.reason, proposer: strOf(p.proposer), segment: strOf(p.segment) || 'forward', proposedAt: strOf(p.proposedAt) || p.at,
+            ...(Number.isInteger(p.reasonCut) &amp;&amp; p.reasonCut > 0 ? { reasonCut: p.reasonCut } : {}),
+        },
+    }, p.at)
+    return 'queued'
+}
+
+export default { EDGE_REVIEW_STDS, REVIEW_SOURCE_STDS, stockWaiverKeyOf, stockSourceResolvedOf, queueEdgeReview, queueConflictCheck, queueConflictProposal }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Nov 02 2026 13:25:06 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
