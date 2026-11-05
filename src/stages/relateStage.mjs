@@ -28,8 +28,10 @@
 //   (新建或由非衝突升級;重評與既有邊覆核之升級亦同)不在逐項鏈落地——提案於暫緩當下即持久為 RS4 提案待判(standards/edgeQueue 之
 //   queueConflictProposal;來源記完成前已持久,中途被砍不遺失;使用者已豁免而理由未變者不重提,計 rs4Waived)——於其後以提案席＋核對席
 //   (未成立叫第三席;摘要套件之判定小組)判真衝突才寫入;並消化 RS4 待判與存量衝突邊(配額)。啟用須 holds 與 checks 集合(開工即驗)。
-// 【時間】選配段扣掉保留給後段之時間(opt.reserveMs,未給取每輪依賴之 deps.reserveMs;由組裝者注入,本段不讀他工作之設定)後須夠一次呼叫
-//   (callTimeoutMsOf:席位首家之單次逾時)才開工,每次呼叫以「剩餘−保留」封頂(抓取套件之 reserveOf);反向、輪巡、重評、既有邊覆核、衝突核對同一份保留時間。
+// 【時間】正向段與選配段扣掉保留給後段之時間(opt.reserveMs,未給取每輪依賴之 deps.reserveMs;由組裝者注入,本段不讀他工作之設定)後須夠一次呼叫
+//   (callTimeoutMsOf:席位首家之單次逾時)才開工,每次呼叫以「剩餘−保留」封頂(抓取套件之 reserveOf);正向、反向、輪巡、重評、既有邊覆核、衝突核對同一份保留時間。
+//   正向段:開工前與每輪(wave)開工前各判一次,不足即少做幾輪(開工前即不足 → 本輪延後,detail.forwardDeferred、新筆記留在池中下輪再做);容量鍵
+//   (rounds、notesPerCall)不因時間不足而縮。未注入保留(取值為 0)者正向段不設首家逾時門檻,守門只剩整輪逾期(行為同扣保留前)。
 // 【AI 呼叫(stages/relateAiCall)】六類呼叫同一形狀:注入之 opt.callAI 收 { spec, seat, segment, shouldStop, budgetMs, acceptTruncated };
 //   回覆為陣列、逐項驗證而部分接受,故逐次給 acceptTruncated:true(截斷時救回前段完整之項)。單項之合格判準＝stages/relateChain 之 coveredItemOf。
 // 【history 浮上再驗(檢定標準 RS1／RS2／RS3)】本輪新建之邊以完整全序合併時,勝出身分之最優代表可為 history 條目;
@@ -44,9 +46,9 @@ import { noteConsumedOf } from '../core/capturePackage.mjs'
 import { oneline } from '../core/capturePackage.mjs'
 import { runAiBatchStage } from '../core/summarizePackage.mjs'
 import { applyTaps, makeMsg, runChainOverMsgs, stdReport, stageFields } from '../core/capturePackage.mjs'
-import { budgetOf } from '../core/capturePackage.mjs'
+import { reserveOf, reserveMsOf } from '../core/capturePackage.mjs'
 import { STATUS } from '../core/capturePackage.mjs'
-import { RELATE_DEFAULT, relateSeatOf } from '../core/relateSettings.mjs'
+import { RELATE_DEFAULT, relateSeatOf, callTimeoutMsOf } from '../core/relateSettings.mjs'
 import { RELATE_CTX_FLAGS } from '../logContract.mjs'
 import { typeRankOf, createMutex, buildAdjacency, conflictNeighborsOf, generationMismatchOf } from '../stores/edgeStore.mjs'
 import { openRelateLedgers, recentReevalRetiredIds } from '../stores/relateLedgers.mjs'
@@ -93,9 +95,10 @@ import { runEdgeReviewSegment } from './edgeReviewSegment.mjs'
  * @param {Boolean} [opt.edgeReview] 輸入既有邊覆核段是否啟用，未給則用 settings.relate.standards.edgeReview.enabled
  * @param {Integer} [opt.edgeReviewPerRun] 輸入既有邊覆核之存量配額，未給則用 settings.relate.standards.edgeReview.perRun
  * @param {Integer} [opt.maxRelationsPerNote=RELATE_MAX_RELATIONS_PER_NOTE] 輸入單篇最多取用之關聯數
- * @param {Number|Function} [opt.reserveMs] 輸入保留給後段之毫秒數(非負)，或 (ctx) => 毫秒數(每輪求值):選配段(反向、輪巡、重評、既有邊覆核、
- *   衝突核對)扣保留後剩餘不足一次呼叫即不開工、每次 AI 呼叫以「剩餘−保留」封頂;由組裝者注入,本段不讀他工作之設定。未給則取每輪依賴之
- *   ctx.deps.reserveMs(皆未給為 0;不合者於該段開工時拋出)
+ * @param {Number|Function} [opt.reserveMs] 輸入保留給後段之毫秒數(非負)，或 (ctx) => 毫秒數(每輪求值):正向段與選配段(反向、輪巡、重評、既有邊覆核、
+ *   衝突核對)扣保留後剩餘不足一次呼叫即不開工(正向段於每輪開工前亦判,不足即少做幾輪;開工前即不足 → 本輪延後,detail.forwardDeferred)、
+ *   每次 AI 呼叫以「剩餘−保留」封頂;由組裝者注入,本段不讀他工作之設定。未給則取每輪依賴之 ctx.deps.reserveMs(皆未給為 0,此時正向段行為同
+ *   扣保留前;不合者於該段開工時拋出,正向段為本段開工時)
  * @returns {Object} 回傳 stage 物件 { name, run }
  * @throws {Error} tap 或 reevalTap 對不上錨點、掛載規格不合時拋出(建構期)
  * @example
@@ -240,10 +243,24 @@ export function stageRelate(opt = {}) {
             if (rt.conflictCheckOn && (!stores.holds || !stores.checks)) throw new Error('衝突核對(relate.standards.conflictCheck.enabled)需要 holds 與 checks 集合')
             const inPool = inRelatePool
 
-            // 時間預算(抓取套件之 budget 單一擁有者):每次呼叫以剩餘時間封頂、嘗試之間可中止;每輪開工前由 harness 守門
-            const budget = budgetOf(ctx)
+            // 時間預算(抓取套件之 budget 單一擁有者):正向段與各選配段同一份保留時間(檔頭【時間】)——扣掉保留給後段之時間後才是本段可用:
+            //   開工前判一次(fwdDeferred)、每輪開工前由 harness 以 fwdBatchStop 守門,每次呼叫以「剩餘−保留」封頂、嘗試之間(fwdStop)可中止
             const call = relateAiCallOf({ ai, callAI: opt.callAI })
-            const callFwd = (p, c) => call(p, c, { spec: relateSeatOf(settings, 'relate'), seat: 'proposer', segment: 'forward', shouldStop: budget.shouldStop, budgetMs: budget.remainingMs() })
+            const fwdSeat = relateSeatOf(settings, 'relate')
+            const fwdKeep = reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, '關聯正向段之 reserveMs')(ctx)
+            const fwdTime = reserveOf(ctx, fwdKeep)
+            // 開工門檻:有保留時為席位首家之單次逾時(同選配段);未保留時為 0——守門只剩整輪逾期,與扣保留前完全相同
+            const fwdMinMs = fwdKeep > 0 ? callTimeoutMsOf(settings, fwdSeat) : 0
+            const fwdStop = () => fwdTime.shouldStop(fwdMinMs)
+            // 批次每輪開工前之守門:有保留時,池已空(無待處理者)不報時間停止——剩餘常低於門檻,池空仍記 stopped 與 WARN 會誤導;無保留者同扣保留前
+            const fwdBatchStop = fwdKeep > 0 ? () => live.some(inPool) && fwdStop() : fwdStop
+            const callFwd = (p, c) => call(p, c, { spec: fwdSeat, seat: 'proposer', segment: 'forward', shouldStop: fwdStop, budgetMs: fwdTime.remainingMs() })
+            // 開工前:有待處理者而扣保留後剩餘不足一次呼叫 → 本輪不開工(輪數 0:不取件、不呼叫、不記 relateTries),新筆記留在池中下輪再做;
+            //   輪數不是正整數(opt.rounds 打錯)者不在此判,照舊交批次執行器檢核而拋錯,不被延後吞掉
+            const fwdRounds = opt.rounds ?? settings.relate.rounds
+            const fwdWaiting = live.filter(inPool).length
+            const fwdDeferred = fwdKeep > 0 && Number.isInteger(fwdRounds) && fwdRounds > 0 && fwdWaiting > 0 && !fwdTime.canStart(fwdMinMs)
+            if (fwdDeferred) log.info(`關聯正向段：扣保留時間後剩餘時間不足一次呼叫（${Math.round(fwdMinMs / 1000)}s），本輪延後（待處理 ${fwdWaiting} 篇）`)
 
             /**
              * 單項驗證:index 對得到批內之目標(itemTargetOf)、relations 為陣列,且為空或至少一條過納入閘(coveredItemOf)——皆取 stages/relateChain(與 buildEdges、
@@ -293,8 +310,8 @@ export function stageRelate(opt = {}) {
                 log,
                 batchSize: opt.batchSize ?? settings.relate.notesPerCall,
                 parallel: opt.parallel ?? settings.ai.parallel,
-                rounds: opt.rounds ?? settings.relate.rounds,
-                shouldStop: budget.shouldStop,
+                rounds: fwdDeferred ? 0 : fwdRounds,
+                shouldStop: fwdBatchStop,
                 // relateTries 升冪(隊頭防阻塞:slug 永遠解析不過、屢次未涵蓋或批次屢敗者排隊尾——不佔名額也不丟)→ createdAt 升冪
                 pickPool: async (limit) => live
                     .filter(inPool)
@@ -491,6 +508,7 @@ export function stageRelate(opt = {}) {
                 ...ccDet,
                 ...erDet,
                 ...rotDet,
+                forwardDeferred: fwdDeferred,
                 reverseQueued: a.reverseQueued || 0,
                 reverseTargets: ra.reverseTargets || 0,
                 reverseEdges: ra.reverseEdges || 0,

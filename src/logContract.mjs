@@ -92,8 +92,8 @@ export const RELATE_REPORT_KEYS = Object.freeze({
             'genMismatch', 'blocked',
             // 開工前之維護(無 AI):型別改名、清單外型別(另登錄既有邊覆核待判者)、墓碑驅動之清理、懸空、內容變更之反應
             'typeRenamed', 'typeOffList', 'typeOffListQueued', 'retired', 'dangling', 'changedSeen', 'changedTouchExtracted',
-            // 正向與合計(筆記不足 2 篇時只有維護之鍵與 targets／edges／conflicts／pending)
-            'targets', 'reTargets', 'edges', 'edgeStdRejected', 'edgeStdFixed', 'relateCapDropped', 'relateDupDropped', 'edgeSurfaceRejected',
+            // 正向與合計(筆記不足 2 篇時只有維護之鍵與 targets／edges／conflicts／pending;forwardDeferred＝扣保留時間後不足一次呼叫而正向段本輪延後)
+            'forwardDeferred', 'targets', 'reTargets', 'edges', 'edgeStdRejected', 'edgeStdFixed', 'relateCapDropped', 'relateDupDropped', 'edgeSurfaceRejected',
             'conflicts', 'edgesChanged', 'conflictTouchExtracted',
             // 重評(relate.reeval.perRun > 0 時;reevalReproposed 另於重評停用而有再提出者出現)
             'reevalPending', 'reevalTargets', 'reevalPages', 'reevalCompleted', 'reevalZero', 'reevalChanged', 'reevalRetired', 'reevalUpgraded',

@@ -1,4 +1,4 @@
-# 現況（w-knowledge-relate）— 2026-11-02
+# 現況（w-knowledge-relate）— 2026-11-05
 
 > 只記現況，不寫過程（過程在 `../exp/`）。接續工作先讀本檔；完成一項功能或結束一輪工作即更新。
 > **路徑基準**：原始碼在 `src/`，本檔所列檔案路徑除已標 `src/`、`test/`、`toolg/` 者外皆相對 `src/`。
@@ -7,7 +7,7 @@
 
 - npm 套件 `w-knowledge-relate`（`package.json` 版本 1.0.0）；主入口 `src/WKnowledgeRelate.mjs`（具名匯出與預設匯出同一組，269 名）、總組裝 `createKnowledgeRelate`、執行期件 `createRelateRuntime`、物件 `relateObject.mjs`；`main` 指 `dist/w-knowledge-relate.umd.js`。
 - 佈局：`src/`（根層 5 檔＋`bench/ core/ domain/ ops/ stages/ standards/ stores/`）、`test/`、`toolg/`、`g.mjs`（離線範例）、`模型評比.csv`；不設 `exports`／`files`、不提供 `.npmignore`（npm 包＝git 版控內容，`sgud/` 與 `test/tools/` 隨包）。
-- 依賴：`w-knowledge-capture` ^1.0.2（經 `src/core/capturePackage.mjs`，125 名；指定詞 `w-knowledge-capture/src/WKnowledgeCapture.mjs`）、`w-knowledge-summarize` ^1.0.2（經 `src/core/summarizePackage.mjs`，33 名；指定詞 `w-knowledge-summarize/src/WKnowledgeSummarize.mjs`；測試橋接取其 `test/tools/`）、`wsemi` ^1.9.42；dev：`w-data-pipeline`、`w-dispatch-ai`、`w-orm-lmdb`（測試用）、`w-package-tools`（編譯與文件工具）。
+- 依賴：`w-knowledge-capture` ^1.0.2（經 `src/core/capturePackage.mjs`，124 名；指定詞 `w-knowledge-capture/src/WKnowledgeCapture.mjs`）、`w-knowledge-summarize` ^1.0.2（經 `src/core/summarizePackage.mjs`，33 名；指定詞 `w-knowledge-summarize/src/WKnowledgeSummarize.mjs`；測試橋接取其 `test/tools/`）、`wsemi` ^1.9.42；dev：`w-data-pipeline`、`w-dispatch-ai`、`w-orm-lmdb`（測試用）、`w-package-tools`（編譯與文件工具）。
 - 被誰用：下游經各自之埠，以 `w-knowledge-relate/src/…` 與 `w-knowledge-relate/test/tools/…` 深層路徑取本套件之件。
 - 發布狀態：尚未發布（發布由使用者）。
 
@@ -26,6 +26,7 @@
 | 日期 | 項 | 結果 |
 |---|---|---|
 | 2026-11-02 | 結構整理後全套（`npm test`）：原始碼移入 `src/`、補根目錄檔與 `toolg/`、`package.json` 依賴對齊、JSDoc 補齊、README 標頭與 Example、命令列用法字串改實際路徑、`sgud/` 改套件角度 | **551 ✓、0 ✗、4 pending**（pending 皆為 `api-relate-bench-ai` 四角色，未設 `WK_LIVE_AI=1` 不發真實請求）；整理前 548 ✓、0 ✗、4 pending（新增〈打包清單〉〈範例 g.mjs〉〈命令列用法為實際路徑〉三案） |
+| 2026-11-05 | 正向段亦扣保留時間（REL-18）後全套（`npm test`）；新增 `unit-relate-forward-reserve` 15 案，對正向段保留邏輯植入 19 個變異皆被殺；既有保留時間案 4 案之環境改為正向席首家逾時短於被測段之（斷言不變） | **567 ✓、0 ✗、4 pending**（pending 同上）；新測試首版 13 案對修前碼 12 紅、1 綠（未注入保留之行為不變案），後補 2 案（池空不報停止、`opt.rounds` 打錯不被吞）以變異驗證；`dist/`、`docs/` 未重產（發布時自動產製） |
 | 2026-11-02 | 編譯與載入 | `toolg/gDistRollup.mjs` exit 0；`require(dist)` 具名匯出 269＝主入口 269，集合與型別同；`jsdoc`、`gDocsExams`、`genDocsDist` exit 0 |
 
 ## 功能現況（對應規則帳本）
@@ -33,6 +34,7 @@
 | 功能 | 狀態 | 規則／測試 |
 |---|---|---|
 | 正向（新筆記、內容變更之筆記）、投影、總覽 | 落地 | REL-01～08；`unit-relate-stage`、`unit-flow-relate`、`unit-relate-projection` |
+| 保留時間（`opt.reserveMs`／`deps.reserveMs`）：正向段與反向、輪巡、重評、既有邊覆核、衝突核對皆扣；正向段開工前與每輪開工前判，不足即少做幾輪（開工前即不足 → `forwardDeferred`，新筆記留池）；未注入（0）行為同未扣 | 落地 | REL-18；`unit-relate-forward-reserve` |
 | 反向段 `relate.reverse.perRun`（預設 0）、候選輪巡 `relate.rotation`（預設 0） | 落地，預設停用 | STD-20；`unit-relate-rotation` |
 | 重評 RS5（兩席；`relate.reeval.apply` 預設 false） | 落地；**開閘須使用者同意** | REL-13；`unit-relate-change`、`unit-relate-aicall`、`unit-relate-reeval` |
 | 衝突核對 RS4（`relate.standards.conflictCheck`，預設關） | 落地；兩席段入項前預檢、twoSeat 票 | STD-11／27／29；`unit-relate-conflictcheck` |

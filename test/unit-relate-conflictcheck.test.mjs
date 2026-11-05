@@ -516,7 +516,8 @@ describe('unit-relate-conflictcheck', function() {
     it('保留時間(deps.reserveMs／stageRelate 之 opt.reserveMs):扣保留後剩餘不足三席之首家逾時 → 本輪延後(rs4TimeDeferred;新提案入待判、不落地、不呼叫);opt.reserveMs 優先', async () => {
         const mk = () => {
             const e = env({ notes: [...fresh(['n']), ...done(['m'])], forward: { 標題n: [{ to: 'm', type: C, reason: R_CONFLICT }] } })
-            // 剩 1,000 秒、首家逾時 300 秒:保留 900 秒 → 延後
+            // 剩 1,000 秒、核對席首家逾時 300 秒:保留 900 秒 → 延後(正向席首家逾時 60 秒:正向段亦扣保留〔REL-18〕,剩餘 100 秒仍夠,才有新提案可供核對段判延後)
+            e.ctx.deps.settings.ai.providerTimeouts['stub:fwd'] = 60_000
             e.ctx.remainingMs = () => 1_000_000
             e.ctx.deps.reserveMs = 900_000
             return e

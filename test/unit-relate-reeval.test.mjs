@@ -288,7 +288,8 @@ describe('unit-relate-reeval', function() {
 
     it('保留時間(deps.reserveMs／stageRelate 之 opt.reserveMs):扣保留後剩餘不足兩席之首家逾時 → 本輪延後(reevalDeferred;不呼叫、不記 tries、未評完);opt.reserveMs 優先', async () => {
         const e = base({ reeval: byTitle() })
-        // 剩 1,000 秒、首家逾時 300 秒:保留 900 秒 → 延後
+        // 剩 1,000 秒、重評席首家逾時 300 秒:保留 900 秒 → 延後(正向席 stub:a 首家逾時 60 秒:正向段亦扣保留〔REL-18〕,剩餘 100 秒仍夠,才有正向評完之待重評篇可供重評段判延後)
+        e.ctx.deps.settings.ai.providerTimeouts['stub:a'] = 60_000
         e.ctx.remainingMs = () => 1_000_000
         e.ctx.expired = () => false
         e.ctx.deps.reserveMs = 900_000

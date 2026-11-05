@@ -13,7 +13,7 @@
 export {
     // ── ① 核心件:管線秩序、時間預算與保留時間、判定形狀、正體(非本篇文字之片段)、語言設定(字形政策、輸出語言稱呼)、文字與概念鍵、小工具(含值之字串化、鍵集之檢核問題、命令列之直接執行判定)──
     defineMw, applyTaps, mergeTaps, makeMsg, count, runChainOverMsgs, stdReport,
-    budgetOf, reserveOf, reserveMsOf,
+    reserveOf, reserveMsOf,
     STATUS, result, fromProblems,
     withoutForeignSpans,
     resolveLocale, scriptOf, scriptApplies, SCRIPT_NA_DETAIL,

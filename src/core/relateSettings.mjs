@@ -161,7 +161,7 @@ const CALL_TIMEOUT_FALLBACK_MS = 300_000
 
 /**
  * 開工門檻:一次 AI 呼叫所需之時間——各席首選家之單次逾時(ai.providerTimeouts[席位之 use] → ai.timeoutMs → 300000)取最大者。
- *   選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留時間後須夠此數才開工;各段同一函數,席位集合由各段給
+ *   正向段(有保留時)與選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留時間後須夠此數才開工;各段同一函數,席位集合由各段給
  *
  * @param {Object} settings 輸入已解析之設定(取 ai)
  * @param {Object|Array} seats 輸入席位或席位陣列(非物件者略過;全無時以 ai.timeoutMs → 300000 計)

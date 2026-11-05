@@ -14,7 +14,7 @@
   - 改此定義即改四支提示詞之字面:先 `node test/tools/genPromptGolden.mjs` 比對差異（不寫檔）,確認皆為刻意變更並取得同意才加 `--write` 重產標準檔,並依〈題組項與正式提示詞同一形式〉重驗評分.
   - 跨提示詞改判準之 A/B 做法（留給下次）:以正式提示詞＋正式席位比對,判準（指標、採用條件、持平與回退）於開跑前凍結,A/B 之題與結果留作回歸題組;依凍結判準判,回報分項列出並記下仍未解者,不讓「採用」讀成「解決」.回退判準見 REL-14.
 
-- **邊界**:本套件只經兩個單一匯入點取上游之件:`core/capturePackage.mjs`（抓取套件;現況 125 名）與 `core/summarizePackage.mjs`（摘要套件;現況 33 名）,皆明列名稱,新增依賴先列於埠;埠之每一名須有非測試檔取用（`unit-relate-package` ① 守門）;測試另經 `test/tools/captureForTest.mjs`、`test/tools/summarizeForTest.mjs` 取上游之測試件,橋接之每一名須被 `test/` 下至少一檔取用（尚無自動守門案,維護時人工盤點;規則帳本 GEN-22）.本套件 `core/` 與兩套件之 `core/` 無同相對路徑之檔（兩埠檔除外;`unit-relate-package` ① 守門）.上游缺能力者在上游以 opt-in 擴充（預設行為不變、附測試）,本套件不繞道自寫.
+- **邊界**:本套件只經兩個單一匯入點取上游之件:`core/capturePackage.mjs`（抓取套件;現況 124 名）與 `core/summarizePackage.mjs`（摘要套件;現況 33 名）,皆明列名稱,新增依賴先列於埠;埠之每一名須有非測試檔取用（`unit-relate-package` ① 守門）;測試另經 `test/tools/captureForTest.mjs`、`test/tools/summarizeForTest.mjs` 取上游之測試件,橋接之每一名須被 `test/` 下至少一檔取用（尚無自動守門案,維護時人工盤點;規則帳本 GEN-22）.本套件 `core/` 與兩套件之 `core/` 無同相對路徑之檔（兩埠檔除外;`unit-relate-package` ① 守門）.上游缺能力者在上游以 opt-in 擴充（預設行為不變、附測試）,本套件不繞道自寫.
   - 盤點:`git grep -n -E "from '(w-knowledge-capture|w-knowledge-summarize)" -- src test` 應只命中兩個埠檔（`src/core/`）與兩個橋接檔（`test/tools/`;橋接亦轉出上游 `test/tools/*` 之測試件）,他處不得直接 import 上游套件.
   - 結構測試:`test/unit-relate-package.test.mjs`.
 

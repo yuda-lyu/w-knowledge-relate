@@ -385,7 +385,7 @@ createKnowledgeRelate({
 - `data`、`vocab` 子階段不讀(總組裝另放,供他段與工具);`settings` 可另有他工作之段。
 - `holds`／`checks`:衝突核對與既有邊覆核開啟時必備(缺即該段拋錯);重評缺 `holds` 時判不了之邊不登錄待判(WARN,下輪照常重評);其餘情形選用。`cores` 選用。
 - ctx 旗標:寫 `RELATE_CTX_FLAGS`(`relateEdges`、`relateBlocked`),讀摘要套件之 `SUMMARIZE_CTX_FLAGS.tagChanged`(同一管線內之重標)。筆記記錄之 `extractedAt` 為摘要套件之資料契約欄(§1)。
-- `reserveMs`:保留給同一輪後段之時間(毫秒數或 `(ctx) => 毫秒數`);子階段之 `opt.reserveMs` 未給時取之——本套件不讀他工作之設定。
+- `reserveMs`:保留給同一輪後段之時間(毫秒數或 `(ctx) => 毫秒數`);子階段之 `opt.reserveMs` 未給時取之——本套件不讀他工作之設定。正向段與選配段皆扣之;皆未給為 0(正向段行為同未扣保留時)。
 
 **維運 API 之依賴契約**(§12 之 op、投影、存量處置):
 
@@ -417,7 +417,7 @@ const rt = createRelateRuntime(cfg, settings, {
 | 改某一環之行為 | `cfg.stageOpts.<relate|project|relationIndex>.tap`:動作鏈之錨點 before／after／replace(關聯:`buildEdges`、`markDirty`、`persistEdges`、`queueReverse`、`markRelated`——正向、反向、輪巡同一條鏈;投影:`project`;總覽:`rebuild`);重評鏈 `cfg.stageOpts.reeval.tap`(`verdict`、`agree`、`apply`、`markReviewed`)或 `cfg.stageOpts.reeval.chain` 整條置換。錨點對不上者建構期即拋 |
 | 換掉整條管線 | `cfg.stages` 給 `[{ name, run(ctx) }]`(與 `stageOpts` 擇一);可用匯出之子階段工廠(`stageRelate`、`stageRelateProject`、`stageRelationIndex`)自組,依賴一律走 `ctx.deps` |
 | 他總組裝共用關聯件 | `createRelateRuntime`(§9);物件 `createRelateObject(opt)`(子階段 opts 與總組裝之 `stageOpts` 同形) |
-| 保留時間給後段 | `cfg.stageOpts.relate.reserveMs`(毫秒數或 `(ctx) => 毫秒數`):選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留後剩餘不足一次呼叫即不開工、每次呼叫以「剩餘−保留」封頂。他總組裝亦可於每輪依賴給 `deps.reserveMs`(同形) |
+| 保留時間給後段 | `cfg.stageOpts.relate.reserveMs`(毫秒數或 `(ctx) => 毫秒數`):正向段與選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留後剩餘不足一次呼叫即不開工、每次呼叫以「剩餘−保留」封頂;正向段每輪開工前亦判,不足即少做幾輪(開工前即不足 → 本輪延後,新筆記留在待處理池、report 記 `forwardDeferred`;容量鍵不縮)。他總組裝亦可於每輪依賴給 `deps.reserveMs`(同形) |
 | 調整上限 | `cfg.stageOpts.relate.maxRelationsPerNote`(單篇至多取用之關聯數,預設 4,衝突優先保留;見 §17)、`cfg.stageOpts.relationIndex.indexTopN`(總覽顯示篇數,預設 40) |
 | 換儲存 | `cfg.lmdb.WOrm` 給相容之 ORM 建構函數 |
 | 收尾通知／巡檢 | `cfg.afterRun({ report, summaryFile, log, deps })`(管線之外、摘要之後;失敗只記 WARN) |

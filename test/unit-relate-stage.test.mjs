@@ -36,6 +36,8 @@ const DOMAIN = createRelateDomain({})
 const [T0, T1, T2, T3] = DOMAIN.relationTypes.filter((t) => t !== DOMAIN.conflictType)
 const C = DOMAIN.conflictType
 let seq = 0
+// 正向席(stub:a)首家逾時 60 秒、反向席(stub:r)300 秒:正向段亦扣保留(REL-18),測反向段之保留時間須先讓正向段夠時間跑
+const FWD_SHORT = { providerTimeouts: { 'stub:a': 60_000, 'stub:r': 300_000 } }
 
 /**
  * 測試環境:筆記(含 md)、邊、設定、依標題回腳本之 AI 替身;保留給後段之時間(deps.reserveMs)為 900 秒
@@ -294,11 +296,12 @@ describe('unit-relate-stage', function() {
             { id: 'g2', concepts: ['s', 't', 'v'], createdAt: '2026-01-01', relatedAt: '2026-01-02' },
             { id: 'o1', title: '舊一', concepts: ['p', 'q'], createdAt: '2026-01-01', relatedAt: '2026-01-02' },
         ]
-        let left = 1_000_000 // 扣 900 秒保留後只剩 100 秒 < 首家逾時 300 秒
+        let left = 1_000_000 // 扣 900 秒保留後只剩 100 秒:正向席首家逾時 60 秒 → 正向段照做;反向席首家逾時 300 秒 → 反向段延後
         let failRev = true
         const e = env({
             notes,
-            relate: { candidatesPerNote: 2, reverse: { perRun: 4 } },
+            ai: FWD_SHORT,
+            relate: { candidatesPerNote: 2, reverse: { perRun: 4, ai: { use: 'stub:r' } } },
             remainingMs: () => left,
             fail: (seg) => seg === 'reverse' && failRev,
             script: { 舊一: (seg) => (seg === 'reverse' ? [{ to: 'n', type: T1, reason: '舊一之風險模型延伸到新筆記之訊號' }] : []) },
@@ -331,8 +334,9 @@ describe('unit-relate-stage', function() {
             { id: 'g2', concepts: ['s', 't', 'v'], createdAt: '2026-01-01', relatedAt: '2026-01-02' },
             { id: 'o1', title: '舊一', concepts: ['p', 'q'], createdAt: '2026-01-01', relatedAt: '2026-01-02' },
         ]
-        // 剩 1,000 秒、首家逾時 300 秒:保留 900 秒(env 之 deps.reserveMs)→ 延後;保留 0 → 開工
-        const mk = () => env({ notes, relate: { candidatesPerNote: 2, reverse: { perRun: 4 } }, remainingMs: () => 1_000_000, script: { 舊一: (seg) => (seg === 'reverse' ? [{ to: 'n', type: T1, reason: '舊一之風險模型延伸到新筆記之訊號' }] : []) } })
+        // 剩 1,000 秒、反向席首家逾時 300 秒:保留 900 秒(env 之 deps.reserveMs)→ 延後;保留 0 → 開工
+        //   (正向席首家逾時 60 秒:正向段亦扣保留〔REL-18〕,剩餘 100 秒仍夠,才有反向待處理對可供反向段判延後)
+        const mk = () => env({ notes, ai: FWD_SHORT, relate: { candidatesPerNote: 2, reverse: { perRun: 4, ai: { use: 'stub:r' } } }, remainingMs: () => 1_000_000, script: { 舊一: (seg) => (seg === 'reverse' ? [{ to: 'n', type: T1, reason: '舊一之風險模型延伸到新筆記之訊號' }] : []) } })
         assert.equal((await mk().run()).detail.reverseDeferred, true, 'deps.reserveMs 生效')
         const rb = await mk().run({ reserveMs: 0 })
         assert.deepEqual([rb.detail.reverseDeferred, rb.detail.reverseTargets], [false, 1], 'opt.reserveMs 優先(0 亦為明給)')
@@ -340,7 +344,8 @@ describe('unit-relate-stage', function() {
         const d = mk()
         delete d.ctx.deps.reserveMs
         assert.equal((await d.run()).detail.reverseDeferred, false, '皆未給 → 不保留')
-        await assert.rejects(() => mk().run({ reserveMs: 'abc' }), /關聯反向段之 reserveMs 須為非負毫秒數或 \(ctx\) => 毫秒數，收到 abc/)
+        // 不合者於本段開工時拋錯:正向段先開工,故字樣為正向段;反向／輪巡段之字樣由執行器單元案驗(createRelateQueueRunner 之 reserveLabel)
+        await assert.rejects(() => mk().run({ reserveMs: 'abc' }), /關聯正向段之 reserveMs 須為非負毫秒數或 \(ctx\) => 毫秒數，收到 abc/)
     })
 
     it('關聯物件摘要:「處理 N、關聯 N 條、衝突 N 組（AI N 次）」契約不變;重判、反向、刪除、投影失敗 >0 才附', async () => {
@@ -592,6 +597,18 @@ describe('unit-relate-stage', function() {
             assert.deepEqual([res.deferred, calls.length, seen.length], [false, 1, 1])
             assert.equal(seen[0].note, q1, '固定欄 note 不被覆寫')
             assert.deepEqual([seen[0]._segment, seen[0]._provider, typeof seen[0]._resolver, seen[0]._candidates.map((c) => c.id), seen[0]._page], ['reverse', 'stub:p', 'function', ['q2'], ['p']])
+        })
+
+        it('createRelateQueueRunner(REL-18 後;反向／輪巡段之 reserveMs 字樣):opt.reserveMs 不合 → 建立時以 reserveLabel 拋錯(不論有無 items);合法值(含函數)不拋', () => {
+            const e = env({ notes: [{ id: 'q1', concepts: ['x'], createdAt: '2026-01-01', relatedAt: '2026-01-02' }], relate: { reverse: { perRun: 4 } } })
+            const mkRunner = (opt) => createRelateQueueRunner({
+                ctx: e.ctx, settings: e.ctx.deps.settings, opt, domain: DOMAIN, log: e.log, seat: e.ctx.deps.settings.relate.ai, segment: 'rotation', label: '輪巡', reserveLabel: '關聯輪巡段之 reserveMs',
+                call: async () => ({ ok: true, data: [], providerId: 'stub:p', skipped: false, error: '' }), validOf: () => () => true, applyVia: async () => ({}),
+            })
+            assert.throws(() => mkRunner({ reserveMs: 'abc' }), /關聯輪巡段之 reserveMs 須為非負毫秒數或 \(ctx\) => 毫秒數，收到 abc/)
+            assert.throws(() => mkRunner({ reserveMs: () => -1 }), /關聯輪巡段之 reserveMs 函數須回傳非負毫秒數，收到 -1/)
+            assert.deepEqual(Object.keys(mkRunner({ reserveMs: 0 })), ['run'])
+            assert.deepEqual(Object.keys(mkRunner({ reserveMs: () => 1_000 })), ['run'])
         })
 
         it('relateSeatOf(終審 R20;席位沿用之唯一規則):reverse／rotation 未設即 relate.ai;reeval.first 未設即 relate.ai、second 未設即 first、third 未設為 null;鍵不合即拋', () => {
