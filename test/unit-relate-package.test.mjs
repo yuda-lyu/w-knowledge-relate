@@ -43,7 +43,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..').re
 /** 宿主之痕跡:磁碟機絕對路徑(盤符＋反斜線;字串字面中之跳脫形亦含)與使用者目錄 */
 const HOST_PATH = /\b[A-Za-z]:\\|\/Users\/|C:\/Users/
 /** 宿主之名(專案名與其通知管道;本套件為通用套件,發布內容不得提及) */
-const HOST_NAME = /tai-kns|telegram/i
+//宿主專屬功能之字樣;使用端專案代號之檢查由發布流程之守門負責(名單不入公開庫)
+const HOST_NAME = /telegram/i
 
 // ═══════════════════════ 掃描工具(①②共用) ═══════════════════════
 
@@ -451,12 +452,12 @@ describe('unit-relate-package', function() {
             }
         })
 
-        it('發布內容(README、*.csv、非測試 .mjs)不含宿主之痕跡:磁碟機絕對路徑(含字串字面中之跳脫形)、使用者目錄與宿主名(tai-kns、Telegram);test/ 內不計', () => {
+        it('發布內容(README、*.csv、非測試 .mjs)不含宿主之痕跡:磁碟機絕對路徑(含字串字面中之跳脫形)、使用者目錄與宿主專屬功能字樣(Telegram);test/ 內不計', () => {
             // 判準自檢:被抓到與不誤判(盤符之相對寫法、網址、正斜線之範例路徑不算;宿主名不分大小寫、字首相近之他詞不算)
             for (const s of ['C:\\work\\x', "'d:\\\\kb'", '/Users/me/x', 'C:/Users/me']) assert.ok(HOST_PATH.test(s), s)
             for (const s of ['c:/kb/db', "workDir: 'd:/my-kb'", 'https://a.example/b', 'a:b', '相對\\路徑']) assert.ok(!HOST_PATH.test(s), s)
-            for (const s of ['tai-kns-trade', 'TELEGRAM_TEXT_MAX', 'telegram 通知']) assert.ok(HOST_NAME.test(s), s)
-            for (const s of ['telegraph', 'tai-news', '知識庫']) assert.ok(!HOST_NAME.test(s), s)
+            for (const s of ['TELEGRAM_TEXT_MAX', 'telegram 通知']) assert.ok(HOST_NAME.test(s), s)
+            for (const s of ['telegraph', '知識庫']) assert.ok(!HOST_NAME.test(s), s)
             const files = [...sourceFiles('.mjs').filter((f) => !f.startsWith('test/')), ...sourceFiles('.csv').filter((f) => !f.startsWith('test/')), 'README.md']
             assert.ok(files.length >= 40 && files.some((f) => f.endsWith('.csv')), `掃描量過少或漏 csv：${files.length}`)
             const bad = []
