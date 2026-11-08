@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>ops/provenanceOps.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AI_ADAPTER_OPT">AI_ADAPTER_OPT</a></li><li><a href="global.html#BENCH_NOW">BENCH_NOW</a></li><li><a href="global.html#CALL_TIMEOUT_FALLBACK_MS">CALL_TIMEOUT_FALLBACK_MS</a></li><li><a href="global.html#CFG_KEYS">CFG_KEYS</a></li><li><a href="global.html#CHECKED_STDS">CHECKED_STDS</a></li><li><a href="global.html#CHECK_BLANK">CHECK_BLANK</a></li><li><a href="global.html#CHECK_STATES">CHECK_STATES</a></li><li><a href="global.html#CLI">CLI</a></li><li><a href="global.html#COLLECTION_KEYS">COLLECTION_KEYS</a></li><li><a href="global.html#CONFLICT_DEFINITION">CONFLICT_DEFINITION</a></li><li><a href="global.html#CONFLICT_EVENT_FILE">CONFLICT_EVENT_FILE</a></li><li><a href="global.html#DATA_KEYS">DATA_KEYS</a></li><li><a href="global.html#DELETION_FILES">DELETION_FILES</a></li><li><a href="global.html#DELETION_HALF_STATE_LABEL">DELETION_HALF_STATE_LABEL</a></li><li><a href="global.html#DOMAIN_FACTORY">DOMAIN_FACTORY</a></li><li><a href="global.html#E">E</a></li><li><a href="global.html#EDGE_AUDIT_FILE">EDGE_AUDIT_FILE</a></li><li><a href="global.html#EDGE_FIX_STDS">EDGE_FIX_STDS</a></li><li><a href="global.html#EDGE_INFO_LABELS">EDGE_INFO_LABELS</a></li><li><a href="global.html#EDGE_OBJECT">EDGE_OBJECT</a></li><li><a href="global.html#EDGE_PRODUCED_STAGES">EDGE_PRODUCED_STAGES</a></li><li><a href="global.html#EDGE_REVIEW_STDS">EDGE_REVIEW_STDS</a></li><li><a href="global.html#EDGE_STANDARDS">EDGE_STANDARDS</a></li><li><a href="global.html#EDGE_VERDICTS">EDGE_VERDICTS</a></li><li><a href="global.html#EDGE_VERDICT_MIN_REASON">EDGE_VERDICT_MIN_REASON</a></li><li><a href="global.html#FIX_STD">FIX_STD</a></li><li><a href="global.html#INFO_STDS">INFO_STDS</a></li><li><a href="global.html#LEDGER_FILES">LEDGER_FILES</a></li><li><a href="global.html#LOCAL_ISO">LOCAL_ISO</a></li><li><a href="global.html#MIN_SHARED_SCORE">MIN_SHARED_SCORE</a></li><li><a href="global.html#MUTEX_KEY">MUTEX_KEY</a></li><li><a href="global.html#NAMESPACES">NAMESPACES</a></li><li><a href="global.html#NO_MATERIAL_DETAIL">NO_MATERIAL_DETAIL</a></li><li><a href="global.html#OPTIONAL_DOMAIN_MEMBERS">OPTIONAL_DOMAIN_MEMBERS</a></li><li><a href="global.html#OWN_KEYS">OWN_KEYS</a></li><li><a href="global.html#PANEL_DEFS">PANEL_DEFS</a></li><li><a href="global.html#PIPELINE_NAME">PIPELINE_NAME</a></li><li><a href="global.html#PLACEHOLDER_REASONS">PLACEHOLDER_REASONS</a></li><li><a href="global.html#PRODUCED_FIELD_KEYS">PRODUCED_FIELD_KEYS</a></li><li><a href="global.html#PRODUCED_UNDO_WHY">PRODUCED_UNDO_WHY</a></li><li><a href="global.html#PROMPT_DOMAIN">PROMPT_DOMAIN</a></li><li><a href="global.html#PROMPT_KEYS">PROMPT_KEYS</a></li><li><a href="global.html#PROPOSER_ROLE_OF_SEGMENT">PROPOSER_ROLE_OF_SEGMENT</a></li><li><a href="global.html#PROVENANCE_QUERY_KEYS">PROVENANCE_QUERY_KEYS</a></li><li><a href="global.html#R">R</a></li><li><a href="global.html#REASON_MAX_CHARS">REASON_MAX_CHARS</a></li><li><a href="global.html#REASON_MIN_CHARS">REASON_MIN_CHARS</a></li><li><a href="global.html#REASON_PROBLEM_CHARS">REASON_PROBLEM_CHARS</a></li><li><a href="global.html#REASON_REWRITE_STDS">REASON_REWRITE_STDS</a></li><li><a href="global.html#REEVAL_BLANK">REEVAL_BLANK</a></li><li><a href="global.html#REEVAL_OPT_KEYS">REEVAL_OPT_KEYS</a></li><li><a href="global.html#REEVAL_REPROPOSE_DAYS">REEVAL_REPROPOSE_DAYS</a></li><li><a href="global.html#RELATE_AI_DEFAULT">RELATE_AI_DEFAULT</a></li><li><a href="global.html#RELATE_AI_SCHEMA">RELATE_AI_SCHEMA</a></li><li><a href="global.html#RELATE_AI_STANDARD_IDS">RELATE_AI_STANDARD_IDS</a></li><li><a href="global.html#RELATE_API_HINT">RELATE_API_HINT</a></li><li><a href="global.html#RELATE_AUDITED_STANDARD_IDS">RELATE_AUDITED_STANDARD_IDS</a></li><li><a href="global.html#RELATE_BASELINE_RULING_PREFIX">RELATE_BASELINE_RULING_PREFIX</a></li><li><a href="global.html#RELATE_BENCH_CASES_FILES">RELATE_BENCH_CASES_FILES</a></li><li><a href="global.html#RELATE_BENCH_CHANGE">RELATE_BENCH_CHANGE</a></li><li><a href="global.html#RELATE_BENCH_MODELS">RELATE_BENCH_MODELS</a></li><li><a href="global.html#RELATE_BENCH_ROLES">RELATE_BENCH_ROLES</a></li><li><a href="global.html#RELATE_BENCH_USAGE">RELATE_BENCH_USAGE</a></li><li><a href="global.html#RELATE_BLANK">RELATE_BLANK</a></li><li><a href="global.html#RELATE_CAPACITY_DESC">RELATE_CAPACITY_DESC</a></li><li><a href="global.html#RELATE_CTX_FLAGS">RELATE_CTX_FLAGS</a></li><li><a href="global.html#RELATE_DATA_KEYS">RELATE_DATA_KEYS</a></li><li><a href="global.html#RELATE_DEFAULT">RELATE_DEFAULT</a></li><li><a href="global.html#RELATE_DIRS">RELATE_DIRS</a></li><li><a href="global.html#RELATE_DOMAIN_KEYS">RELATE_DOMAIN_KEYS</a></li><li><a href="global.html#RELATE_EXPECT_KEYS">RELATE_EXPECT_KEYS</a></li><li><a href="global.html#RELATE_FEATURES">RELATE_FEATURES</a></li><li><a href="global.html#RELATE_GUIDE_FIELDS">RELATE_GUIDE_FIELDS</a></li><li><a href="global.html#RELATE_HOLD_DEADLINE_DAYS">RELATE_HOLD_DEADLINE_DAYS</a></li><li><a href="global.html#RELATE_HOLD_NEXT">RELATE_HOLD_NEXT</a></li><li><a href="global.html#RELATE_INDEX_TITLE">RELATE_INDEX_TITLE</a></li><li><a href="global.html#RELATE_INDEX_TOP_N">RELATE_INDEX_TOP_N</a></li><li><a href="global.html#RELATE_LOG_KNOWN">RELATE_LOG_KNOWN</a></li><li><a href="global.html#RELATE_LOG_MUST_SEE">RELATE_LOG_MUST_SEE</a></li><li><a href="global.html#RELATE_LOG_PARSE">RELATE_LOG_PARSE</a></li><li><a href="global.html#RELATE_MAX_RELATIONS_PER_NOTE">RELATE_MAX_RELATIONS_PER_NOTE</a></li><li><a href="global.html#RELATE_PROMPT_SIGS">RELATE_PROMPT_SIGS</a></li><li><a href="global.html#RELATE_REPORT_KEYS">RELATE_REPORT_KEYS</a></li><li><a href="global.html#RELATE_SCAN_OBJECT">RELATE_SCAN_OBJECT</a></li><li><a href="global.html#RELATE_SCHEMA">RELATE_SCHEMA</a></li><li><a href="global.html#RELATE_SEATS">RELATE_SEATS</a></li><li><a href="global.html#RELATE_SEAT_KEYS">RELATE_SEAT_KEYS</a></li><li><a href="global.html#RELATE_SEAT_LABELS">RELATE_SEAT_LABELS</a></li><li><a href="global.html#RELATE_SECTION_TITLES">RELATE_SECTION_TITLES</a></li><li><a href="global.html#RELATE_SEGMENTS">RELATE_SEGMENTS</a></li><li><a href="global.html#RELATE_SETTING_TYPES">RELATE_SETTING_TYPES</a></li><li><a href="global.html#RELATE_STAGE_KEYS">RELATE_STAGE_KEYS</a></li><li><a href="global.html#RELATE_STANDARDS">RELATE_STANDARDS</a></li><li><a href="global.html#RELATE_STORE_KEYS">RELATE_STORE_KEYS</a></li><li><a href="global.html#RELATE_TAP_STAGE_KEYS">RELATE_TAP_STAGE_KEYS</a></li><li><a href="global.html#RELATE_UNGATED_WRITE_ENTRIES">RELATE_UNGATED_WRITE_ENTRIES</a></li><li><a href="global.html#RELATE_VOCAB_DEFAULT">RELATE_VOCAB_DEFAULT</a></li><li><a href="global.html#RELATE_VOCAB_KEYS">RELATE_VOCAB_KEYS</a></li><li><a href="global.html#RELATE_VOCAB_NULL_AS">RELATE_VOCAB_NULL_AS</a></li><li><a href="global.html#RELATE_VOCAB_OWN_KEYS">RELATE_VOCAB_OWN_KEYS</a></li><li><a href="global.html#RELATION_ROLE_NAMES">RELATION_ROLE_NAMES</a></li><li><a href="global.html#RESTORABLE_REASONS">RESTORABLE_REASONS</a></li><li><a href="global.html#RETIRE_REASONS">RETIRE_REASONS</a></li><li><a href="global.html#REVERTED_OUTCOME">REVERTED_OUTCOME</a></li><li><a href="global.html#REVIEW_KINDS">REVIEW_KINDS</a></li><li><a href="global.html#REVIEW_SOURCE_STDS">REVIEW_SOURCE_STDS</a></li><li><a href="global.html#REVISION_LEDGERS">REVISION_LEDGERS</a></li><li><a href="global.html#ROTATION_RESET">ROTATION_RESET</a></li><li><a href="global.html#ROW_KEYS">ROW_KEYS</a></li><li><a href="global.html#RS4">RS4</a></li><li><a href="global.html#RS5">RS5</a></li><li><a href="global.html#RS6">RS6</a></li><li><a href="global.html#RULING_STD">RULING_STD</a></li><li><a href="global.html#SECTIONS">SECTIONS</a></li><li><a href="global.html#SETTLED_RE">SETTLED_RE</a></li><li><a href="global.html#WKnowledgeRelate">WKnowledgeRelate</a></li><li><a href="global.html#WRITE_ENTRIES">WRITE_ENTRIES</a></li><li><a href="global.html#addToAdjacency">addToAdjacency</a></li><li><a href="global.html#admitItemOf">admitItemOf</a></li><li><a href="global.html#admitRelation">admitRelation</a></li><li><a href="global.html#aiStandardRowOf">aiStandardRowOf</a></li><li><a href="global.html#appendAudit">appendAudit</a></li><li><a href="global.html#appendConflictEvent">appendConflictEvent</a></li><li><a href="global.html#applyEdgeStockFix">applyEdgeStockFix</a></li><li><a href="global.html#archiveFilesOf">archiveFilesOf</a></li><li><a href="global.html#assertGeneration">assertGeneration</a></li><li><a href="global.html#auditDomainOf">auditDomainOf</a></li><li><a href="global.html#auditRelateStandards">auditRelateStandards</a></li><li><a href="global.html#baseVerdictOf">baseVerdictOf</a></li><li><a href="global.html#benchRelateEdgesOf">benchRelateEdgesOf</a></li><li><a href="global.html#bestByIdentity">bestByIdentity</a></li><li><a href="global.html#buildAdjacency">buildAdjacency</a></li><li><a href="global.html#callTimeoutMsOf">callTimeoutMsOf</a></li><li><a href="global.html#candidateNameOf">candidateNameOf</a></li><li><a href="global.html#candidateScoreOf">candidateScoreOf</a></li><li><a href="global.html#canon">canon</a></li><li><a href="global.html#checkEdge">checkEdge</a></li><li><a href="global.html#checkKey">checkKey</a></li><li><a href="global.html#checkPromptItemOf">checkPromptItemOf</a></li><li><a href="global.html#checkSingle">checkSingle</a></li><li><a href="global.html#checkSyncOf">checkSyncOf</a></li><li><a href="global.html#checkVerdictOf">checkVerdictOf</a></li><li><a href="global.html#classDecisionOf">classDecisionOf</a></li><li><a href="global.html#clearStaleReview">clearStaleReview</a></li><li><a href="global.html#closeNoteHold">closeNoteHold</a></li><li><a href="global.html#compareProposals">compareProposals</a></li><li><a href="global.html#conceptKeysOf">conceptKeysOf</a></li><li><a href="global.html#conflictCheckBenchRole">conflictCheckBenchRole</a></li><li><a href="global.html#conflictCheckOf">conflictCheckOf</a></li><li><a href="global.html#conflictNeighborsOf">conflictNeighborsOf</a></li><li><a href="global.html#conflictPageProblems">conflictPageProblems</a></li><li><a href="global.html#conflictVerdictOf">conflictVerdictOf</a></li><li><a href="global.html#coresCiting">coresCiting</a></li><li><a href="global.html#coveredItemOf">coveredItemOf</a></li><li><a href="global.html#createCheckHasher">createCheckHasher</a></li><li><a href="global.html#createDirtyLedger">createDirtyLedger</a></li><li><a href="global.html#createEdgeProvenance">createEdgeProvenance</a></li><li><a href="global.html#createKnowledgeRelate">createKnowledgeRelate</a></li><li><a href="global.html#createMaterialReader">createMaterialReader</a></li><li><a href="global.html#createMutex">createMutex</a></li><li><a href="global.html#createRelateDomain">createRelateDomain</a></li><li><a href="global.html#createRelateObject">createRelateObject</a></li><li><a href="global.html#createRelateQueueRunner">createRelateQueueRunner</a></li><li><a href="global.html#createRelateRuntime">createRelateRuntime</a></li><li><a href="global.html#createRelateState">createRelateState</a></li><li><a href="global.html#createReverseIndex">createReverseIndex</a></li><li><a href="global.html#createReverseLedger">createReverseLedger</a></li><li><a href="global.html#createSideReader">createSideReader</a></li><li><a href="global.html#createTombstones">createTombstones</a></li><li><a href="global.html#currentTypeProblems">currentTypeProblems</a></li><li><a href="global.html#cutOf">cutOf</a></li><li><a href="global.html#cutReason">cutReason</a></li><li><a href="global.html#decideOf">decideOf</a></li><li><a href="global.html#deleteNote">deleteNote</a></li><li><a href="global.html#deletionHalfStatesOf">deletionHalfStatesOf</a></li><li><a href="global.html#deletionStatusOf">deletionStatusOf</a></li><li><a href="global.html#domainNeeds">domainNeeds</a></li><li><a href="global.html#domainOf">domainOf</a></li><li><a href="global.html#domainShapeProblems">domainShapeProblems</a></li><li><a href="global.html#domainTypeRenamerOf">domainTypeRenamerOf</a></li><li><a href="global.html#dropAll">dropAll</a></li><li><a href="global.html#edgeCheckHashOf">edgeCheckHashOf</a></li><li><a href="global.html#edgeCheckScanOf">edgeCheckScanOf</a></li><li><a href="global.html#edgeFixOf">edgeFixOf</a></li><li><a href="global.html#edgeId">edgeId</a></li><li><a href="global.html#edgeInfoOf">edgeInfoOf</a></li><li><a href="global.html#edgeLedgersOf">edgeLedgersOf</a></li><li><a href="global.html#edgePlanOf">edgePlanOf</a></li><li><a href="global.html#edgeProblems">edgeProblems</a></li><li><a href="global.html#edgeRestoredOf">edgeRestoredOf</a></li><li><a href="global.html#edgeReviewBenchRole">edgeReviewBenchRole</a></li><li><a href="global.html#edgeRowUnitsOf">edgeRowUnitsOf</a></li><li><a href="global.html#edgeStd">edgeStd</a></li><li><a href="global.html#edgeTimeOf">edgeTimeOf</a></li><li><a href="global.html#edgeUnitsOf">edgeUnitsOf</a></li><li><a href="global.html#edgesByProvenance">edgesByProvenance</a></li><li><a href="global.html#edgesReviewedOf">edgesReviewedOf</a></li><li><a href="global.html#escalatedHoldNextOf">escalatedHoldNextOf</a></li><li><a href="global.html#gateAllows">gateAllows</a></li><li><a href="global.html#gateCtxOf">gateCtxOf</a></li><li><a href="global.html#gateEdgeProposal">gateEdgeProposal</a></li><li><a href="global.html#gateRestore">gateRestore</a></li><li><a href="global.html#generationMismatchOf">generationMismatchOf</a></li><li><a href="global.html#historyOf">historyOf</a></li><li><a href="global.html#historyScriptHoldOf">historyScriptHoldOf</a></li><li><a href="global.html#inRelatePool">inRelatePool</a></li><li><a href="global.html#indexDirtyOf">indexDirtyOf</a></li><li><a href="global.html#info">info</a></li><li><a href="global.html#inputVocabProblems">inputVocabProblems</a></li><li><a href="global.html#isEdgeRow">isEdgeRow</a></li><li><a href="global.html#isRelated">isRelated</a></li><li><a href="global.html#itemTargetOf">itemTargetOf</a></li><li><a href="global.html#lastRevisionOf">lastRevisionOf</a></li><li><a href="global.html#later">later</a></li><li><a href="global.html#ledgerCorruptTextOf">ledgerCorruptTextOf</a></li><li><a href="global.html#levelOf">levelOf</a></li><li><a href="global.html#loadLedgerJson">loadLedgerJson</a></li><li><a href="global.html#maintainRelations">maintainRelations</a></li><li><a href="global.html#makeEdge">makeEdge</a></li><li><a href="global.html#makeSlugResolver">makeSlugResolver</a></li><li><a href="global.html#markNoteProgress">markNoteProgress</a></li><li><a href="global.html#matches">matches</a></li><li><a href="global.html#materialOfNote">materialOfNote</a></li><li><a href="global.html#mergeEdge">mergeEdge</a></li><li><a href="global.html#mwBuildEdges">mwBuildEdges</a></li><li><a href="global.html#mwMarkDirty">mwMarkDirty</a></li><li><a href="global.html#mwMarkRelated">mwMarkRelated</a></li><li><a href="global.html#mwPersistEdges">mwPersistEdges</a></li><li><a href="global.html#mwProjectDirty">mwProjectDirty</a></li><li><a href="global.html#mwQueueReverse">mwQueueReverse</a></li><li><a href="global.html#mwRebuildRelationIndex">mwRebuildRelationIndex</a></li><li><a href="global.html#mwReevalAgree">mwReevalAgree</a></li><li><a href="global.html#mwReevalApply">mwReevalApply</a></li><li><a href="global.html#mwReevalMarkReviewed">mwReevalMarkReviewed</a></li><li><a href="global.html#mwReevalVerdict">mwReevalVerdict</a></li><li><a href="global.html#needsCheck">needsCheck</a></li><li><a href="global.html#needsEdgeReview">needsEdgeReview</a></li><li><a href="global.html#needsReeval">needsReeval</a></li><li><a href="global.html#neighborsOf">neighborsOf</a></li><li><a href="global.html#normalizeEdgeProposal">normalizeEdgeProposal</a></li><li><a href="global.html#noteProblems">noteProblems</a></li><li><a href="global.html#noteReader">noteReader</a></li><li><a href="global.html#opProducedOf">opProducedOf</a></li><li><a href="global.html#openChecked">openChecked</a></li><li><a href="global.html#openDeletions">openDeletions</a></li><li><a href="global.html#openRelateLedgers">openRelateLedgers</a></li><li><a href="global.html#openStores">openStores</a></li><li><a href="global.html#packIds">packIds</a></li><li><a href="global.html#pageVotesOf">pageVotesOf</a></li><li><a href="global.html#pagesOf">pagesOf</a></li><li><a href="global.html#paginateBy">paginateBy</a></li><li><a href="global.html#pairCheck">pairCheck</a></li><li><a href="global.html#pairCheckItemOf">pairCheckItemOf</a></li><li><a href="global.html#pairItemOf">pairItemOf</a></li><li><a href="global.html#pairProblems">pairProblems</a></li><li><a href="global.html#parseRelateBenchArgs">parseRelateBenchArgs</a></li><li><a href="global.html#persistEdge">persistEdge</a></li><li><a href="global.html#pickCandidates">pickCandidates</a></li><li><a href="global.html#pickRelateVocab">pickRelateVocab</a></li><li><a href="global.html#pickRelationsOf">pickRelationsOf</a></li><li><a href="global.html#planEdgeStockFix">planEdgeStockFix</a></li><li><a href="global.html#planRelateBench">planRelateBench</a></li><li><a href="global.html#presentOthersOf">presentOthersOf</a></li><li><a href="global.html#producedFieldsOf">producedFieldsOf</a></li><li><a href="global.html#producedUndoPlanOf">producedUndoPlanOf</a></li><li><a href="global.html#producedUndoneOf">producedUndoneOf</a></li><li><a href="global.html#projectAffected">projectAffected</a></li><li><a href="global.html#projectAll">projectAll</a></li><li><a href="global.html#projectNote">projectNote</a></li><li><a href="global.html#projectNotes">projectNotes</a></li><li><a href="global.html#projectText">projectText</a></li><li><a href="global.html#proposalOf">proposalOf</a></li><li><a href="global.html#pruneDangling">pruneDangling</a></li><li><a href="global.html#qualityTag">qualityTag</a></li><li><a href="global.html#quarantineHoldNextOf">quarantineHoldNextOf</a></li><li><a href="global.html#queryOf">queryOf</a></li><li><a href="global.html#queueConflictCheck">queueConflictCheck</a></li><li><a href="global.html#queueConflictProposal">queueConflictProposal</a></li><li><a href="global.html#queueEdgeReview">queueEdgeReview</a></li><li><a href="global.html#queueRewrite">queueRewrite</a></li><li><a href="global.html#rawVerdictText">rawVerdictText</a></li><li><a href="global.html#readArchive">readArchive</a></li><li><a href="global.html#readAuditRows">readAuditRows</a></li><li><a href="global.html#readConflictEvents">readConflictEvents</a></li><li><a href="global.html#readEdgeAudit">readEdgeAudit</a></li><li><a href="global.html#readEdgeStockLedger">readEdgeStockLedger</a></li><li><a href="global.html#reasonFormProblem">reasonFormProblem</a></li><li><a href="global.html#reasonRewriteProblemsOf">reasonRewriteProblemsOf</a></li><li><a href="global.html#rebuildRelationIndex">rebuildRelationIndex</a></li><li><a href="global.html#recentReevalRetiredIds">recentReevalRetiredIds</a></li><li><a href="global.html#recordCheck">recordCheck</a></li><li><a href="global.html#reevalBaseline">reevalBaseline</a></li><li><a href="global.html#reevalBenchRole">reevalBenchRole</a></li><li><a href="global.html#reevalCaseProblems">reevalCaseProblems</a></li><li><a href="global.html#reevalChainOf">reevalChainOf</a></li><li><a href="global.html#reevalMissingOf">reevalMissingOf</a></li><li><a href="global.html#reevalPartsOf">reevalPartsOf</a></li><li><a href="global.html#reevalPromptItemOf">reevalPromptItemOf</a></li><li><a href="global.html#reevalRequeue">reevalRequeue</a></li><li><a href="global.html#reevalTargetIdOf">reevalTargetIdOf</a></li><li><a href="global.html#reevalVerdictOf">reevalVerdictOf</a></li><li><a href="global.html#relateAiCallOf">relateAiCallOf</a></li><li><a href="global.html#relateBenchRole">relateBenchRole</a></li><li><a href="global.html#relateBenchRoleOf">relateBenchRoleOf</a></li><li><a href="global.html#relateCapacityOf">relateCapacityOf</a></li><li><a href="global.html#relateCaseProblems">relateCaseProblems</a></li><li><a href="global.html#relateCheck">relateCheck</a></li><li><a href="global.html#relateDomainNeedsOf">relateDomainNeedsOf</a></li><li><a href="global.html#relateFeatureProblems">relateFeatureProblems</a></li><li><a href="global.html#relateGuideDefaultOf">relateGuideDefaultOf</a></li><li><a href="global.html#relateHoldDeadlineOf">relateHoldDeadlineOf</a></li><li><a href="global.html#relateMaterialOf">relateMaterialOf</a></li><li><a href="global.html#relateOptOf">relateOptOf</a></li><li><a href="global.html#relatePageProblems">relatePageProblems</a></li><li><a href="global.html#relatePanelsOf">relatePanelsOf</a></li><li><a href="global.html#relatePendingOf">relatePendingOf</a></li><li><a href="global.html#relateProblemsOf">relateProblemsOf</a></li><li><a href="global.html#relateScanOf">relateScanOf</a></li><li><a href="global.html#relateSeatOf">relateSeatOf</a></li><li><a href="global.html#relateSeatPathOf">relateSeatPathOf</a></li><li><a href="global.html#relateSeatsOf">relateSeatsOf</a></li><li><a href="global.html#relateSuiteProblems">relateSuiteProblems</a></li><li><a href="global.html#relateSummaryOf">relateSummaryOf</a></li><li><a href="global.html#relateVerdictOf">relateVerdictOf</a></li><li><a href="global.html#relateWarningsOf">relateWarningsOf</a></li><li><a href="global.html#relationTypesVersionOf">relationTypesVersionOf</a></li><li><a href="global.html#removeFromAdjacency">removeFromAdjacency</a></li><li><a href="global.html#renameEdgeTypes">renameEdgeTypes</a></li><li><a href="global.html#renderRelationSections">renderRelationSections</a></li><li><a href="global.html#resolveRelateData">resolveRelateData</a></li><li><a href="global.html#resolveRelateSettings">resolveRelateSettings</a></li><li><a href="global.html#resolveRelateVocab">resolveRelateVocab</a></li><li><a href="global.html#restoreEdge">restoreEdge</a></li><li><a href="global.html#restoreNote">restoreNote</a></li><li><a href="global.html#restoredStandards">restoredStandards</a></li><li><a href="global.html#retireEdge">retireEdge</a></li><li><a href="global.html#retiredEdgesOf">retiredEdgesOf</a></li><li><a href="global.html#retypeAllowed">retypeAllowed</a></li><li><a href="global.html#reversePairsBackOf">reversePairsBackOf</a></li><li><a href="global.html#revertEdgeRevision">revertEdgeRevision</a></li><li><a href="global.html#revertedStandards">revertedStandards</a></li><li><a href="global.html#reviewCaseProblems">reviewCaseProblems</a></li><li><a href="global.html#reviewEdgesOf">reviewEdgesOf</a></li><li><a href="global.html#reviewPageProblems">reviewPageProblems</a></li><li><a href="global.html#reviewQueueOf">reviewQueueOf</a></li><li><a href="global.html#reviewVerdictOf">reviewVerdictOf</a></li><li><a href="global.html#reviewVerdictOfCase">reviewVerdictOfCase</a></li><li><a href="global.html#reviseEdge">reviseEdge</a></li><li><a href="global.html#rewriteEdge">rewriteEdge</a></li><li><a href="global.html#rollbackEdgeStockFix">rollbackEdgeStockFix</a></li><li><a href="global.html#rotationBumpOf">rotationBumpOf</a></li><li><a href="global.html#rotationCursorOf">rotationCursorOf</a></li><li><a href="global.html#rotationPageOf">rotationPageOf</a></li><li><a href="global.html#rotationProgressOf">rotationProgressOf</a></li><li><a href="global.html#rotationQueueOf">rotationQueueOf</a></li><li><a href="global.html#rs4ClassOf">rs4ClassOf</a></li><li><a href="global.html#rs4DecisionOf">rs4DecisionOf</a></li><li><a href="global.html#rs6ClassOf">rs6ClassOf</a></li><li><a href="global.html#rs6DecisionOf">rs6DecisionOf</a></li><li><a href="global.html#rs6VoteActionOf">rs6VoteActionOf</a></li><li><a href="global.html#runCheckPanelPages">runCheckPanelPages</a></li><li><a href="global.html#runConflictCheckSegment">runConflictCheckSegment</a></li><li><a href="global.html#runEdgeReviewSegment">runEdgeReviewSegment</a></li><li><a href="global.html#runReevalSegment">runReevalSegment</a></li><li><a href="global.html#runRelateBench">runRelateBench</a></li><li><a href="global.html#runRelateBenchCli">runRelateBenchCli</a></li><li><a href="global.html#sameEdge">sameEdge</a></li><li><a href="global.html#sameEdgeVerdict">sameEdgeVerdict</a></li><li><a href="global.html#sameVisible">sameVisible</a></li><li><a href="global.html#saveLedgerJson">saveLedgerJson</a></li><li><a href="global.html#scanConflictEdges">scanConflictEdges</a></li><li><a href="global.html#scriptFixHistory">scriptFixHistory</a></li><li><a href="global.html#seatVotesOf">seatVotesOf</a></li><li><a href="global.html#sectionsHashOf">sectionsHashOf</a></li><li><a href="global.html#seqAt">seqAt</a></li><li><a href="global.html#seqOf">seqOf</a></li><li><a href="global.html#settleArchive">settleArchive</a></li><li><a href="global.html#shuffleStable">shuffleStable</a></li><li><a href="global.html#stageRelate">stageRelate</a></li><li><a href="global.html#stageRelateProject">stageRelateProject</a></li><li><a href="global.html#stageRelationIndex">stageRelationIndex</a></li><li><a href="global.html#stampEdge">stampEdge</a></li><li><a href="global.html#stdRetiredHowOf">stdRetiredHowOf</a></li><li><a href="global.html#stockDomainOf">stockDomainOf</a></li><li><a href="global.html#stockOrderOf">stockOrderOf</a></li><li><a href="global.html#stockProgressOf">stockProgressOf</a></li><li><a href="global.html#stockQueueOf">stockQueueOf</a></li><li><a href="global.html#stockSourceResolvedOf">stockSourceResolvedOf</a></li><li><a href="global.html#stockWaiverKeyOf">stockWaiverKeyOf</a></li><li><a href="global.html#typeRankOf">typeRankOf</a></li><li><a href="global.html#undoDeleteNote">undoDeleteNote</a></li><li><a href="global.html#unfixableRouteOf">unfixableRouteOf</a></li><li><a href="global.html#uniqIds">uniqIds</a></li><li><a href="global.html#unpackIds">unpackIds</a></li><li><a href="global.html#verdictClassOf">verdictClassOf</a></li><li><a href="global.html#verdictExpectProblems">verdictExpectProblems</a></li><li><a href="global.html#verdictsByIndexOf">verdictsByIndexOf</a></li><li><a href="global.html#verdictsOf">verdictsOf</a></li><li><a href="global.html#verifyEdgeStockChain">verifyEdgeStockChain</a></li><li><a href="global.html#voteMissingOf">voteMissingOf</a></li><li><a href="global.html#voteOfVerdict">voteOfVerdict</a></li><li><a href="global.html#waivedSameProblem">waivedSameProblem</a></li><li><a href="global.html#waiverCoversEdge">waiverCoversEdge</a></li><li><a href="global.html#withCut">withCut</a></li><li><a href="global.html#withProduced">withProduced</a></li><li><a href="global.html#withProducedRestored">withProducedRestored</a></li><li><a href="global.html#writeEdge">writeEdge</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">ops/provenanceOps.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// provenanceOps.mjs — 依邊之產出鏈選件之維運件(純讀;跨套件規格〈知識套件之產出鏈〉§6)
+//
+// 【用途】「該輪／該供應者／該時段產生之邊」成批列出,供使用端驅動:選件 → 撤出(走既有稽核撤出路徑 stores/edgeRetire 之 retireEdge,理由記
+//   'reprocess' 等)→ 兩端重投、重關聯。本件只讀邊記錄之 produced／producedHistory,不新增任何寫入路徑;舊邊(無 produced)不回填、不出現。
+// 【條件皆為「且」】stamp、stage、provider、seat 全等;since／until 比對 produced.at(含端點、依時刻先後,不依字串);只比對 produced(最後一筆);
+//   history:true 時改比對 producedHistory,同一筆須同時滿足全部條件(「某輪某供應者寫過」之意,不是各條件各自在不同筆中出現)。
+// 【條件之檢測】給了而無效者拒收(報錯),不改用預設(與一般 opt 之 K3 不同):篩選條件一旦被當成未給,結果會放寬成「全部有產出鏈之邊」,而選件之後
+//   接的是撤出。未知之鍵亦拒收(誤拼之條件靜默忽略同樣會放寬)。stamp、seat、provider 可給 null——選「輪次外之寫入」與「無 AI 呼叫之寫入」。
+
+import isobj from 'wsemi/src/isobj.mjs'
+import isarr from 'wsemi/src/isarr.mjs'
+import isestr from 'wsemi/src/isestr.mjs'
+import isfun from 'wsemi/src/isfun.mjs'
+
+/** edgesByProvenance 之查詢鍵(白名單) */
+export const PROVENANCE_QUERY_KEYS = Object.freeze(['stamp', 'stage', 'provider', 'seat', 'since', 'until', 'history'])
+
+const STAMP_RE = /^\d{14}$/
+const STAGE_RE = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/
+const TIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/
+
+/**
+ * 檢核查詢條件並正規化(新物件;不改輸入)
+ *
+ * @param {*} q 輸入查詢條件(undefined、null 視為 {})
+ * @returns {Object} 回傳 { stamp?, stage?, provider?, seat?, since?:毫秒, until?:毫秒, history:Boolean }(未給之條件不在物件內)
+ * @throws {Error} q 非一般物件、含未知之鍵、任一條件給了而無效時拋出;訊息 `invalid &lt;名稱>: must be &lt;種類描述>`,不含輸入值
+ */
+function queryOf(q) {
+    if (q === undefined || q === null) q = {}
+    if (!isobj(q)) throw new Error('invalid query: must be a plain object')
+    for (const k of Object.keys(q)) {
+        if (!PROVENANCE_QUERY_KEYS.includes(k)) throw new Error(`invalid query.${k}: unknown key`)
+    }
+    const out = { history: false }
+    if (q.stamp !== undefined) {
+        if (q.stamp !== null &amp;&amp; !(typeof q.stamp === 'string' &amp;&amp; STAMP_RE.test(q.stamp))) throw new Error('invalid query.stamp: must be a 14-digit stamp string or null')
+        out.stamp = q.stamp
+    }
+    if (q.stage !== undefined) {
+        if (!(typeof q.stage === 'string' &amp;&amp; STAGE_RE.test(q.stage))) throw new Error('invalid query.stage: must be a lowercase kebab-case name')
+        out.stage = q.stage
+    }
+    for (const k of ['provider', 'seat']) {
+        if (q[k] === undefined) continue
+        if (q[k] !== null &amp;&amp; !isestr(q[k])) throw new Error(`invalid query.${k}: must be a non-empty string or null`)
+        out[k] = q[k]
+    }
+    for (const k of ['since', 'until']) {
+        if (q[k] === undefined) continue
+        const ms = typeof q[k] === 'string' &amp;&amp; TIME_RE.test(q[k]) ? Date.parse(q[k]) : NaN
+        if (!Number.isFinite(ms)) throw new Error(`invalid query.${k}: must be a time string YYYY-MM-DDTHH:mm:ss with Z or ±hh:mm`)
+        out[k] = ms
+    }
+    if (out.since !== undefined &amp;&amp; out.until !== undefined &amp;&amp; out.since > out.until) throw new Error('invalid query.since: must not be later than query.until')
+    if (q.history !== undefined) {
+        if (typeof q.history !== 'boolean') throw new Error('invalid query.history: must be a boolean')
+        out.history = q.history
+    }
+    return out
+}
+
+/**
+ * 一筆產出者是否符合全部條件
+ *
+ * @param {*} p 輸入產出者
+ * @param {Object} q 輸入 queryOf 之產物
+ * @returns {Boolean} 回傳是否符合
+ */
+function matches(p, q) {
+    if (!isobj(p)) return false
+    for (const k of ['stamp', 'stage', 'provider', 'seat']) {
+        if (q[k] !== undefined &amp;&amp; p[k] !== q[k]) return false
+    }
+    if (q.since !== undefined || q.until !== undefined) {
+        const at = typeof p.at === 'string' ? Date.parse(p.at) : NaN
+        if (!Number.isFinite(at)) return false
+        if (q.since !== undefined &amp;&amp; at &lt; q.since) return false
+        if (q.until !== undefined &amp;&amp; at > q.until) return false
+    }
+    return true
+}
+
+/**
+ * 依邊之產出鏈選邊(純讀):回傳其產出者符合全部條件之邊;邊記錄無 produced 者(舊邊)不出現
+ *
+ * @param {Object} deps 輸入依賴物件，必給；{ stores:{ relations(select) } }(關聯邊集合)
+ * @param {Object} [query={}] 輸入查詢條件(全部選填;皆為「且」;給了而無效者拒收,不改用預設——見檔頭【條件之檢測】)
+ * @param {String|null} [query.stamp] 輸入輪次 stamp(14 位數字字串,對應該輪 run.json 之 stamp);null＝輪次外之寫入
+ * @param {String} [query.stage] 輸入產出階段(小寫連字號名:relate、reverse、reeval、conflict-check、edge-review、standards-fix)
+ * @param {String|null} [query.provider] 輸入實際成交條目(非空字串;null＝無 AI 呼叫之寫入)
+ * @param {String|null} [query.seat] 輸入席位(非空字串,如 relate.ai、first、second、proposer;null＝無 AI 呼叫之寫入)
+ * @param {String} [query.since] 輸入起(含;時間字串 YYYY-MM-DDTHH:mm:ss,須帶 Z 或 ±hh:mm,可帶毫秒),比對 produced.at
+ * @param {String} [query.until] 輸入迄(含;格式同 since)
+ * @param {Boolean} [query.history=false] 輸入 true 時改比對 producedHistory 之任一筆(同一筆須滿足全部條件)
+ * @returns {Promise} 回傳 Promise，resolve 回傳 [{ edgeId, from, to, type, produced }](依 produced.at 先後、同刻依 edgeId;produced 為新物件:
+ *   history 為 false 時為邊之 produced,true 時為符合條件之最近一筆〔不一定是邊目前之 produced〕);失敗為 reject(deps 無效、query 無效)
+ * @throws {Error} 以 reject 呈現:deps 缺 stores.relations.select、query 非一般物件、含未知之鍵、或任一條件無效
+ * @example
+ * let edges = [
+ *     { id: 'e1', from: 'a', to: 'b', type: '甲', reason: '理由', produced: { v: 1, stamp: '20261108100000', stage: 'relate', seat: 'relate.ai', provider: 'p1', pkg: 'w-demo@1.0.0', at: '2026-11-08T10:00:00+08:00' } },
+ *     { id: 'e2', from: 'a', to: 'c', type: '乙', reason: '理由', produced: { v: 1, stamp: '20261108110000', stage: 'relate', seat: 'relate.ai', provider: 'p2', pkg: 'w-demo@1.0.0', at: '2026-11-08T11:00:00+08:00' } },
+ *     { id: 'e3', from: 'b', to: 'c', type: '甲', reason: '舊邊無產出鏈' },
+ * ]
+ * let deps = { stores: { relations: { select: async () => edges } } }
+ * let r = await edgesByProvenance(deps, { stamp: '20261108110000' })
+ * console.log(r.map((x) => `${x.edgeId}:${x.produced.provider}`))
+ * // => [ 'e2:p2' ]
+ * console.log((await edgesByProvenance(deps, { stage: 'relate' })).map((x) => x.edgeId), (await edgesByProvenance(deps)).length)
+ * // => [ 'e1', 'e2' ] 2
+ * await edgesByProvenance(deps, { provder: 'p1' }).catch((e) => console.log(e.message))
+ * // => invalid query.provder: unknown key
+ */
+export async function edgesByProvenance(deps, query = {}) {
+
+    //check
+    if (!isobj(deps) || !isobj(deps.stores) || !isfun(deps.stores.relations?.select)) throw new Error('invalid deps: must be an object with stores.relations (select)')
+    const q = queryOf(query)
+
+    const rows = []
+    for (const e of await deps.stores.relations.select()) {
+        if (!isobj(e) || !isobj(e.produced)) continue
+        let hit = null
+        if (q.history) {
+            const hs = isarr(e.producedHistory) &amp;&amp; e.producedHistory.length ? e.producedHistory : [e.produced]
+            for (let i = hs.length - 1; i >= 0 &amp;&amp; !hit; i--) if (matches(hs[i], q)) hit = hs[i]
+        }
+        else if (matches(e.produced, q)) hit = e.produced
+        if (hit) rows.push({ edgeId: e.id, from: e.from, to: e.to, type: e.type, produced: structuredClone(hit) })
+    }
+    const atOf = (r) => Date.parse(r.produced.at)
+    return rows.sort((a, b) => (atOf(a) - atOf(b)) || (a.edgeId &lt; b.edgeId ? -1 : a.edgeId > b.edgeId ? 1 : 0))
+}
+
+export default { PROVENANCE_QUERY_KEYS, edgesByProvenance }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sun Nov 08 2026 23:33:57 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
