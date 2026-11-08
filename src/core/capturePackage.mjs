@@ -44,4 +44,6 @@ export {
     readJsonlRows, appendJsonlRow,
     // ── ⑦ 日誌契約:核心件(總組裝共用件之每輪序列、AI 調度層之事件、本機網路判斷)所發之字樣(本套件之契約以之組成)──
     CORE_LOG_KNOWN, CORE_LOG_MUST_SEE,
+    // ── ⑧ 產出鏈共用件(跨套件規格〈知識套件之產出鏈〉§5:produced 之組出與歷史追加、套件版、提示詞指紋之輪次快取;邊記錄之產出鏈以之組成)──
+    makeProduced, appendProduced, pkgIdOf, createPromptFpCache,
 } from 'w-knowledge-capture/src/WKnowledgeCapture.mjs'

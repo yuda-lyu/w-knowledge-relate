@@ -46,8 +46,9 @@ import {
     given, normalizeWorkDir, resolveRuntime, runtimeCfgOf,
     checkKeys, resolveDirsCfg, resolveClockCfg, resolvePromptsCfg, checkDataKeys, checkStageConfig, checkOptionalCollections, resolveLmdbCfg,
     resolveLogFactory, resolveAfterRun, checkAiAdapter, createRoundLog, buildAiAdapter, startupWarningsOf,
-    createStoreOpener, pipelineNameOf, createRoundRunner, assemblyInfoOf, captureNetGuardOf, standardsCountsOf,
+    createStoreOpener, pipelineNameOf, createRoundRunner, assemblyInfoOf, captureNetGuardOf, standardsCountsOf, createPromptFpCache,
 } from './core/capturePackage.mjs'
+import { relateBenchRoleOf } from './bench/relateBench.mjs'
 import { resolveRelateSettings, relateSeatsOf } from './core/relateSettings.mjs'
 import { createRelateObject, RELATE_TAP_STAGE_KEYS } from './relateObject.mjs'
 import {
@@ -206,20 +207,28 @@ export function createKnowledgeRelate(cfg = {}) {
      * 【只放可列舉之普通屬性】w-data-pipeline 之管線建脈絡時以 spread 複製 deps({ ...parentCtx.deps, ...spec.deps });getter
      *   (Object.defineProperty 預設 enumerable:false)在 spread 時直接消失 → 子階段拿到 undefined、每輪靜默失敗。
      *
+     * 【提示詞指紋】每輪建一個快取實例(跨套件規格〈知識套件之產出鏈〉§5.5;每輪每角色只算一次):promptFpOf(評比角色 id) 以本套件之評比角色
+     *   (relate、reeval、conflict-check、edge-review)與已解析之詞彙算出 16 碼指紋,供邊之產出鏈(stores/edgeProvenance);算不出者回 null 並於當輪日誌記一行 WARN。
+     *
      * @param {Object} stores 輸入 openStores 之產物
-     * @returns {Object} 回傳依賴物件 { stores, clock, dirs, data(安裝方原給之資料), vocab(已解析之詞彙表), locale(語言設定), settings, ai, domains(生效之一份) }
+     * @returns {Object} 回傳依賴物件 { stores, clock, dirs, data(安裝方原給之資料), vocab(已解析之詞彙表), locale(語言設定), settings, ai, domains(生效之一份),
+     *   promptFpOf(角色 id → 16 碼指紋｜null) }
      */
-    const buildDeps = (stores) => ({
-        stores,
-        clock,
-        dirs,
-        data: rt.data,
-        vocab: rt.vocab,
-        locale: rt.locale,
-        settings,
-        ai,
-        domains: rt.domains,
-    })
+    const buildDeps = (stores) => {
+        const fp = createPromptFpCache({ onFail: (id, e) => roundLog.warn(`邊之產出鏈：角色 ${id} 之提示詞指紋算不出（${String(e?.message ?? e).slice(0, 80)}），本輪略過該欄`) })
+        return {
+            stores,
+            clock,
+            dirs,
+            data: rt.data,
+            vocab: rt.vocab,
+            locale: rt.locale,
+            settings,
+            ai,
+            domains: rt.domains,
+            promptFpOf: (role) => fp.promptFpOf(relateBenchRoleOf(role), { vocab: rt.vocab }),
+        }
+    }
 
     /**
      * 執行一輪關聯(寫開工標記 → 開集合 → 跑管線(鎖、時間預算) → 符合度掃描(可選) → 寫執行摘要 → 收尾鉤子(可選) → 關集合)

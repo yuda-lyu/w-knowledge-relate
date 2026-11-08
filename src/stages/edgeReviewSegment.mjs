@@ -51,6 +51,7 @@ import { putHold, resolveHold, listHolds, pipelineDueOf } from '../core/captureP
 import { recordCheck } from '../core/stores/checks.mjs'
 import { makeEdge } from '../stores/edgeStore.mjs'
 import { rewriteEdge } from '../stores/edgeRewrite.mjs'
+import { EDGE_PRODUCED_STAGES, voteOfVerdict, producedFieldsOf } from '../stores/edgeProvenance.mjs'
 import { appendAudit } from '../stores/relateLedgers.mjs'
 import { retireEdge } from '../stores/edgeRetire.mjs'
 import { readEdgeAudit, retiredEdgesOf } from '../stores/edgeAudit.mjs'
@@ -287,7 +288,7 @@ export async function runEdgeReviewSegment(o) {
         let first = null
         for (const v of verdicts.filter((y) => isobj(y) && y.reason)) {
             const g = gateEdgeProposal(makeEdge({ from: x.edge.from, to: x.edge.to, type, reason: v.reason, nowIso: nowIso() }), gctx)
-            if (g.ok) return g
+            if (g.ok) return { ...g, by: v } // by＝被採用之裁決值(產出鏈之成交者由此回找該票)
             first = first || g
         }
         return first || { ok: false, reasons: ['無可用之理由'] }
@@ -296,12 +297,17 @@ export async function runEdgeReviewSegment(o) {
     const ledgers = { relations: stores.relations, ledgers: rt.ledgers, stateDir }
     const retireOpt = (reason, detail, extra) => ({ reason, at: nowIso(), detail, conflictTypes: domain.conflictTypeNames, hasNote: (id) => byId.has(id), adj: rt.adj, extra })
     // 改寫(互斥內回讀比對;陳舊不套):新值＝閘後之型別與理由(截短者帶 reasonCut;stores/edgeStore 檔頭【理由截短之明示】)
-    const rewrite = (x, gEdge, kind) => rt.mutex(async () => {
+    //   產出鏈之成交者(stores/edgeProvenance 檔頭【席位與成交者】):採用其改寫值之那一票(by＝gateOf 之被採用裁決值;seat 與 provider 同稽核列 votes 之該票);
+    //   無票可回找者不寫產出鏈
+    const rewrite = (x, g, kind) => rt.mutex(async () => {
         const cur = await stores.relations.get(x.edge.id)
         if (stale(cur, x)) return { r: 'stale' }
         const now = nowIso()
+        const gEdge = g.edge
         const proposal = { ...makeEdge({ from: cur.from, to: cur.to, type: gEdge.type, reason: gEdge.reason, nowIso: now }), ...(gEdge.reasonCut ? { reasonCut: gEdge.reasonCut } : {}) }
-        const w = await rewriteEdge(ledgers, cur, proposal, { rank: rt.rank, at: now, conflictTypes: domain.conflictTypeNames, hasNote: (id) => byId.has(id), adj: rt.adj })
+        const v = voteOfVerdict(x.votes, g.by)
+        const produced = rt.prov && v ? rt.prov.make({ stage: EDGE_PRODUCED_STAGES.edgeReview, seat: v.seat, provider: v.provider || '', role: 'edge-review' }) : undefined
+        const w = await rewriteEdge(ledgers, cur, proposal, { rank: rt.rank, at: now, conflictTypes: domain.conflictTypeNames, hasNote: (id) => byId.has(id), adj: rt.adj, produced })
         return { r: kind, edge: w.edge }
     })
     const removed = () => {
@@ -450,7 +456,7 @@ export async function runEdgeReviewSegment(o) {
             log.info(`既有邊覆核：${label(x)} 兩席判為漏標之衝突，交衝突核對判定（${oneline(g.edge.reason, 80)}）`)
             continue
         }
-        const res = await rewrite(x, g.edge, d.action)
+        const res = await rewrite(x, g, d.action)
         if (res.r === 'stale') {
             det.rs6Stale++
             continue
@@ -467,7 +473,8 @@ export async function runEdgeReviewSegment(o) {
         }
         await record(res.edge, STATUS.PASS, res.r === 'reason' ? '兩席判關聯成立、理由改寫為具體' : (res.r === 'retype' ? `兩席判型別應為「${res.edge.type}」` : '兩席判為漏標之衝突，已改為衝突型（衝突核對 RS4 另核）'), x.votes)
         await resolve(x, `${ACTION_WORD[res.r]}落地`)
-        audit(x, res.r, { written: { type: res.edge.type, reason: res.edge.reason } })
+        // 改寫列之 edge 另帶改寫前之產出鏈三欄(新增欄位;revertEdgeRevision 撤回時據以撤銷該次改寫所留之產出鏈;改寫前無產出鏈者不帶)
+        audit(x, res.r, { edge: { from: x.edge.from, to: x.edge.to, type: x.edge.type, reason: x.edge.reason, ...producedFieldsOf(x.edge) }, written: { type: res.edge.type, reason: res.edge.reason } })
         log.info(`既有邊覆核：${label(x)} ${ACTION_WORD[res.r]}（${res.r === 'reason' ? '' : `「${res.edge.type}」；`}${oneline(res.edge.reason, 80)}）`)
     }
     await finish()

@@ -51,6 +51,7 @@ import { makeEdge } from '../stores/edgeStore.mjs'
 import { appendAudit } from '../stores/relateLedgers.mjs'
 import { retireEdge } from '../stores/edgeRetire.mjs'
 import { rewriteEdge } from '../stores/edgeRewrite.mjs'
+import { EDGE_PRODUCED_STAGES, voteOfVerdict, producedFieldsOf } from '../stores/edgeProvenance.mjs'
 import { RS5, relateHoldDeadlineOf, RELATE_HOLD_NEXT, RELATE_API_HINT } from '../stores/relateHolds.mjs'
 import { gateEdgeProposal, gateCtxOf } from '../standards/edgeGate.mjs'
 import { packIds, unpackIds, reviewEdgesOf, pagesOf, verdictsByIndexOf, verdictsOf, decideOf, levelOf, gateAllows, reevalPromptItemOf } from '../stores/reevalPolicy.mjs'
@@ -232,9 +233,10 @@ export const mwReevalApply = () => defineMw({
             const gctx = gateCtxOf(domain, { hasNote: (id) => rt.byId.has(id), materialOf: (id) => (seen.has(id) ? seen.get(id) : null), locale: ctx.deps.locale })
             const tryReason = (reason) => gateEdgeProposal(makeEdge({ from: note.id, to: r.nb, type: r.type, reason, nowIso: seg.nowIso() }), gctx)
             const g = tryReason(r.reason)
-            if (g.ok || !r.b?.reason || r.b.reason === r.reason) return g
+            // by＝被採用之裁決值(產出鏈之成交者由此回找該票:第一席之理由合格取成立之第一票,否則取成立之第二票)
+            if (g.ok || !r.b?.reason || r.b.reason === r.reason) return g.ok ? { ...g, by: r.a } : g
             const g2 = tryReason(r.b.reason)
-            return g2.ok ? g2 : g
+            return g2.ok ? { ...g2, by: r.b } : g
         }
         const held = []
         for (const r of results) {
@@ -296,7 +298,10 @@ export const mwReevalApply = () => defineMw({
                     return 'deferred'
                 }
                 const newType = gated.edge.type
-                await rewriteEdge({ relations, ledgers: rt.ledgers, stateDir: seg.stateDir }, cur, { ...gated.edge, createdAt: now, updatedAt: now }, { rank: rt.rank, at: now, note: note.id, conflictTypes: domain.conflictTypeNames, hasNote: (id) => rt.byId.has(id), adj: rt.adj })
+                // 產出鏈之成交者(stores/edgeProvenance 檔頭【席位與成交者】):採用其改寫值之那一票(seat 與 provider 同重評帳 verdicts 之該票);無票可回找者不寫
+                const v = voteOfVerdict(r.votes, gated.by)
+                const produced = rt.prov && v ? rt.prov.make({ stage: EDGE_PRODUCED_STAGES.reeval, seat: v.seat, provider: v.provider || '', role: 'reeval' }) : undefined
+                await rewriteEdge({ relations, ledgers: rt.ledgers, stateDir: seg.stateDir }, cur, { ...gated.edge, createdAt: now, updatedAt: now }, { rank: rt.rank, at: now, note: note.id, conflictTypes: domain.conflictTypeNames, hasNote: (id) => rt.byId.has(id), adj: rt.adj, produced })
                 return wasConflict ? (newType === rt.conflictType ? 'changed' : 'downgraded') : (newType === rt.conflictType ? 'upgraded' : 'changed')
             })
             if (res === 'stale') {
@@ -312,7 +317,8 @@ export const mwReevalApply = () => defineMw({
                 ctx.log.info(`關聯重評：[[${r.edge.from}]] ⇄ [[${r.edge.to}]] 升為衝突，交衝突核對判定（${oneline(gated.edge.reason, 80)}）`)
                 continue
             }
-            appendAudit(seg.files.reeval, { ...base, proposal, level, outcome: 'applied', ...(gated ? { written: { type: gated.edge.type, reason: gated.edge.reason, fixes: gated.fixes } } : {}) })
+            // 改寫列(有 gated)之 edge 另帶改寫前之產出鏈三欄(新增欄位;revertEdgeRevision 撤回時據以撤銷該次改寫所留之產出鏈;改寫前無產出鏈者不帶)
+            appendAudit(seg.files.reeval, { ...base, ...(gated ? { edge: { ...base.edge, ...producedFieldsOf(r.edge) } } : {}), proposal, level, outcome: 'applied', ...(gated ? { written: { type: gated.edge.type, reason: gated.edge.reason, fixes: gated.fixes } } : {}) })
             if (res === 'retired') count(msg, 'reevalRetired')
             else {
                 count(msg, 'reevalChanged')

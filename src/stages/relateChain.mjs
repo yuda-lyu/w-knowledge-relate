@@ -21,6 +21,8 @@ import isfun from 'wsemi/src/isfun.mjs'
 import { oneline } from '../core/capturePackage.mjs'
 import { defineMw, count } from '../core/capturePackage.mjs'
 import { makeEdge, persistEdge, addToAdjacency } from '../stores/edgeStore.mjs'
+import { EDGE_PRODUCED_STAGES } from '../stores/edgeProvenance.mjs'
+import { RELATE_SEGMENTS, relateSeatPathOf } from '../core/relateSettings.mjs'
 import { isRelated } from '../stores/relatedNotes.mjs'
 import { packIds, REEVAL_REPROPOSE_DAYS } from '../stores/reevalPolicy.mjs'
 import { rotationCursorOf, ROTATION_RESET } from '../stores/rotationPolicy.mjs'
@@ -258,7 +260,8 @@ export const mwMarkDirty = () => defineMw({
 /**
  * 錨點:persistEdges(邊落庫:行程內互斥中「get → mergeEdge → insertNew｜patch(回讀驗證)」;本輪新建之邊完整全序,跨輪只升為衝突)
  *
- * 讀 msg.data(_edges、_rt、_segment、_provider);寫 msg.data._edges(落庫後之值)、_pending(交衝突核對之提案);計數 edges(新建)、
+ * 讀 msg.data(_edges、_rt〔含 prov:邊之產出鏈之產出者工廠,新建與可見欄位改變之寫入追加 produced;未給即不寫〕、_segment、_provider〔該批呼叫之成交者 providerId,
+ * 即 produced.provider〕);寫 msg.data._edges(落庫後之值)、_pending(交衝突核對之提案);計數 edges(新建)、
  * conflicts(新成為衝突之無序對)、edgesChanged(可見欄位改變)、reverseEdges(反向段新建)、rotationEdges(輪巡段新建)、
  * conflictTouchExtracted(新衝突觸及下游已處理之筆記——下游處理時刻 extractedAt 非空;檔頭【下游已處理之筆記】)、
  * reevalReproposed(新建之對於 REEVAL_REPROPOSE_DAYS 天內曾被重評撤銷;只觀察)、rs4Deferred(交衝突核對之新衝突)、rs4Waived(使用者已豁免而理由未變之提案,
@@ -309,7 +312,9 @@ export const mwPersistEdges = () => defineMw({
             }
             // allowTypeChange 於互斥內求值:並行批次互選同一對時,後到者須看得到前者剛建之邊屬本輪;admit:浮上之 history 再驗(檔頭)
             const r = await rt.mutex(async () => {
-                const res = await persistEdge(relations, e, { rank: rt.rank, conflictType: rt.conflictType, allowTypeChange: rt.createdThisRun.has(e.id), admit: rt.admitSurfaced })
+                // 產出鏈(stores/edgeProvenance):階段＝正向與輪巡 relate、反向 reverse;席位＝實際使用之設定路徑;成交者＝該批呼叫結果之 providerId(遞補時為遞補者)
+                const produced = rt.prov?.make({ stage: seg === 'reverse' ? EDGE_PRODUCED_STAGES.reverse : EDGE_PRODUCED_STAGES.relate, seat: RELATE_SEGMENTS.includes(seg) ? relateSeatPathOf(ctx.deps.settings, seg) : 'relate.ai', provider: String(msg.data._provider || ''), role: 'relate' })
+                const res = await persistEdge(relations, e, { rank: rt.rank, conflictType: rt.conflictType, allowTypeChange: rt.createdThisRun.has(e.id), admit: rt.admitSurfaced, produced })
                 if (res.created) rt.createdThisRun.add(res.edge.id)
                 if (res.changed) addToAdjacency(rt.adj, res.edge)
                 return res

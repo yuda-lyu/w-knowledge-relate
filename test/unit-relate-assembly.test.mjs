@@ -483,7 +483,7 @@ describe('unit-relate-assembly', function() {
     // ══════════════════════════ 每輪依賴與執行 ══════════════════════════
     describe('每輪依賴(deps)與一輪執行', function() {
 
-        it('deps 契約:{ stores, clock, dirs, data, vocab, settings, ai, domains } 皆為可列舉之普通屬性;同一輪各子階段取得同一份;deps.domains／vocab／settings／data 即 info() 之同一物件;stores 為 RELATE_STORE_KEYS', async () => {
+        it('deps 契約:{ stores, clock, dirs, data, vocab, locale, settings, ai, domains, promptFpOf } 皆為可列舉之普通屬性;同一輪各子階段取得同一份;deps.domains／vocab／settings／data 即 info() 之同一物件;stores 為 RELATE_STORE_KEYS', async () => {
             const sink = []
             const probe = (name) => ({ name, run: async (ctx) => {
                 sink.push(ctx.deps)
@@ -497,7 +497,8 @@ describe('unit-relate-assembly', function() {
             assertSubStagesOk(rep, assert)
             const d = sink[0]
             assert.equal(d, sink[1], '同一輪各子階段之 deps 為同一份')
-            assert.deepEqual(Object.keys(d).sort(), ['ai', 'clock', 'data', 'dirs', 'domains', 'locale', 'settings', 'stores', 'vocab'])
+            // promptFpOf:邊之產出鏈之提示詞指紋(每輪一個快取實例;stores/edgeProvenance),為產出鏈新增之依賴
+            assert.deepEqual(Object.keys(d).sort(), ['ai', 'clock', 'data', 'dirs', 'domains', 'locale', 'promptFpOf', 'settings', 'stores', 'vocab'])
             const desc = Object.getOwnPropertyDescriptors(viaAfter)
             for (const [k, dd] of Object.entries(desc)) assert.ok(dd.enumerable && 'value' in dd && !dd.get, `deps.${k} 須為可列舉之普通屬性`)
             assert.deepEqual(Object.keys(d.stores), [...RELATE_STORE_KEYS])

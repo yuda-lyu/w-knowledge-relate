@@ -40,6 +40,9 @@
 //   extractedAt 為摘要套件筆記記錄之資料契約,由讀筆記之下游寫入)——只計數與 INFO,下游自行偵測並處置其產物。
 // 【ctx 旗標(logContract 之 RELATE_CTX_FLAGS)】edgesChanged＝本輪邊之實際異動數(新增、可見欄位改變、撤出;每筆寫入只計一次)、
 //   blocked＝邊庫世代不符(投影子階段據以略過)。
+// 【邊之產出鏈(stores/edgeProvenance)】本段每輪建一個產出者工廠 rt.prov(stamp 取本段 ctx.stamp,同該輪 run.json;提示詞指紋取每輪依賴
+//   deps.promptFpOf,未注入即無指紋),各段寫邊時以 rt.prov.make 組 produced 交 persistEdge／rewriteEdge 之 o.produced:正向(relate)、反向(reverse)、
+//   輪巡(relate)、重評(reeval)、衝突核對(conflict-check)、既有邊覆核(edge-review)、型別改名(standards-fix)。手組 rt 而未給 prov 者不寫產出鏈。
 
 import isobj from 'wsemi/src/isobj.mjs'
 import { noteConsumedOf } from '../core/capturePackage.mjs'
@@ -51,6 +54,7 @@ import { STATUS } from '../core/capturePackage.mjs'
 import { RELATE_DEFAULT, relateSeatOf, callTimeoutMsOf } from '../core/relateSettings.mjs'
 import { RELATE_CTX_FLAGS } from '../logContract.mjs'
 import { typeRankOf, createMutex, buildAdjacency, conflictNeighborsOf, generationMismatchOf } from '../stores/edgeStore.mjs'
+import { createEdgeProvenance } from '../stores/edgeProvenance.mjs'
 import { openRelateLedgers, recentReevalRetiredIds } from '../stores/relateLedgers.mjs'
 import { deletionHalfStatesOf, DELETION_HALF_STATE_LABEL } from '../stores/deletions.mjs'
 import { isRelated, relatePendingOf, needsReeval, inRelatePool } from '../stores/relatedNotes.mjs'
@@ -180,9 +184,11 @@ export function stageRelate(opt = {}) {
                 return stdReport({ ok: false, stats: { fail: 1 }, detail: { genMismatch: mismatch, blocked: true, targets: 0, edges: 0, conflicts: 0, pending: relatePendingOf(allNotes) } })
             }
             const byId = new Map(allNotes.map((n) => [n.id, n]))
+            // 邊之產出鏈(stores/edgeProvenance 檔頭):stamp 取本段 ctx.stamp(與 run.json 同值;輪次外之呼叫無);提示詞指紋取每輪依賴之 deps.promptFpOf(未注入即無指紋)
+            const prov = createEdgeProvenance({ stamp: ctx.stamp ?? null, nowIso: () => clock.iso8(), promptFpOf: ctx.deps.promptFpOf })
             // ②③④ 維護(早於「筆記不足 2 篇」之提前返回:清理與補帳不因無新工作而跳過)
             const edgeReviewOn = (opt.edgeReview ?? settings.relate.standards.edgeReview.enabled) === true
-            const m = await maintainRelations({ stores, edges: edges0, byId, ledgers, domain, stateDir: dirs.state, nowIso, log, edgeReviewOn })
+            const m = await maintainRelations({ stores, edges: edges0, byId, ledgers, domain, stateDir: dirs.state, nowIso, log, edgeReviewOn, prov })
             const base = { typeRenamed: m.typeRenamed, typeOffList: m.typeOffList, typeOffListQueued: m.typeOffListQueued, retired: m.retired, dangling: m.dangling, changedSeen: m.changedSeen, changedTouchExtracted: m.changedTouchExtracted }
             // ⑤ 刪除、還原、撤銷之半狀態(檔頭):每輪發必看字樣;墓碑在而記錄在之篇不是本段之對象(live 以外)
             const half = deletionHalfStatesOf(dirs.state, (id) => byId.has(id))
@@ -216,6 +222,8 @@ export function stageRelate(opt = {}) {
                 ledgers,
                 adj,
                 byId,
+                // 邊之產出鏈(各段寫邊時取之;手組 rt 之呼叫端未給即不寫產出鏈)
+                prov,
                 // 本段之對象(記錄在且不在墓碑——刪除或還原停在中途者除外,檔頭⑤):逐項鏈之納入閘以之判端點
                 isLive: (id) => byId.has(id) && !isTomb(id),
                 conflictOf,

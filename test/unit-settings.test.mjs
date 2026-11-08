@@ -135,13 +135,13 @@ describe('unit-settings', function() {
             assert.deepEqual(s.warnings, [])
         })
 
-        it('預設與 schema 之鍵集逐組一致,且每個預設值本身通過所屬型別之判準;relate 段共 29 個葉', () => {
+        it('預設與 schema 之鍵集逐組一致,且每個預設值本身通過所屬型別之判準;relate 段共 30 個葉(29＋產出鏈之 graphProduced 開關)', () => {
             for (const g of GROUPS) assert.deepEqual(Object.keys(g.dflt).sort(), Object.keys(g.schema).sort(), `${g.path.join('.')}:預設鍵集應等於 schema 鍵集`)
             for (const l of LEAVES) {
                 assert.ok(TYPES[l.type], `${l.path.join('.')}:型別「${l.type}」須在型別表`)
                 assert.ok(TYPES[l.type].test(l.dflt), `${l.path.join('.')} 之預設值須合型別「${l.type}」`)
             }
-            assert.equal(leavesOf(RELATE_SCHEMA, RELATE_DEFAULT).length, 29)
+            assert.equal(leavesOf(RELATE_SCHEMA, RELATE_DEFAULT).length, 30)
         })
 
         it('ai 段＝摘要套件之 ai 段(同一物件,不另寫);本段專屬之型別只有 reevalApply、dateOrEmpty(不加進共用之型別表)', () => {
@@ -153,8 +153,9 @@ describe('unit-settings', function() {
             for (const k of Object.keys(RELATE_SETTING_TYPES)) assert.equal(k in SETTING_TYPES, false, `${k} 不在共用之型別表`)
         })
 
-        it('relate 段之數值預設(29 葉);符合度掃描預設關閉', () => {
+        it('relate 段之數值預設(30 葉);符合度掃描預設關閉;graph.json 帶產出鏈摘要之開關預設關', () => {
             const s = RS({}).relate
+            assert.equal(s.graphProduced, false)
             assert.deepEqual([s.rounds, s.notesPerCall, s.candidatesPerNote], [2, 6, 25])
             assert.deepEqual(s.reverse, { perRun: 0, ai: null })
             assert.deepEqual(s.rotation, { perRun: 0 })

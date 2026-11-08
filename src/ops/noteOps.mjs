@@ -49,6 +49,10 @@
 //   回復之值為衝突型而檢核未涵蓋者登錄 RS4 待判〔同②〕)→ 同一段帳追加 { at, entry:'user', edgeId, edge:撤回前之值, outcome:'reverted', revertOf:該列 at,
 //   written:回復後之值 }(帳讀者以 outcome 分)→ 預設當場投影兩端。不清兩端之評完標記(裁示即使用者之判定)。提案列(核對帳 written／written-reason／
 //   written-other-type:新衝突之落地,含重評、覆核升級交核對而落地者)不在列——其 edge 為提案本身而非改寫前之現值,逆操作無據。可預演(非 apply 純讀)。
+// 【撤回與邊之產出鏈】撤回把可見內容換回改寫前之值,produced＝現行可見內容之產出者,故撤回**撤銷**該次改寫所留之產出鏈(同存量處置之回退),不追加新紀錄:
+//   改寫列(三段帳)之 edge 另帶改寫前之 produced／producedHistory／producedHistoryDropped(新增欄位;改寫前無產出鏈者不帶)→ 原樣換回;列無此欄(舊帳列,或改寫前本無
+//   產出鏈)→ 由現行邊判(produced 為歷史末筆、階段＝該段、寫入時刻不晚於該列之 at 者退一筆;歷史只有一筆而無捨去者＝改寫前無產出鏈,三欄移除),判不了則不動,
+//   回傳 producedUndo 帶原因字樣。細節見 stores/edgeProvenance 檔頭【撤銷而非追加】。
 // 【世代】寫入前檢核邊庫世代(未遷移之有序對庫拒寫)。呼叫端負責取執行鎖。
 
 import fs from 'fs'
@@ -69,6 +73,7 @@ import { openRelateLedgers, appendAudit, readAuditRows, LEDGER_FILES } from '../
 import { retiredEdgesOf } from '../stores/edgeAudit.mjs'
 import { retireEdge, RESTORABLE_REASONS } from '../stores/edgeRetire.mjs'
 import { rewriteEdge } from '../stores/edgeRewrite.mjs'
+import { createEdgeProvenance, stampEdge, producedUndoPlanOf, EDGE_PRODUCED_STAGES } from '../stores/edgeProvenance.mjs'
 import { archiveFilesOf, readArchive, openDeletions } from '../stores/deletions.mjs'
 import { gateEdgeProposal, gateCtxOf } from '../standards/edgeGate.mjs'
 import { reviewEdgesOf } from '../stores/reevalPolicy.mjs'
@@ -93,6 +98,17 @@ const REVISION_LEDGERS = Object.freeze([
 ])
 /** 逆操作之帳列 outcome(三段帳同一字) */
 const REVERTED_OUTCOME = 'reverted'
+
+/**
+ * 維運件(輪次外;不呼叫 AI)寫邊時之產出者:邊之產出鏈(stores/edgeProvenance)——stamp null、seat 與 provider 同時 null、寫入時刻取 deps.clock.iso8(無則現在)
+ *
+ * @param {Object} deps 輸入依賴(取 clock)
+ * @param {String} stage 輸入產出階段(EDGE_PRODUCED_STAGES 之值)
+ * @returns {Object} 回傳 produced
+ */
+function opProducedOf(deps, stage) {
+    return createEdgeProvenance({ stamp: null, nowIso: isfun(deps?.clock?.iso8) ? () => deps.clock.iso8() : undefined }).make({ stage, seat: null, provider: null })
+}
 
 /**
  * 兩時刻之先後(以時刻比較;任一無法解析時依字面)
@@ -595,7 +611,12 @@ export async function undoDeleteNote(deps, slug, opt = {}) {
     const renameOf = domainTypeRenamerOf(domain)
     const plan = await edgePlanOf({
         arc, slug, noteOf, last: retiredEdgesOf(readAuditRows(ledgers.files.retired)), get: (id) => stores.relations.get(id),
-        decide: (e) => ({ ok: true, edge: (renameOf && renameOf(e)) || e }), same: sameEdge,
+        // 型別改名之機械改寫為標準修正:追加 standards-fix 之產出者(無改名者原樣放回,帶撤出前之產出鏈)
+        decide: (e) => {
+            const renamed = renameOf && renameOf(e)
+            return { ok: true, edge: renamed ? stampEdge(renamed, e, opProducedOf(deps, EDGE_PRODUCED_STAGES.standardsFix)) : e }
+        },
+        same: sameEdge,
     })
     // 先記後寫:本篇與鄰居記待投影、總覽待重建
     ledgers.touch([slug, ...plan.neighbors])
@@ -726,9 +747,10 @@ export async function restoreNote(deps, slug, opt = {}) {
     const rank = typeRankOf(domain)
     const plan = await edgePlanOf({
         arc, slug, noteOf, last: retiredEdgesOf(readAuditRows(path.join(dirs.state, LEDGER_FILES.retired))), get: (id) => stores.relations.get(id),
+        // 納入閘有確定性修正者(g.fixes)為標準修正:追加 standards-fix 之產出者;無修正者原樣放回(帶撤出前之產出鏈)
         decide: (e, other, otherNote) => {
             const g = gateRestore(e, domain, new Map([[slug, rec], [other, otherNote]]), given, deps.locale)
-            return g.ok ? { ok: true, edge: g.edge } : { ok: false, reasons: g.reasons }
+            return g.ok ? { ok: true, edge: g.fixes.length ? stampEdge(g.edge, e, opProducedOf(deps, EDGE_PRODUCED_STAGES.standardsFix)) : g.edge } : { ok: false, reasons: g.reasons }
         },
         same: sameVisible,
     })
@@ -1101,7 +1123,9 @@ export async function restoreEdge(deps, id, opt = {}) {
     if (isRuling && !stores.checks) throw new Error(`restoreEdge 還原撤出理由 ${rec.reason} 之邊即裁示（${ruling.std}），須 stores.checks 記檢核紀錄——否則存量佇列會再核對而迴圈`)
     await projectAffected(deps, [e.from, e.to], { ledgers, project: false })
     const rank = typeRankOf(domain)
-    const edge = resumed ? cur : (await persistEdge(stores.relations, g.edge, { rank, conflictType: domain.conflictType, allowTypeChange: false })).edge
+    // 產出鏈:原樣還原者帶撤出前之產出鏈;使用者給了新理由或納入閘有確定性修正者,邊值已非當時產出者所出,追加 standards-fix 之產出者(規格未列使用者還原,取最近之階段)
+    const toWrite = reasonReplaced || g.fixes.length ? stampEdge(g.edge, e, opProducedOf(deps, EDGE_PRODUCED_STAGES.standardsFix)) : g.edge
+    const edge = resumed ? cur : (await persistEdge(stores.relations, toWrite, { rank, conflictType: domain.conflictType, allowTypeChange: false })).edge
     const st = await restoredStandards(deps, edge, pair, { ...std0, apply: true })
     appendAudit(ledgers.files.retired, { at: deps.clock.iso8(), reason: 'restored', restoredFrom: rec.reason, ...(reasonReplaced ? { reasonReplaced: true } : {}), edge })
     // 非裁示之還原:兩端在撤出後內容變更且已評完者清其評完標記(放回之邊未經其本版本裁決——未判不記已審);裁示即使用者之判定,不重評
@@ -1168,6 +1192,9 @@ async function revertedStandards(deps, edge, notes, o) {
  * @param {Object} [opt={}] 輸入 { apply:Boolean, conflictCheck?:Boolean(未給依 deps.settings,皆無則登錄), project?:Boolean(預設 true:套用後當場投影兩端) }
  * @returns {Promise} 回傳 Promise，resolve 回傳 { id, found, ledger?:'reeval'|'conflictCheck'|'edgeReview', std?, revertOf?(該改寫列之 at), revertible, reason(不可撤回之原因),
  *   applied, from?:{ type, reason }(撤回前＝AI 寫入之值), to?:{ type, reason }(回復後之值), fixes?, ruling:String(視為使用者裁示之標準 id——該段帳之標準;無為 ''),
+ *   producedUndo?:{ done:Boolean, how:'row'｜'history'｜'none', why?:String }(邊之產出鏈之撤銷:撤回＝可見內容換回改寫前之值,故撤銷該次改寫所留之產出鏈、不追加;
+ *   how 'row'＝稽核列帶改寫前之三欄而換回、'history'＝由現行邊退一筆(列無此欄之舊帳列,或改寫前本無產出鏈而三欄移除)、'none'＝無須動或判不了;done 為 false 時不動並帶
+ *   why〔stores/edgeProvenance 之 PRODUCED_UNDO_WHY:history-mismatch、stage-mismatch、at-unverifiable、newer-than-row、history-dropped〕;預演亦帶),
  *   rs4Queued:Boolean(預演為「將登錄」), projected? }
  * @throws {Error} 缺 deps.domain(任何寫入前)、世代不符、套用裁示而未開 checks 集合(任何寫入前)時拋出
  * @example
@@ -1237,16 +1264,21 @@ export async function revertEdgeRevision(deps, id, opt = {}) {
     const ruling = (std === RS4 && isConflict) || (std === RS6 && !isConflict)
     const how = `使用者以 revertEdgeRevision 撤回${ledger.label}之改寫（${base.revertOf}）——${std === RS5 ? '回復改寫前之值' : `裁示${std === RS4 ? '為真衝突' : '關聯成立'}；此值不再自動${std === RS4 ? '核對' : '覆核'}`}`
     const std0 = { ledger, ruling, how, conflictCheck: conflictCheckOf(deps, opt), source: `revertEdgeRevision 撤回${ledger.label}之改寫` }
-    if (opt.apply !== true) return { ...base, revertible: true, reason: '', applied: false, from, to, fixes: g.fixes, ...(await revertedStandards(deps, g.edge, pair, { ...std0, apply: false })) }
+    // 產出鏈:撤回＝可見內容換回改寫前之值,故撤銷該次改寫所留之產出鏈(不追加新紀錄;produced＝現行可見內容之產出者)。取法見 stores/edgeProvenance 檔頭【撤銷而非追加】:
+    //   稽核列 edge 帶改寫前之三欄者原樣換回(how 'row');否則由現行邊判(how 'history'),判不了則不動並帶原因字樣(PRODUCED_UNDO_WHY)
+    const undo = producedUndoPlanOf(cur, row, EDGE_PRODUCED_STAGES[ledger.key])
+    const producedUndo = { done: undo.done, how: undo.how, ...(undo.why ? { why: undo.why } : {}) }
+    if (opt.apply !== true) return { ...base, revertible: true, reason: '', applied: false, from, to, fixes: g.fixes, producedUndo, ...(await revertedStandards(deps, g.edge, pair, { ...std0, apply: false })) }
     // 裁示須記檢核紀錄(否則存量佇列再核對而迴圈):任何寫入前驗
     if (ruling && !stores.checks) throw new Error(`revertEdgeRevision 撤回${ledger.label}之改寫即裁示（${std.std}），須 stores.checks 記檢核紀錄——否則存量佇列會再核對而迴圈`)
     // 改寫(兩端記待投影、總覽待重建、衝突降級事件、AI 寫入之值入 history、updatedAt＝現在;與各段之改寫同一件)
-    const w = await rewriteEdge({ relations: stores.relations, ledgers, stateDir: deps.dirs.state }, cur, g.edge, { rank: typeRankOf(domain), at: now, conflictTypes: domain.conflictTypeNames, hasNote: (x) => pair.has(x) })
+    // 產出鏈三欄換成改寫前之值(undo.restore;null＝判不了、不動)
+    const w = await rewriteEdge({ relations: stores.relations, ledgers, stateDir: deps.dirs.state }, cur, g.edge, { rank: typeRankOf(domain), at: now, conflictTypes: domain.conflictTypeNames, hasNote: (x) => pair.has(x), ...(undo.restore ? { restoreProduced: undo.restore } : {}) })
     const st = await revertedStandards(deps, w.edge, pair, { ...std0, apply: true })
-    appendAudit(ledgers.files[ledger.key], { at: now, entry: 'user', edgeId: id, edge: { from: cur.from, to: cur.to, type: cur.type, reason: cur.reason }, outcome: REVERTED_OUTCOME, revertOf: row.at, written: { type: w.edge.type, reason: w.edge.reason }, ...(ledger.key === 'reeval' ? { note: row.note, version: row.version } : {}) })
+    appendAudit(ledgers.files[ledger.key], { at: now, entry: 'user', edgeId: id, edge: { from: cur.from, to: cur.to, type: cur.type, reason: cur.reason }, outcome: REVERTED_OUTCOME, revertOf: row.at, written: { type: w.edge.type, reason: w.edge.reason }, producedUndo, ...(ledger.key === 'reeval' ? { note: row.note, version: row.version } : {}) })
     let projected = null
     if (opt.project !== false) projected = await projectNotes(deps, [cur.from, cur.to], { ledger: ledgers.dirty })
-    return { ...base, revertible: true, reason: '', applied: true, from, to, fixes: g.fixes, ...st, projected }
+    return { ...base, revertible: true, reason: '', applied: true, from, to, fixes: g.fixes, producedUndo, ...st, projected }
 }
 
 export default { deleteNote, deletionStatusOf, undoDeleteNote, restoreNote, pruneDangling, projectAll, reevalBaseline, reevalRequeue, restoreEdge, revertEdgeRevision }

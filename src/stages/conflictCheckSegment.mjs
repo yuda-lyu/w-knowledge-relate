@@ -56,6 +56,7 @@ import { putHold, resolveHold, listHolds, holdKey, pipelineDueOf } from '../core
 import { recordCheck } from '../core/stores/checks.mjs'
 import { makeEdge, persistEdge, addToAdjacency, compareProposals } from '../stores/edgeStore.mjs'
 import { rewriteEdge } from '../stores/edgeRewrite.mjs'
+import { EDGE_PRODUCED_STAGES, PROPOSER_ROLE_OF_SEGMENT, voteOfVerdict, producedFieldsOf } from '../stores/edgeProvenance.mjs'
 import { appendAudit } from '../stores/relateLedgers.mjs'
 import { retireEdge } from '../stores/edgeRetire.mjs'
 import { readEdgeAudit, retiredEdgesOf } from '../stores/edgeAudit.mjs'
@@ -350,18 +351,26 @@ export async function runConflictCheckSegment(o) {
         let first = null
         for (const v of verdicts.filter((y) => isobj(y) && y.reason)) {
             const g = gateEdgeProposal(makeEdge({ from: x.edge.from, to: x.edge.to, type: v.type, reason: v.reason, nowIso: at }), gctx)
-            if (g.ok) return g
+            if (g.ok) return { ...g, by: v } // by＝被採用之裁決值(產出鏈之成交者由此回找該票:adoptedOf)
             first = first || g
         }
         return first || { ok: false, reasons: ['無可用之理由'] }
     }
+    // 產出鏈之成交者(stores/edgeProvenance 檔頭【席位與成交者】):keep 原樣落地之提案＝提案席('proposer',供應者＝提案之實際成交者,提示詞角色依提案來源段);
+    //   reason／downgrade＝採用其改寫值之那一票(seat 與 provider 同稽核列 votes 之該票)。找不到(無票可回找)＝不寫產出鏈
+    const proposerOf = (x) => ({ seat: 'proposer', provider: x.proposer, role: PROPOSER_ROLE_OF_SEGMENT[x.segment] || 'relate' })
+    const adoptedOf = (x, by) => {
+        const v = voteOfVerdict(x.votes, by)
+        return v ? { seat: v.seat, provider: v.provider || '', role: 'conflict-check' } : null
+    }
+    const producedOf = (who) => (rt.prov && who ? rt.prov.make({ stage: EDGE_PRODUCED_STAGES.conflictCheck, seat: who.seat, provider: who.provider, role: who.role }) : undefined)
     // 核對帳之入口欄:hold:<物件>｜'stock'(存量;帳列之持久化值)｜'proposal'
     const audit = (x, outcome, extra = {}) => appendAudit(files.conflictCheck, { at: nowIso(), entry: x.hold && !memIds.has(x.edge.id) ? `hold:${x.hold.object}` : (x.fromBacklog ? 'stock' : x.kind), edgeId: x.edge.id, edge: { from: x.edge.from, to: x.edge.to, type: x.edge.type, reason: x.edge.reason }, votes: (x.votes || []).map(voteRow), outcome, ...(x.kind === 'proposal' ? { segment: x.segment } : {}), ...extra })
-    const writeProposal = async (x, e) => rt.mutex(async () => {
+    const writeProposal = async (x, e, who) => rt.mutex(async () => {
         // 先記後寫:端點記待投影＋總覽待重建(帳之 touch;總覽不只靠輪末之 ctx 旗標——中途被砍亦不漏)
         rt.ledgers.touch([e.from, e.to], { has: (id) => byId.has(id) })
         // admit:完整全序模式下浮上之 history 條目再驗(stores/edgeStore 檔頭【history 浮上再驗】;relateStage 之 rt 提供)
-        const res = await persistEdge(stores.relations, e, { rank: rt.rank, conflictType: rt.conflictType, allowTypeChange: rt.createdThisRun.has(e.id), admit: rt.admitSurfaced })
+        const res = await persistEdge(stores.relations, e, { rank: rt.rank, conflictType: rt.conflictType, allowTypeChange: rt.createdThisRun.has(e.id), admit: rt.admitSurfaced, produced: producedOf(who) })
         if (res.surfaceRejected) det.rs4SurfaceRejected++
         if (res.created) rt.createdThisRun.add(res.edge.id)
         if (res.changed) addToAdjacency(rt.adj, res.edge)
@@ -470,7 +479,7 @@ export async function runConflictCheckSegment(o) {
                 audit(x, 'std-reject', { problems: g.reasons })
                 continue
             }
-            const res = await writeProposal(x, g.edge)
+            const res = await writeProposal(x, g.edge, action === 'keep' ? proposerOf(x) : adoptedOf(x, g.by))
             det.rs4Written++
             if (action === 'keep') det.rs4Kept++
             else if (action === 'reason') det.rs4ReasonFixed++
@@ -532,7 +541,7 @@ export async function runConflictCheckSegment(o) {
             }
             // 閘後截短之理由帶 reasonCut(stores/edgeStore 檔頭【理由截短之明示】);降級事件由 rewriteEdge 依型別判(與重評、覆核同一件)
             const proposal = { ...makeEdge({ from: cur.from, to: cur.to, type: g.edge.type, reason: g.edge.reason, nowIso: now }), ...(g.edge.reasonCut ? { reasonCut: g.edge.reasonCut } : {}) }
-            const w = await rewriteEdge(ledgers, cur, proposal, { rank: rt.rank, at: now, conflictTypes: domain.conflictTypeNames, hasNote: (id) => byId.has(id), adj: rt.adj })
+            const w = await rewriteEdge(ledgers, cur, proposal, { rank: rt.rank, at: now, conflictTypes: domain.conflictTypeNames, hasNote: (id) => byId.has(id), adj: rt.adj, produced: producedOf(adoptedOf(x, g.by)) })
             return { r: action, edge: w.edge }
         })
         if (res.r === 'stale') {
@@ -562,7 +571,8 @@ export async function runConflictCheckSegment(o) {
             await recordEdge(x.edge, STATUS.VIOLATION, `兩席判非衝突，改為「${res.edge.type}」`, x.votes)
         }
         await resolve(x, res.r === 'reason' ? '真衝突，理由已改寫為陳述雙方' : `非衝突，已改為「${res.edge.type}」`)
-        audit(x, res.r, { written: { type: res.edge.type, reason: res.edge.reason } })
+        // 改寫列之 edge 另帶改寫前之產出鏈三欄(新增欄位;revertEdgeRevision 撤回時據以撤銷該次改寫所留之產出鏈;改寫前無產出鏈者不帶)
+        audit(x, res.r, { edge: { from: x.edge.from, to: x.edge.to, type: x.edge.type, reason: x.edge.reason, ...producedFieldsOf(x.edge) }, written: { type: res.edge.type, reason: res.edge.reason } })
         log.info(`衝突核對：${label(x)} ${res.r === 'reason' ? '理由改寫' : `判非衝突，改為「${res.edge.type}」`}（${oneline(res.edge.reason, 80)}）`)
     }
     await finish()

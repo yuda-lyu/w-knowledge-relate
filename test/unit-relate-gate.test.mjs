@@ -289,7 +289,8 @@ describe('unit-relate-gate', function() {
             assert.deepEqual(readAuditRows(ledgers.files.retired).map((x) => [x.reason, x.detail, x.edge.id]), [e1, e2, e3].map((e) => ['std-retire', 'RS2 理由空泛', e.id]))
             assert.deepEqual([ledgers.dirty.ids(), ledgers.state.get().indexDirty, adj.get('a').size, ledgers.reverse.pairs().map((p) => p.o)], [['a', 'b', 'c'], true, 0, ['c']])
             // 封閉清單(rs4-retire／rs4-quarantine:衝突核對 RS4 之撤銷與隔離,2026-10-04 D 段;rs6-retire／rs6-quarantine:既有邊覆核 RS6,2026-10-05)
-            assert.deepEqual(RETIRE_REASONS, ['note-deleted', 'prune-dangling', 'reeval-retire', 'std-retire', 'rs4-retire', 'rs4-quarantine', 'rs6-retire', 'rs6-quarantine'])
+            //   reprocess:使用端依產出鏈選件(ops/provenanceOps)後撤出重處理之理由(只登記常數,撤出流程不變;邊之產出鏈見 unit-relate-provenance)
+            assert.deepEqual(RETIRE_REASONS, ['note-deleted', 'prune-dangling', 'reeval-retire', 'std-retire', 'rs4-retire', 'rs4-quarantine', 'rs6-retire', 'rs6-quarantine', 'reprocess'])
             // 回驗:刪不掉即拋錯
             const stuck = { get: async () => e1, del: async () => {} }
             await assert.rejects(() => retireEdge({ ...deps, relations: stuck }, e1, { reason: 'std-retire', at: AT }), /撤出後回驗仍在/)

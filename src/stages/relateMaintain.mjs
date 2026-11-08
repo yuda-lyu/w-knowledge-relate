@@ -13,6 +13,7 @@
 import isobj from 'wsemi/src/isobj.mjs'
 import { noteConsumedOf } from '../core/capturePackage.mjs'
 import { writeEdge, domainTypeRenamerOf, buildAdjacency } from '../stores/edgeStore.mjs'
+import { stampEdge, EDGE_PRODUCED_STAGES } from '../stores/edgeProvenance.mjs'
 import { LEDGER_FILES } from '../stores/relateLedgers.mjs'
 import { retireEdge } from '../stores/edgeRetire.mjs'
 import { needsReeval } from '../stores/relatedNotes.mjs'
@@ -22,7 +23,8 @@ import { queueEdgeReview } from '../standards/edgeQueue.mjs'
 /**
  * 開工前之維護(無 AI;見檔頭):型別改名之改寫與清單外告警(既有邊覆核開啟時另登錄 RS6 待判)、墓碑驅動之懸空清理、內容變更之反應
  *
- * @param {Object} o 輸入 { stores, edges, byId, ledgers, domain, stateDir, nowIso, log, edgeReviewOn:Boolean(relate.standards.edgeReview.enabled) }
+ * @param {Object} o 輸入 { stores, edges, byId, ledgers, domain, stateDir, nowIso, log, edgeReviewOn:Boolean(relate.standards.edgeReview.enabled),
+ *   prov?:Object(邊之產出鏈之產出者工廠,stores/edgeProvenance 之 createEdgeProvenance;型別改名之改寫追加 standards-fix 之產出者;未給即不寫產出鏈) }
  * @returns {Promise} 回傳 Promise，resolve 回傳 { edges(清理後), typeRenamed, typeOffList, typeOffListQueued, retired, dangling, changedSeen, changedTouchExtracted }
  * @example
  * let state = fs.mkdtempSync(path.join(os.tmpdir(), 'rel-'))
@@ -54,7 +56,9 @@ export async function maintainRelations(o) {
     if (renameOf) {
         const out = []
         for (const e of edges) {
-            const next = renameOf(e)
+            const renamed = renameOf(e)
+            // 產出鏈(stores/edgeProvenance):機械改寫不呼叫 AI,階段 standards-fix、seat 與 provider 同時 null(o.prov 未給即不寫)
+            const next = renamed ? stampEdge(renamed, e, o.prov?.make({ stage: EDGE_PRODUCED_STAGES.standardsFix, seat: null, provider: null })) : null
             if (next) {
                 // 先記後寫(帳之 touch;中途被砍亦兩端重投)
                 ledgers.touch([e.from, e.to], { has: (x) => byId.has(x) })

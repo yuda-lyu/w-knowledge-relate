@@ -28,6 +28,7 @@ export const RELATE_INDEX_TOP_N = 40
  * @param {String} [cfg.nowIso] 輸入現在時刻 ISO 字串，寫入 frontmatter 之 updated
  * @param {Integer} [cfg.indexTopN=RELATE_INDEX_TOP_N] 輸入 index.md 顯示筆數上限(依連結數降冪)
  * @param {String} [cfg.indexTitle=RELATE_INDEX_TITLE] 輸入標題
+ * @param {Boolean} [cfg.graphProduced=false] 輸入 graph.json 之邊是否另帶產出鏈之純量摘要 produced:{ stamp, stage, provider }(邊記錄無產出鏈者不帶);只收 true,其餘視為 false
  * @returns {Promise} 回傳 Promise，resolve 無回傳值(副作用為寫入 index.md 與 graph.json)
  * @throws {Error} cfg 非物件或 cfg.dir 非有效字串時拋出；stores.relations／stores.notes 缺 select 方法時拋出
  * @example
@@ -70,6 +71,9 @@ export async function rebuildRelationIndex(stores, cfg) {
     const degree = (id) => (byFrom.get(id)?.length || 0) + (byTo.get(id)?.length || 0)
     const shown = allIds.slice().sort((a, b) => degree(b) - degree(a) || String(a).localeCompare(String(b))).slice(0, topN)
 
+    // graph.json 之邊是否帶產出鏈之純量摘要(只收 true;預設不帶——graph.json 與無產出鏈時逐位元組相同;舊邊無產出鏈者不帶)
+    const graphProduced = cfg.graphProduced === true
+
     const title = cfg.indexTitle || RELATE_INDEX_TITLE
     // frontmatter 走摘要套件之 renderFrontmatter(與筆記同一序列化):手寫 `title: "${title}"` 遇標題含雙引號即產出解析不回去的檔頭
     const lines = [renderFrontmatter({ title, type: 'relation-index', updated: cfg.nowIso, edges: edges.length, nodes: allIds.length, shown: shown.length }), '',
@@ -86,7 +90,7 @@ export async function rebuildRelationIndex(stores, cfg) {
     writeFileAtomic(path.join(cfg.dir, 'graph.json'), JSON.stringify({
         updatedAt: cfg.nowIso,
         nodes: notes.map((n) => ({ id: n.id, title: n.title, category: n.category, concepts: n.concepts || [] })),
-        edges: edges.map((e) => ({ from: e.from, to: e.to, type: e.type, reason: e.reason })),
+        edges: edges.map((e) => ({ from: e.from, to: e.to, type: e.type, reason: e.reason, ...(graphProduced && isobj(e.produced) ? { produced: { stamp: e.produced.stamp, stage: e.produced.stage, provider: e.produced.provider } } : {}) })),
     }, null, 2))
 }
 
@@ -98,6 +102,7 @@ export async function rebuildRelationIndex(stores, cfg) {
  * @param {Object} [opt={}] 輸入設定物件，非物件則視為{}
  * @param {Integer} [opt.indexTopN] 輸入 index.md 顯示筆數上限，傳給 rebuildRelationIndex
  * @param {String} [opt.indexTitle] 輸入標題，未給則用 settings.relationIndexTitle
+ * @param {Boolean} [opt.graphProduced] 輸入 graph.json 之邊是否帶產出鏈之純量摘要，未給則用 settings.relate.graphProduced(預設 false)
  * @returns {Object} 回傳 defineMw 產物
  * @example
  * let dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rel-'))
@@ -124,7 +129,7 @@ export const mwRebuildRelationIndex = (opt = {}) => {
         name: 'rebuild',
         handle: async (msg, ctx, next) => {
             const { stores, clock, dirs } = ctx.deps
-            await rebuildRelationIndex(stores, { dir: dirs.relations, nowIso: clock.iso8(), indexTopN: opt.indexTopN, indexTitle: opt.indexTitle || ctx.deps.settings.relationIndexTitle })
+            await rebuildRelationIndex(stores, { dir: dirs.relations, nowIso: clock.iso8(), indexTopN: opt.indexTopN, indexTitle: opt.indexTitle || ctx.deps.settings.relationIndexTitle, graphProduced: opt.graphProduced ?? ctx.deps.settings?.relate?.graphProduced })
             return next(msg)
         },
     })
@@ -138,6 +143,7 @@ export const mwRebuildRelationIndex = (opt = {}) => {
  * @param {Object} [opt.tap] 輸入認名掛載規格(applyTaps 之 taps)
  * @param {Integer} [opt.indexTopN] 輸入 index.md 顯示筆數上限
  * @param {String} [opt.indexTitle] 輸入標題
+ * @param {Boolean} [opt.graphProduced] 輸入 graph.json 之邊是否帶產出鏈之純量摘要，未給則用 settings.relate.graphProduced(預設 false)
  * @returns {Object} 回傳 stage 物件 { name, when, run }
  * @example
  * let dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rel-'))

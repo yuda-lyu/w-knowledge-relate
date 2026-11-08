@@ -6,7 +6,8 @@
 //   中途被砍:多記之 dirty／事件／稽核無害(事件之效力由讀者以「邊當下仍非衝突」覆核);反之先刪後記則撤出不可追溯、兩端永不重投。
 // 【理由(封閉清單)】note-deleted(明示刪除筆記;撤銷刪除 undoDeleteNote 或還原筆記 restoreNote 時一併放回)、prune-dangling(懸空清理)、
 //   reeval-retire(重評兩席一致撤銷)、std-retire(存量未達檢定標準之處置)、rs4-retire(衝突核對兩席一致判無知識關聯)、rs4-quarantine(衝突核對
-//   未能判定之隔離;待使用者判讀)、rs6-retire(既有邊覆核兩席一致判無知識關聯)、rs6-quarantine(既有邊覆核未能判定之隔離;待使用者判讀)。
+//   未能判定之隔離;待使用者判讀)、rs6-retire(既有邊覆核兩席一致判無知識關聯)、rs6-quarantine(既有邊覆核未能判定之隔離;待使用者判讀)、
+//   reprocess(使用端依產出鏈〔ops/provenanceOps 之 edgesByProvenance〕選出之邊,撤出後由兩端重投重關聯;只登記此理由,撤出流程與稽核格式不變)。
 //   RESTORABLE_REASONS 可由 restoreEdge 依稽核還原(還原前須再過納入閘;note-deleted 須兩端皆在——還原筆記時未過納入閘或對方當時不在之邊之補救)。
 // 【稽核亦記還原】restoreEdge、restoreNote、undoDeleteNote 放回後追加 { reason:'restored', restoredFrom, edge, … }(撤出與還原同一份紀錄,
 //   依寫入序可追溯;最後一筆為撤出者即「在撤出中」——stores/edgeAudit 之 retiredEdgesOf)。
@@ -16,9 +17,9 @@ import { appendAudit } from './relateLedgers.mjs'
 import { removeFromAdjacency } from './edgeStore.mjs'
 
 /** 撤出理由(封閉清單) */
-export const RETIRE_REASONS = ['note-deleted', 'prune-dangling', 'reeval-retire', 'std-retire', 'rs4-retire', 'rs4-quarantine', 'rs6-retire', 'rs6-quarantine']
+export const RETIRE_REASONS = ['note-deleted', 'prune-dangling', 'reeval-retire', 'std-retire', 'rs4-retire', 'rs4-quarantine', 'rs6-retire', 'rs6-quarantine', 'reprocess']
 /** 可由 restoreEdge 依稽核還原之撤出理由(note-deleted 另須兩端皆在;檔頭【理由】) */
-export const RESTORABLE_REASONS = ['note-deleted', 'prune-dangling', 'reeval-retire', 'std-retire', 'rs4-retire', 'rs4-quarantine', 'rs6-retire', 'rs6-quarantine']
+export const RESTORABLE_REASONS = ['note-deleted', 'prune-dangling', 'reeval-retire', 'std-retire', 'rs4-retire', 'rs4-quarantine', 'rs6-retire', 'rs6-quarantine', 'reprocess']
 
 /**
  * 撤出一條邊

@@ -101,6 +101,11 @@ export const RELATE_DEFAULT = {
         //   預設關閉:掃描逐邊讀兩端筆記,大庫耗時;由安裝端依庫規模開啟
         scanEachRun: false,
     },
+
+    // ── 產出鏈(produced;跨套件規格〈知識套件之產出鏈〉)──
+    // 邊記錄恆帶產出鏈(produced、producedHistory、producedHistoryDropped;見 stores/edgeProvenance)。本開關只管投影:true 時 graph.json 之邊
+    //   另帶 produced 之純量摘要 { stamp, stage, provider }(舊邊無產出鏈者不帶);false(預設)時 graph.json 與無產出鏈時逐位元組相同
+    graphProduced: false,
 }
 
 /**
@@ -130,6 +135,7 @@ export const RELATE_SCHEMA = {
         ai: PANEL_SCHEMA,
         scanEachRun: 'bool',
     },
+    graphProduced: 'bool',
 }
 
 
@@ -414,9 +420,33 @@ export function relateSeatOf(settings, key) {
     }
 }
 
+/** 單一呼叫點之段名(relateSeatPathOf):正向、反向、輪巡(同一條逐項鏈之 msg.data._segment) */
+export const RELATE_SEGMENTS = Object.freeze(['forward', 'reverse', 'rotation'])
+
+/**
+ * 單一呼叫點之段實際使用之席位之「設定路徑」(產出鏈 produced.seat 之值;與 relateSeatOf 同一條沿用規則——席位本身由 relateSeatOf 取):
+ *   forward ＝ 'relate.ai';reverse、rotation ＝ relate.reverse.ai 已設者為 'relate.reverse.ai',未設即沿用而為 'relate.ai'
+ *
+ * @param {Object} settings 輸入已解析之設定(取 relate;未給或非物件視為全未設)
+ * @param {String} segment 輸入 RELATE_SEGMENTS 之一
+ * @returns {String} 回傳設定路徑
+ * @throws {Error} segment 不在 RELATE_SEGMENTS 時拋出(必須參數,訊息不回顯輸入值)
+ * @example
+ * const s = resolveRelateSettings({ relate: { reverse: { ai: { use: 'x:a' } } } })
+ * console.log(relateSeatPathOf(s, 'forward'), relateSeatPathOf(s, 'reverse'), relateSeatPathOf(s, 'rotation'), relateSeatPathOf(resolveRelateSettings({}), 'reverse'))
+ * // => relate.ai relate.reverse.ai relate.reverse.ai relate.ai
+ */
+export function relateSeatPathOf(settings, segment) {
+    if (!RELATE_SEGMENTS.includes(segment)) throw new Error(`invalid segment: must be one of ${RELATE_SEGMENTS.map((x) => `'${x}'`).join(', ')}`)
+    if (segment === 'forward') return 'relate.ai'
+    return settings?.relate?.reverse?.ai ? 'relate.reverse.ai' : 'relate.ai'
+}
+
 
 export default {
     RELATE_AI_DEFAULT, RELATE_AI_SCHEMA, RELATE_DEFAULT, RELATE_SCHEMA, RELATE_SETTING_TYPES, RELATE_INDEX_TITLE,
     resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, callTimeoutMsOf, relateWarningsOf,
     RELATE_FEATURES, relateFeatureProblems, relatePanelsOf, RELATE_SEAT_LABELS, relateSeatsOf, RELATE_SEAT_KEYS, relateSeatOf,
+    RELATE_SEGMENTS,
+    relateSeatPathOf,
 }

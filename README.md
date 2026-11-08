@@ -302,6 +302,7 @@ createKnowledgeRelate({
 | `relate.standards.edgeReview` | `enabled`／`perRun`／`pageSize`／`maxTries`／`deadline` | false／0／10／3／`''` | 既有邊覆核(RS6);`deadline` 為完成期限(ISO 日期,`''` 不設;給了即隨報告帶出) |
 | `relate.standards` | `ai` | `{ first:null, second:null, third:null }` | 衝突核對與既有邊覆核共用之判定小組(開啟時 first、second 必填) |
 | | `scanEachRun` | false | 每輪結束掃一次可確定性判定之標準(逐邊讀兩端筆記,大庫耗時) |
+| `relate` | `graphProduced` | false | `graph.json` 之邊是否另帶產出鏈之純量摘要 `produced:{ stamp, stage, provider }`(預設不帶,`graph.json` 與無產出鏈時逐位元組相同;邊記錄恆帶產出鏈,見 §12〈邊之產出鏈〉) |
 | `ai` | 抓取套件之 `AI_SCHEMA` 各鍵 | 同抓取套件 | `timeoutMs`、`maxRetries`、`cooldownMs`、`providerTimeouts`、`extraProviders`、`pools`、`providerLimits` |
 | | `healthStreak`／`parallel` | 3／3 | 供應商健康降序之門檻／同時併發之 AI 呼叫數(同摘要套件之 `ai` 段) |
 | `relationIndexTitle` | — | `'知識關聯總覽'` | 關聯總覽之標題(非空字串) |
@@ -373,7 +374,7 @@ createKnowledgeRelate({
 
 ## 9. 組裝與依賴(deps)
 
-**每輪依賴**(總組裝每輪開啟後交入;只放可列舉之普通屬性):`{ stores, clock, dirs, data, vocab, settings, ai, domains }`。套件子階段與自寫子階段同一條注入通道。
+**每輪依賴**(總組裝每輪開啟後交入;只放可列舉之普通屬性):`{ stores, clock, dirs, data, vocab, locale, settings, ai, domains, promptFpOf }`。套件子階段與自寫子階段同一條注入通道。`promptFpOf(評比角色 id)` 為邊之產出鏈之提示詞指紋(每輪一個快取實例;角色 `relate`／`reeval`／`conflict-check`／`edge-review`;算不出回 `null`),他總組裝驅動子階段者可不給(不給即邊之產出鏈無 `promptFp` 欄)。
 
 **子階段之依賴契約(只讀)**——他總組裝以自己之每輪依賴驅動 `createRelateObject` 者,依此給即可:
 
@@ -431,7 +432,7 @@ const rt = createRelateRuntime(cfg, settings, {
 | `<log>/<日>/<時間戳>-run.start.json` | 開工標記(本輪上限之宣告);取鎖之前寫入 |
 | `<log>/<日>/<時間戳>-run.log` | 本輪日誌 |
 | `<log>/<日>/<時間戳>-run.json` | 結構化摘要(管線名預設「知識關聯」〔`cfg.name` 可覆寫〕、段「關聯」與三個子階段之 report、AI 實績;掃描開啟時另有 `standards`) |
-| `<relations>/index.md`、`<relations>/graph.json` | 關聯總覽 |
+| `<relations>/index.md`、`<relations>/graph.json` | 關聯總覽(`graph.json` 之邊預設只有 `from`／`to`／`type`／`reason`;`relate.graphProduced` 開啟時另帶 `produced:{ stamp, stage, provider }`) |
 | 各筆記之 md | 「關聯」「⚠ 衝突與反例」兩章與 frontmatter |
 | `<state>/relate-dirty.json`、`relate-reverse.json`、`relate-state.json` | 待投影、反向待處理對、總覽待重建 |
 | `<state>/relate-tombstones.json`、`<state>/deleted-notes/` | 刪除紀錄(時刻＋理由)、封存(記錄、理由、其邊、md 副本) |
@@ -458,7 +459,7 @@ const rt = createRelateRuntime(cfg, settings, {
 | `deletionStatusOf(deps, slug)` | 否 | 一篇之刪除狀態(記錄、墓碑、封存、仍連到之邊數、md、`complete`;存量處置之連鎖斷言與維運查詢用) |
 | `restoreNote(deps, slug, { dryRun, project, conflictCheck, withHolds })` | 是(預演除外) | **重新收件**:由封存還原記錄、md 與兩端仍在之邊;`dryRun` 純讀預演(列將還原、將拒絕之理由);可續作:筆記本身經 `deps.noteGate`(仍不合格者不還原,`withHolds` 明示接受則照還原並登錄待判;回傳之 `std` 帶確定性修正、待判之標準與 `contentChanged`／`titleChanged` 兩旗標——已被下游消化者任一為真即須請下游重設基準),邊經納入閘(不合格者列出不還原);帶回之衝突邊登錄衝突核對之待判(`conflictCheck:false` 或 `deps.settings` 之衝突核對未開者不登錄) |
 | `restoreEdge(deps, id, { apply, reason, conflictCheck })` | apply 時 | 依稽核還原一條被撤出之邊(重評撤銷、標準撤銷、懸空清理、衝突核對／既有邊覆核之撤出與隔離;刪筆記之邊以 `restoreNote`):過納入閘;撤出時之理由不合標準者可給新理由(`reason`);還原兩席撤出或隔離之邊＝使用者對該標準之裁示 |
-| `revertEdgeRevision(deps, id, { apply, conflictCheck, project })` | apply 時 | 撤回一條邊最後一筆由判定小組套用之改寫(重評帳 `applied`、核對帳 `reason`／`downgrade`、覆核帳 `reason`／`retype`／`upgrade`;三帳合併取最後一筆,為 `reverted` 者不可逆):現值須仍為該次改寫之結果、兩端皆在、改寫前之值過納入閘(不給新理由)才回復(`rewriteEdge`:AI 寫入之值入沿革、`updatedAt`＝現在、衝突降級寫事件帳);同一帳追加 `reverted`(`revertOf`＝該列 `at`)。撤回核對／覆核之改寫＝使用者對 RS4／RS6 之裁示(待判結案、檢核記合格 seats `user`;須 `checks`);撤回重評之改寫 → 該邊之 RS5 待判結案,回復之衝突型邊未經核對者登錄 RS4 待判。提案列(新衝突之落地,含升級交核對者)不在列——其帳列無改寫前之現值 |
+| `revertEdgeRevision(deps, id, { apply, conflictCheck, project })` | apply 時 | 撤回一條邊最後一筆由判定小組套用之改寫(重評帳 `applied`、核對帳 `reason`／`downgrade`、覆核帳 `reason`／`retype`／`upgrade`;三帳合併取最後一筆,為 `reverted` 者不可逆):現值須仍為該次改寫之結果、兩端皆在、改寫前之值過納入閘(不給新理由)才回復(`rewriteEdge`:AI 寫入之值入沿革、`updatedAt`＝現在、衝突降級寫事件帳);同一帳追加 `reverted`(`revertOf`＝該列 `at`)。撤回核對／覆核之改寫＝使用者對 RS4／RS6 之裁示(待判結案、檢核記合格 seats `user`;須 `checks`);撤回重評之改寫 → 該邊之 RS5 待判結案,回復之衝突型邊未經核對者登錄 RS4 待判。提案列(新衝突之落地,含升級交核對者)不在列——其帳列無改寫前之現值。邊之產出鏈隨之**撤銷**(回傳 `producedUndo:{ done, how, why? }`;預演亦帶;取法見下〈邊之產出鏈〉) |
 | `pruneDangling(deps, { apply })` | apply 時 | 懸空邊(端點不在筆記庫)之清理:預設只列出(開錯集合時不致整批刪掉邊庫) |
 | `projectAll(deps, { all })` | 是 | 全庫或待投影帳之投影(帳檔損壞後補回、全庫重投) |
 | `reevalBaseline(deps, { apply, by, ruling })` | apply 時 | 重評之基準重設(單輪待重評篇數逾 `guard` 而不開工時):待重評之筆記記為已評完,須記裁示者與內容;該篇本版本之重評待判以同一裁示豁免 |
@@ -467,6 +468,23 @@ const rt = createRelateRuntime(cfg, settings, {
 | `queueConflictCheck(holds, { edgeId, from, to, reason, at, ctx?, owner?, next? })` | 是 | 既有衝突邊登錄衝突核對之待判(下游判其非對立時交回;已有未結者不重登;`ctx.stockStd` 給了而使用者已就同一問題豁免者不重開) |
 | `queueEdgeReview(holds, edge, { std, why, at, next? })` | 是 | 既有邊登錄既有邊覆核之待判(理由須重寫者;已有未結者不重登;使用者已就同一問題豁免者不重開) |
 | `queueConflictProposal(holds, { from, to, reason, reasonCut?, proposer?, segment?, proposedAt?, at })` | 是 | 新衝突之提案於暫緩當下持久為 RS4 提案待判(衝突核對開啟時各段自動呼叫;已有未結者不重登;使用者已豁免而理由未變者不重提) |
+| `edgesByProvenance(deps, { stamp?, stage?, provider?, seat?, since?, until?, history? })` | 否 | 依邊之產出鏈選邊(純讀;`deps`＝`{ stores:{ relations } }`),見下〈邊之產出鏈〉 |
+
+**邊之產出鏈(produced;跨套件規格〈知識套件之產出鏈〉)**:邊記錄每次「新建、改型、判定小組改寫、標準修正」追加一筆產出者,記錄帶三欄——`produced`(最後一筆)、`producedHistory`(至多最近 50 筆,舊→新;超出捨最舊並於 `producedHistoryDropped` 累計)、`producedHistoryDropped`。一筆產出者:`{ v:1, stamp, stage, seat, provider, promptFp?, pkg, at }`(組出與檢核取抓取套件之 `makeProduced`／`appendProduced`):
+
+| 欄 | 值 |
+|---|---|
+| `stamp` | 該輪之 14 碼 stamp(各段 `ctx.stamp`,同該輪 `run.json` 之 `stamp`);輪次外之維運件(`restoreEdge`、存量處置等)為 `null` |
+| `stage` | `relate`(正向與輪巡)、`reverse`、`reeval`、`conflict-check`、`edge-review`、`standards-fix`(型別改名、存量處置、還原時之確定性修正) |
+| `seat`／`provider` | 單一呼叫點(正向、反向、輪巡):`seat` 為設定路徑(`relate.ai`;反向與輪巡已設 `relate.reverse.ai` 者為之),`provider` 為該批呼叫結果之 `providerId`(**遞補時為遞補者**,不是席位之主席);判定小組改寫:為「被採用其改寫值之那一票」之席位(`first`／`second`／`third`)與供應者,與該段稽核列 `votes`(重評帳為 `verdicts`)之該票同名同值——多票皆合格取票序最前者;衝突核對之新提案原樣落地(keep)為提案席 `proposer`;不呼叫 AI 之寫入(`standards-fix`、使用者撤回)兩者同時為 `null`;`providerId` 為空字串(調度層未回成交者)者**不寫產出鏈**(不以占位字樣代之) |
+| `promptFp` | 該角色(`relate`／`reeval`／`conflict-check`／`edge-review`)「內建題組＋現行詞彙」組出之提示詞之指紋(評比機制之 `planBench().promptFp`);不含 `cfg.prompts` 之覆寫、不是該次呼叫實際送出內容之指紋;算不出、不呼叫 AI、經 UMD(`dist`)取用而內建題組不隨包者省略 |
+| `pkg`／`at` | 本套件之 `name@version`(由模組位置取得)／寫入時刻(本地時區 ISO,秒級) |
+
+- **只在「新建」與「可見欄位(`from`／`to`／`type`／`reason`)改變」時追加**:跨輪再現之提案落敗而只入 `history`、重評判定保留等不改邊者不追加——否則依輪次撤回邊時會誤傷只是被再提案之舊邊。
+- **舊邊不回填**:無 `produced` 之邊不出現在依產出鏈之選件結果;邊既有之 `createdAt`／`updatedAt` 不動、不另加 `at`(`produced.at` 即寫入時刻)。
+- **還原類**:`undoDeleteNote`、`restoreNote`、`restoreEdge` 原樣放回者帶撤出前之產出鏈(不追加);經型別改名、納入閘確定性修正或使用者給新理由而邊值已變者,追加 `standards-fix`。存量處置之回退(`rollbackEdgeStockFix`)撤銷該次處置所留之產出鏈(回退不是新的產出)。`revertEdgeRevision`(撤回判定小組之改寫)同為**撤銷**:撤回後可見內容為改寫前之值,`produced` 即改寫前之那一筆、`producedHistory` 少該次改寫之一筆,不追加新紀錄(改寫前無產出鏈者三欄移除)。改寫前之產出鏈取自三段稽核之改寫列(`edge` 另帶改寫前之 `produced`／`producedHistory`／`producedHistoryDropped`,新增欄位);列無此欄(舊帳列)者由現行邊判——`produced` 為歷史末筆、階段＝該段、寫入時刻不晚於該列之 `at` 時退一筆(歷史只有一筆而無捨去者＝改寫前無產出鏈);判不了則不動、撤回照做,回傳 `producedUndo:{ done:false, how:'none', why }`(`why` 為 `history-mismatch`／`stage-mismatch`／`at-unverifiable`／`newer-than-row`／`history-dropped` 之一;歷史滿 50 筆後之改寫已捨去最舊一筆,退一筆時 `producedHistoryDropped` 不減)。
+- **`edgesByProvenance(deps, query)`**:`query` 之 `stamp`(14 碼字串或 `null`)、`stage`(小寫連字號名)、`provider`／`seat`(非空字串或 `null`)全等,`since`／`until`(須帶 `Z` 或 `±hh:mm` 之時間字串;含端點、依時刻先後比對)比對 `produced.at`;條件皆為「且」;`history:true` 改比對 `producedHistory` 之任一筆(同一筆須同時滿足全部條件),回傳之 `produced` 為符合條件之最近一筆。回傳 `[{ edgeId, from, to, type, produced }]`(依 `produced.at`、同刻依 `edgeId`)。純讀、不新增寫入路徑;`deps` 無效、`query` 非一般物件、含未知之鍵或任一條件無效皆 reject(**不改用預設**——條件被當成未給會放寬成「全部有產出鏈之邊」,而選件之後接的是撤出)。
+- **選件 → 撤出 → 重關聯**:使用端以 `edgesByProvenance` 選出某輪或某供應者所出之邊,逐條以 `retireEdge`(撤出理由 `'reprocess'` 已登錄,可由 `restoreEdge` 依稽核還原;稽核列之邊值帶產出鏈)撤出,兩端再投、重關聯;撤出流程與稽核格式不變。
 
 **待判之處置屬抓取套件**:待判登錄(鍵 `<物件>:<id>:<標準>`;與抓取、摘要套件同一集合)之列表、逾期、要求重試、豁免——`listHolds`、`overdueHolds`、`requestRetry(holds, id, { at })`、`waiveHold(holds, id, { by, ruling, at })`——自抓取套件取用,本套件不轉出。本套件之待判字樣(原因與下一步)一律指本套件之 API 與選項,期限一律 `relateHoldDeadlineOf`。
 
@@ -610,6 +628,7 @@ createKnowledgeRelate({
 - **摘要套件之章名(「核心知識」等)於摘要套件內多處手寫**:本套件以契約測試驗其讀法(衝突核對與既有邊覆核之材料)對摘要套件之版型產物有效。
 - **衝突核對與既有邊覆核無動作鏈**(重評段有):兩段為分頁程序＋判定小組,客製以設定、提示詞與 domain 為之。
 - **還原閘由呼叫端注入**:`restoreNote` 未給 `deps.noteGate` 即 WARN 並原樣還原(筆記本身未經筆記標準)。本套件之詞彙子集不含摘要之鍵,內建還原閘須另收摘要之詞彙而增介面,故不內建;整合時注入摘要套件之 `createNoteRestoreGate({ stores, vocab, clock })`(§16)。撤銷刪除(`undoDeleteNote`)與存量處置之回退原樣還原、不經筆記標準(回退＝撤銷該次處置)。
+- **邊之產出鏈之取捨**:輪巡(規格未列)記為 `relate`;使用者之還原(規格未列)原樣放回者帶撤出前之產出鏈、確定性修正或使用者新理由者追加 `standards-fix`,撤回判定小組之改寫與存量處置之回退則撤銷該次所留之產出鏈、不追加(見 §12〈邊之產出鏈〉;撤回之舊帳列判不了改寫前之產出鏈者不動、回傳帶原因字樣,歷史滿 50 筆後退一筆時 `producedHistoryDropped` 不減);產出鏈之 `promptFp` 為「內建題組＋現行詞彙」之提示詞版本,不含 `cfg.prompts` 之覆寫;`promptFp` 之有無與歷史滿額輪替會使 `patch` 之合併回讀不符而走 `replace` 路徑落庫(同 `history` 變短之既有路徑,寫入後回讀驗)。
 - **非字串之沿革理由**:邊庫之沿革值皆為字串(本套件寫不出非字串);外部寫入之畸形資料若使 RS3 判定違反,確定性修正會略過而列為修不了 → 使用者待判(可豁免)。
 - **模型回覆含多段 JSON**(如先回一段、自我更正後再回完整一段):調度層(抓取套件之 `pickJsonReply`)由後往前取第一段過 `check` 者,即取更正後之那段。各段之 `check` 皆驗到項目之形狀(至少一項帶整數 `index`;重評另須 `verdicts` 陣列),尾隨說明之小片段(如「見 [3]」)不會被取;注入之調度層(`cfg.aiAdapter`)須自行遵守同一判準。
 

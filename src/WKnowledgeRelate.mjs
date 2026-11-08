@@ -43,6 +43,7 @@ import * as relatedNotesNs from './stores/relatedNotes.mjs'
 import * as edgeRetireNs from './stores/edgeRetire.mjs'
 import * as edgeRewriteNs from './stores/edgeRewrite.mjs'
 import * as edgeAuditNs from './stores/edgeAudit.mjs'
+import * as edgeProvenanceNs from './stores/edgeProvenance.mjs'
 import * as deletionsNs from './stores/deletions.mjs'
 import * as conflictEventsNs from './stores/conflictEvents.mjs'
 import * as reverseCandidatesNs from './stores/reverseCandidates.mjs'
@@ -63,6 +64,7 @@ import * as edgeQueueNs from './standards/edgeQueue.mjs'
 // ── 維運(明示刪除與還原、懸空清理、全庫投影、重評之基準、被撤出之邊之還原;受影響者之投影)──
 import * as noteOpsNs from './ops/noteOps.mjs'
 import * as projectOpsNs from './ops/projectOps.mjs'
+import * as provenanceOpsNs from './ops/provenanceOps.mjs'
 // ── AI 能力評分(四角色;核心為抓取套件之 benchKit;命令列 bench/cli.mjs 被 import 時不執行,只轉出同一實體)──
 import * as relateBenchNs from './bench/relateBench.mjs'
 import * as benchCliNs from './bench/cli.mjs'
@@ -94,6 +96,7 @@ export * from './stores/relatedNotes.mjs'
 export * from './stores/edgeRetire.mjs'
 export * from './stores/edgeRewrite.mjs'
 export * from './stores/edgeAudit.mjs'
+export * from './stores/edgeProvenance.mjs'
 export * from './stores/deletions.mjs'
 export * from './stores/conflictEvents.mjs'
 export * from './stores/reverseCandidates.mjs'
@@ -112,6 +115,7 @@ export * from './standards/stockFix.mjs'
 export * from './standards/edgeQueue.mjs'
 export * from './ops/noteOps.mjs'
 export * from './ops/projectOps.mjs'
+export * from './ops/provenanceOps.mjs'
 export * from './bench/relateBench.mjs'
 export * from './bench/cli.mjs'
 
@@ -125,10 +129,10 @@ const NAMESPACES = [
     relateSettingsNs, relateVocabNs, checksNs,
     relateStageNs, relateChainNs, relateMaintainNs, relateQueueSegmentNs, projectStageNs, relationIndexStageNs, reevalSegmentNs, conflictCheckSegmentNs, edgeReviewSegmentNs, checkPanelPagesNs, relateAiCallNs,
     relateDomainNs,
-    edgeStoreNs, candidatesNs, noteProjectionNs, relateLedgersNs, relatedNotesNs, edgeRetireNs, edgeRewriteNs, edgeAuditNs, deletionsNs, conflictEventsNs,
+    edgeStoreNs, candidatesNs, noteProjectionNs, relateLedgersNs, relatedNotesNs, edgeRetireNs, edgeRewriteNs, edgeAuditNs, edgeProvenanceNs, deletionsNs, conflictEventsNs,
     reverseCandidatesNs, rotationPolicyNs, edgeCheckKitNs, reevalPolicyNs, conflictCheckPolicyNs, edgeReviewPolicyNs, checkMaterialNs, relateHoldsNs,
     edgeStandardsNs, edgeGateNs, registryNs, auditNs, stockFixNs, edgeQueueNs,
-    noteOpsNs, projectOpsNs,
+    noteOpsNs, projectOpsNs, provenanceOpsNs,
     relateBenchNs, benchCliNs,
 ]
 

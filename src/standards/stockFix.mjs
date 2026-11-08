@@ -33,6 +33,9 @@
 //   以抓取套件之回退防護(rollbackPlanOf)逐單位比現值:＝after 者寫回 before(其餘欄位——其後之合併、型別等——保留現值)、已＝before 者已完成;
 //   其後被改動之單位或邊已不在(其後被撤出)→ 衝突(不覆寫、不復活、不記回退列;opt.acceptCurrent 記取代列)。覆核列與待判列只動同一登錄
 //   (未結且登錄時刻＝帳列之時刻;抓取套件之 rollbackStockHold)。
+// 【邊之產出鏈(stores/edgeProvenance)】RS3 修正為標準修正:寫入之邊值追加 standards-fix 之產出者(seat 與 provider 同時 null、stamp null〔維運件在輪次外〕、
+//   at＝帳列之 at;帳列之 after.edge 即帶產出鏈之邊值)。回退撤銷該次處置所留之產出鏈:邊之 produced 仍同帳列 after 者,produced／producedHistory／
+//   producedHistoryDropped 換回 before(處置前無者移除);其後已被他處推進者不動——回退不是新的產出。
 // 【回退逐列】rollbackEdgeStockFix 接受任意帳列(他模組之列略過:restored 0、不報錯):呼叫端依帳之全域逆序逐列交付,與他模組之列交錯時先後不變。
 // 【呼叫端負責】取執行鎖、一致備份、使用者同意(正式庫)。本模組不取鎖、不呼叫 AI。
 
@@ -46,7 +49,8 @@ import {
     stockHoldProblems,
 } from '../core/capturePackage.mjs'
 import { checkKey } from '../core/stores/checks.mjs'
-import { writeEdge } from '../stores/edgeStore.mjs'
+import { writeEdge, sameEdge } from '../stores/edgeStore.mjs'
+import { createEdgeProvenance, stampEdge, withProducedRestored, producedFieldsOf, EDGE_PRODUCED_STAGES } from '../stores/edgeProvenance.mjs'
 import { openRelateLedgers } from '../stores/relateLedgers.mjs'
 import { RS4 } from '../stores/conflictCheckPolicy.mjs'
 import { relationTypesVersionOf } from '../stores/edgeCheckKit.mjs'
@@ -176,6 +180,22 @@ function edgeRestoredOf(cur, before, units) {
         })
     }
     return next
+}
+
+/**
+ * 回退時之產出鏈(stores/edgeProvenance;回退＝撤銷該次處置之效果,產出鏈亦隨之撤銷):邊之產出鏈仍為該次處置所留(produced 同帳列 after 之記錄)者,
+ *   三欄(produced、producedHistory、producedHistoryDropped)換回處置前之值(處置前無者即移除);其後已被他處推進者(produced 已不同)原樣不動——
+ *   不以舊值覆蓋後來之產出者,也不為回退另追加(回退不是新的產出)
+ *
+ * @param {Object} next 輸入回退後之邊值(edgeRestoredOf 之產物)
+ * @param {Object} cur 輸入庫內之現值
+ * @param {Object} row 輸入處置帳之邊列(取 before.edge、after.edge)
+ * @returns {Object} 回傳邊值
+ */
+function producedUndoneOf(next, cur, row) {
+    const afterP = row?.after?.edge?.produced
+    if (!isobj(afterP) || !sameEdge(cur.produced, afterP)) return next
+    return withProducedRestored(next, producedFieldsOf(row.before?.edge))
 }
 
 /**
@@ -428,6 +448,8 @@ export async function applyEdgeStockFix(deps, plan, opt = {}) {
     const ledgers = edgeLedgersOf(deps, 'applyEdgeStockFix')
 
     const at = stockAtOf(deps, opt)
+    // 邊之產出鏈之產出者工廠(輪次外之維運件:stamp null;寫入時刻同處置帳列之 at——格式不符者取現在)
+    const prov = createEdgeProvenance({ stamp: null, nowIso: () => at })
     const onEdgeFixed = isfun(opt.onEdgeFixed) ? opt.onEdgeFixed : null
     const holds = isfun(stores.holds?.get) ? stores.holds : null
     const checks = isfun(stores.checks?.get) && isfun(stores.checks?.replace) ? stores.checks : null
@@ -458,7 +480,9 @@ export async function applyEdgeStockFix(deps, plan, opt = {}) {
                 // 檢核紀錄之換值寫前即定(帳列須記之)
                 const check = checks ? await checkSyncOf(stores, checks, cur, fix.edge, typesVer, domain) : null
                 ledgers.touch([cur.from, cur.to])
-                await writeEdge(stores.relations, fix.edge)
+                // 產出鏈(stores/edgeProvenance):確定性修正不呼叫 AI,階段 standards-fix、seat 與 provider 同時 null、stamp null(維運件在輪次外)
+                const fixed = stampEdge(fix.edge, cur, prov.make({ stage: EDGE_PRODUCED_STAGES.standardsFix, seat: null, provider: null }))
+                await writeEdge(stores.relations, fixed)
                 let extra = {}
                 let cbErr = null
                 if (onEdgeFixed) {
@@ -471,7 +495,7 @@ export async function applyEdgeStockFix(deps, plan, opt = {}) {
                     }
                 }
                 // 即記帳(其後之檢核換值失敗亦可依帳回退;after 供回退防護判其後是否被改動)
-                log({ object: 'edge', id, stds: [FIX_STD], changes: fix.changes, before: { edge: cur }, after: { edge: fix.edge }, ...extra, ...(check ? { check: { from: check.from, to: check.to } } : {}) })
+                log({ object: 'edge', id, stds: [FIX_STD], changes: fix.changes, before: { edge: cur }, after: { edge: fixed }, ...extra, ...(check ? { check: { from: check.from, to: check.to } } : {}) })
                 if (check) await checks.replace({ ...check.rec, hash: check.to })
                 bump(FIX_STD)
                 affected.push(cur.from, cur.to)
@@ -689,7 +713,7 @@ export async function rollbackEdgeStockFix(deps, rows, opt = {}) {
                 }
                 if (plan.restore.length) {
                     ledgers.touch([cur.from, cur.to])
-                    await writeEdge(stores.relations, edgeRestoredOf(cur, own.before, plan.restore))
+                    await writeEdge(stores.relations, producedUndoneOf(edgeRestoredOf(cur, own.before, plan.restore), cur, r))
                 }
                 // 檢核紀錄仍為處置所換之值者換回(其後已被他處推進者不動)
                 if (r.check && checks) {

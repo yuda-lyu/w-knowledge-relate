@@ -13,6 +13,9 @@
 //   勝者換人時舊勝者入 history、新勝者之身分出 history)②每筆 history 鍵集固定、值皆字串(proposalOf)③頂層不需刪鍵。
 //   寫後回讀比對;不符即 replace 再驗,仍不符拋錯(該項落 tries)。
 // 【寫入互斥】「get → merge → 寫」以 createMutex 序列化(同一行程之並行批次);跨行程由執行鎖排除。
+// 【產出鏈】邊記錄另帶 produced／producedHistory／producedHistoryDropped(stores/edgeProvenance;由寫入者給 o.produced,合併本身不讀不比較)。
+//   合併之 changed／visibleChanged 不受其影響(重複再現之提案不因產出時刻不同而每輪重寫);追加只在新建與可見欄位改變之寫入。
+//   patch 之合併對陣列依索引、對物件逐鍵——produced 之鍵集縮減(promptFp 消失)或歷史滿額輪替時回讀不符,依上節走 replace 路徑落庫。
 // 【history 浮上再驗(檢定標準 RS1／RS2／RS3)】會讓 history 條目成為現值者只有 mergeEdge 之完整全序模式
 //   (勝出身分之最優代表可為雙方 history 之同身分條目);reviseEdge(現值＝已過閘之裁決提案,舊現值入 history)、renameEdgeTypes(現值留任、
 //   只改型別名,與現值同身分之 history 移出而非升任)、只升不改模式(現值＝庫內現值或來者)皆不會。呼叫端給 o.admit(提案)=>Boolean 時,
@@ -25,6 +28,7 @@ import isarr from 'wsemi/src/isarr.mjs'
 import isestr from 'wsemi/src/isestr.mjs'
 import pmKeyMutex from 'wsemi/src/pmKeyMutex.mjs'
 import { sha1, strOf, cmp } from '../core/capturePackage.mjs'
+import { stampEdge } from './edgeProvenance.mjs'
 
 /** 寫入互斥之鍵(本套件只序列化一種資源——邊集合;wsemi 之 pmKeyMutex 依鍵排隊,本套件以固定鍵包裝為單一互斥) */
 const MUTEX_KEY = 'edges'
@@ -377,7 +381,8 @@ export async function writeEdge(relations, edge) {
  *
  * @param {Object} relations 輸入邊集合(get／insertNew／patch／replace)
  * @param {Object} incoming 輸入來者提案(makeEdge 之產物)
- * @param {Object} o 輸入 mergeEdge 之選項
+ * @param {Object} o 輸入 mergeEdge 之選項,另 { produced?:Object(本次之產出者,stores/edgeProvenance 之 make 之產物;新建與可見欄位改變之寫入才追加產出鏈,
+ *   其餘原樣;未給即不寫產出鏈) }
  * @returns {Promise} 回傳 Promise，resolve 回傳 mergeEdge 之結果(edge 為落庫後之值)
  * @throws {Error} 寫入後回驗不符時拋出
  * @example
@@ -396,7 +401,7 @@ export async function writeEdge(relations, edge) {
  */
 export async function persistEdge(relations, incoming, o = {}) {
     const stored = await relations.get(incoming.id)
-    const r = mergeEdge(stored, incoming, o)
+    const r = withProduced(mergeEdge(stored, incoming, o), stored, o.produced)
     if (!r.changed) return r
     if (r.created) {
         const ins = await relations.insertNew([r.edge])
@@ -405,12 +410,27 @@ export async function persistEdge(relations, incoming, o = {}) {
             return r
         }
         // 他處先插入(互斥內不應發生;跨行程由執行鎖排除):以庫內為準再合併一次
-        const again = mergeEdge(await relations.get(incoming.id), incoming, o)
+        const cur = await relations.get(incoming.id)
+        const again = withProduced(mergeEdge(cur, incoming, o), cur, o.produced)
         if (again.changed) await writeEdge(relations, again.edge)
         return again
     }
     await writeEdge(relations, r.edge)
     return r
+}
+
+/**
+ * 合併結果加上本次之產出者(檔頭【產出鏈】):只在新建與可見欄位改變時追加(stores/edgeProvenance 檔頭【只在可見內容改變時追加】);
+ *   未給 produced、或無異動者原樣回傳
+ *
+ * @param {Object} res 輸入 mergeEdge 之結果
+ * @param {Object|null} stored 輸入合併前庫內之邊(新建者為 null)
+ * @param {Object|null|undefined} produced 輸入本次之產出者
+ * @returns {Object} 回傳 res(edge 已帶產出鏈三欄,或原樣)
+ */
+function withProduced(res, stored, produced) {
+    if (!produced || !res.changed || !(res.created || res.visibleChanged)) return res
+    return { ...res, edge: stampEdge(res.edge, res.created ? null : stored, produced) }
 }
 
 /**
