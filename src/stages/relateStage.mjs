@@ -29,7 +29,8 @@
 //   queueConflictProposal;來源記完成前已持久,中途被砍不遺失;使用者已豁免而理由未變者不重提,計 rs4Waived)——於其後以提案席＋核對席
 //   (未成立叫第三席;摘要套件之判定小組)判真衝突才寫入;並消化 RS4 待判與存量衝突邊(配額)。啟用須 holds 與 checks 集合(開工即驗)。
 // 【時間】正向段與選配段扣掉保留給後段之時間(opt.reserveMs,未給取每輪依賴之 deps.reserveMs;由組裝者注入,本段不讀他工作之設定)後須夠一次呼叫
-//   (callTimeoutMsOf:席位首家之單次逾時)才開工,每次呼叫以「剩餘−保留」封頂(抓取套件之 reserveOf);正向、反向、輪巡、重評、既有邊覆核、衝突核對同一份保留時間。
+//   (抓取套件之 captureCallMsOf:席位首家之單次逾時,席位 timeoutMs 優先;判定小組三段取三席之最大)才開工,每次呼叫經抓取套件之 reservedAiCallOf
+//   (進門判定、預算與「剩餘−保留」取小〔reserveOf〕、鏈內續派判停;stages/relateAiCall 檔頭);正向、反向、輪巡、重評、既有邊覆核、衝突核對同一份保留時間。
 //   正向段:開工前與每輪(wave)開工前各判一次,不足即少做幾輪(開工前即不足 → 本輪延後,detail.forwardDeferred、新筆記留在池中下輪再做);容量鍵
 //   (rounds、notesPerCall)不因時間不足而縮。未注入保留(取值為 0)者正向段不設首家逾時門檻,守門只剩整輪逾期(行為同扣保留前)。
 // 【AI 呼叫(stages/relateAiCall)】六類呼叫同一形狀:注入之 opt.callAI 收 { spec, seat, segment, shouldStop, budgetMs, acceptTruncated };
@@ -49,9 +50,9 @@ import { noteConsumedOf } from '../core/capturePackage.mjs'
 import { oneline } from '../core/capturePackage.mjs'
 import { runAiBatchStage } from '../core/summarizePackage.mjs'
 import { applyTaps, makeMsg, runChainOverMsgs, stdReport, stageFields } from '../core/capturePackage.mjs'
-import { reserveOf, reserveMsOf } from '../core/capturePackage.mjs'
+import { reserveOf, reserveMsOf, reservedAiCallOf, captureCallMsOf } from '../core/capturePackage.mjs'
 import { STATUS } from '../core/capturePackage.mjs'
-import { RELATE_DEFAULT, relateSeatOf, callTimeoutMsOf } from '../core/relateSettings.mjs'
+import { RELATE_DEFAULT, relateSeatOf } from '../core/relateSettings.mjs'
 import { RELATE_CTX_FLAGS } from '../logContract.mjs'
 import { typeRankOf, createMutex, buildAdjacency, conflictNeighborsOf, generationMismatchOf } from '../stores/edgeStore.mjs'
 import { createEdgeProvenance } from '../stores/edgeProvenance.mjs'
@@ -67,7 +68,7 @@ import { conceptKeysOf, pickCandidates, makeSlugResolver } from '../stores/candi
 import { createReverseIndex } from '../stores/reverseCandidates.mjs'
 import { REEVAL_REPROPOSE_DAYS } from '../stores/reevalPolicy.mjs'
 import { rotationPageOf, rotationQueueOf, rotationProgressOf, rotationCursorOf, rotationBumpOf } from '../stores/rotationPolicy.mjs'
-import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf } from './relateAiCall.mjs'
 import { itemTargetOf, coveredItemOf, mwBuildEdges, mwMarkDirty, mwPersistEdges, mwQueueReverse, mwMarkRelated } from './relateChain.mjs'
 import { maintainRelations } from './relateMaintain.mjs'
 import { createRelateQueueRunner } from './relateQueueSegment.mjs'
@@ -252,17 +253,17 @@ export function stageRelate(opt = {}) {
             const inPool = inRelatePool
 
             // 時間預算(抓取套件之 budget 單一擁有者):正向段與各選配段同一份保留時間(檔頭【時間】)——扣掉保留給後段之時間後才是本段可用:
-            //   開工前判一次(fwdDeferred)、每輪開工前由 harness 以 fwdBatchStop 守門,每次呼叫以「剩餘−保留」封頂、嘗試之間以續派門檻(chainStepMsOf;reservedCallOf)可中止
+            //   開工前判一次(fwdDeferred)、每輪開工前由 harness 以 fwdBatchStop 守門,每次呼叫經抓取套件之 reservedAiCallOf——進門、預算取小、嘗試之間以續派門檻可中止
             const call = relateAiCallOf({ ai, callAI: opt.callAI })
             const fwdSeat = relateSeatOf(settings, 'relate')
             const fwdKeep = reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, '關聯正向段之 reserveMs')(ctx)
             const fwdTime = reserveOf(ctx, fwdKeep)
-            // 開工門檻:有保留時為席位首家之單次逾時(同選配段);未保留時為 0——守門只剩整輪逾期,與扣保留前完全相同
-            const fwdMinMs = fwdKeep > 0 ? callTimeoutMsOf(settings, fwdSeat) : 0
+            // 開工門檻:有保留時為席位首家之單次逾時(同選配段;captureCallMsOf,席位 timeoutMs 優先);未保留時為 0——守門只剩整輪逾期,與扣保留前完全相同
+            const fwdMinMs = fwdKeep > 0 ? captureCallMsOf(settings, fwdSeat) : 0
             const fwdStop = () => fwdTime.shouldStop(fwdMinMs)
             // 批次每輪開工前之守門:有保留時,池已空(無待處理者)不報時間停止——剩餘常低於門檻,池空仍記 stopped 與 WARN 會誤導;無保留者同扣保留前
             const fwdBatchStop = fwdKeep > 0 ? () => live.some(inPool) && fwdStop() : fwdStop
-            const askFwd = reservedCallOf(call, fwdTime, fwdMinMs)
+            const askFwd = reservedAiCallOf(call, fwdTime, { firstMs: fwdMinMs })
             const callFwd = (p, c) => askFwd(p, c, { spec: fwdSeat, seat: 'proposer', segment: 'forward' })
             // 開工前:有待處理者而扣保留後剩餘不足一次呼叫 → 本輪不開工(輪數 0:不取件、不呼叫、不記 relateTries),新筆記留在池中下輪再做;
             //   輪數不是正整數(opt.rounds 打錯)者不在此判,照舊交批次執行器檢核而拋錯,不被延後吞掉

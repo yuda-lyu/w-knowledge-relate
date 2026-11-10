@@ -530,6 +530,45 @@ describe('unit-relate-edgereview', function() {
         assert.deepEqual([df.rs6Deferred, df.rs6Kept], [false, 1], 'opt.reserveMs 優先')
     })
 
+    it('第三席之進門門檻取該席首家之逾時(保留時間;REL-20〈逐次進門門檻〉、Gitea #132):前兩席耗時後,扣保留之剩餘已不足段之開工門檻(三席首家逾時之最大值)而仍夠第三席首家之逾時 → 第三席照叫、該邊照判;恰等 → 照叫;連第三席首家之逾時亦不足 → 不送出、中止(不記檢核、不寫覆核帳);每頁開工前之守門仍取三席之最大', async () => {
+        // 替身:前兩席並行(兩席之進門皆已判過)後才推進假時鐘「前兩席耗時 firstMs」;第三席之進門由抓取套件之包裝判(不足即不送出,替身收不到)
+        const mk = (o) => {
+            let now = 0
+            const e0 = edge('a', 'b')
+            const two = o.pages === 2 ? { notes: ids(['a', 'b', 'c', 'd']), edges: [e0, edge('c', 'd')], relate: { standards: { edgeReview: { pageSize: 1 } } } } : { notes: ids(['a', 'b']), edges: [e0] }
+            const e = env({ ...two, review: (seat) => (seat === 'second' ? { verdict: 'retire', reason: R_RET } : { verdict: 'keep', reason: '' }) })
+            e.ctx.deps.settings.ai.providerTimeouts['stub:b'] = 360_000   // 段之開工門檻＝三席首家逾時之最大值 360 秒
+            e.ctx.deps.settings.ai.providerTimeouts['stub:c'] = 120_000   // 第三席首家之逾時 120 秒
+            e.ctx.remainingMs = () => o.totalMs - now
+            e.ctx.deps.reserveMs = 900_000
+            const seats = []
+            const callAI = async (prompt, check, co) => {
+                if (co?.segment === 'edgeReview') seats.push(co.seat)
+                const r = await e.callAI(prompt, check, co)
+                if (co?.segment === 'edgeReview' && co.seat === 'first') now += o.firstMs
+                return r
+            }
+            return { e, e0, seats, run: () => stageRelate({ callAI }).run(e.ctx) }
+        }
+        // ①頁開工時扣保留後剩 420 秒;前兩席耗 200 秒 → 剩 220 秒(< 360、≥ 120)→ 第三席照叫、保留成立(修前:第三席不送出、rs6Aborted)
+        const a = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000 })
+        const da = detOf(await a.run())
+        assert.deepEqual([a.seats, da.rs6Aborted, da.rs6Third, da.rs6Kept], [['first', 'second', 'third'], false, 1, 1], JSON.stringify(da))
+        assert.ok(await a.e.checks.get(checkKey(RS6.objectEdge, a.e0.id)), '照判 → 記檢核')
+        // ②等號邊界:耗 300 秒 → 剩恰 120 秒 → 照叫
+        const b = mk({ totalMs: 900_000 + 420_000, firstMs: 300_000 })
+        const db = detOf(await b.run())
+        assert.deepEqual([b.seats, db.rs6Aborted, db.rs6Kept], [['first', 'second', 'third'], false, 1], JSON.stringify(db))
+        // ③耗 300.001 秒 → 剩 119.999 秒 → 不送出、中止:不記檢核、不寫覆核帳
+        const c = mk({ totalMs: 900_000 + 420_000, firstMs: 300_001 })
+        const dc = detOf(await c.run())
+        assert.deepEqual([c.seats, dc.rs6Aborted, dc.rs6Third, dc.rs6Checked, (await c.e.checks.select()).length, c.e.erLog().length], [['first', 'second'], true, 1, 0, 0, 0], JSON.stringify(dc))
+        // ④每頁開工前之守門仍取段之開工門檻(三席之最大,不取第三席之門檻):每頁一條、兩頁;第一頁耗 200 秒後剩 220 秒 → 第一頁之第三席照叫、第二頁不開工(rs6Stopped)
+        const p = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000, pages: 2 })
+        const dp = detOf(await p.run())
+        assert.deepEqual([p.seats, dp.rs6Stopped, dp.rs6Aborted, dp.rs6Checked], [['first', 'second', 'third'], true, false, 1], JSON.stringify(dp))
+    })
+
     it('配額與優先:每輪至多 relate.standards.edgeReview.perRun 條、觸及已提煉者先;額度中止 → 不記任何結果、存量下輪再排', async () => {
         const e1 = edge('a', 'b', T0, R0, '2026-01-01T00:00:00+08:00')
         const e2 = edge('c', 'd', T0, R0, '2026-01-09T00:00:00+08:00')

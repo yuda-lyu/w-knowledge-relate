@@ -162,50 +162,6 @@ export const RELATE_CAPACITY_DESC = Object.freeze({
     relate: 'relate.rounds×ai.parallel×relate.notesPerCall',
 })
 
-/** 未設任何逾時時之單次呼叫逾時(毫秒;同 AI 調度層 ai.timeoutMs 之預設) */
-const CALL_TIMEOUT_FALLBACK_MS = 300_000
-
-/**
- * 開工門檻:一次 AI 呼叫所需之時間——各席首選家之單次逾時(ai.providerTimeouts[席位之 use] → ai.timeoutMs → 300000)取最大者。
- *   正向段(有保留時)與選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留時間後須夠此數才開工;各段同一函數,席位集合由各段給
- *
- * @param {Object} settings 輸入已解析之設定(取 ai)
- * @param {Object|Array} seats 輸入席位或席位陣列(非物件者略過;全無時以 ai.timeoutMs → 300000 計)
- * @returns {Number} 回傳毫秒數
- * @example
- * console.log(callTimeoutMsOf({ ai: { timeoutMs: 1000, providerTimeouts: { 'x:a': 5000 } } }, [{ use: 'x:a' }, { use: 'x:b' }]))
- * // => 5000
- */
-export function callTimeoutMsOf(settings, seats) {
-    const ai = isobj(settings?.ai) ? settings.ai : {}
-    const of = (seat) => Number(ai.providerTimeouts?.[seat?.use]) || Number(ai.timeoutMs) || CALL_TIMEOUT_FALLBACK_MS
-    const list = (Array.isArray(seats) ? seats : [seats]).filter(isobj)
-    return list.length ? Math.max(...list.map(of)) : of(null)
-}
-
-/** 鏈內續派之最低所需(毫秒):主席失敗後,扣保留之剩餘不少於此數才續派遞補 */
-const CHAIN_STEP_MS = 60_000
-
-/**
- * 鏈內續派門檻:一次呼叫之遞補鏈內(主席失敗後之嘗試之間)是否續派之判停值——席位之 minAttemptMs(未給取 CHAIN_STEP_MS)與開工門檻之較小者。
- *   開工門檻(callTimeoutMsOf)只管「要不要送出一次新的呼叫」;鏈內若仍以開工門檻判,進門時剩餘不足「開工門檻＋主席逾時」者,
- *   主席等滿逾時後之剩餘即小於開工門檻,遞補被中止(形同未設遞補)。各次嘗試之逾時另由 budgetMs(剩餘−保留)封頂。
- *   開工門檻為 0(正向段未保留:守門只剩整輪逾期)者回 0,與未保留時之行為相同
- *
- * @param {Number} firstMs 輸入開工門檻毫秒數(callTimeoutMsOf 之值;非正數視為 0)
- * @param {Object} [seat] 輸入本次呼叫之席位(取 minAttemptMs;非正數或未給即取 CHAIN_STEP_MS)
- * @returns {Number} 回傳毫秒數
- * @example
- * console.log(chainStepMsOf(360000), chainStepMsOf(30000), chainStepMsOf(0), chainStepMsOf(360000, { minAttemptMs: 30000 }))
- * // => 60000 30000 0 30000
- */
-export function chainStepMsOf(firstMs, seat) {
-    const ms = Number(firstMs)
-    if (!(ms > 0)) return 0
-    const own = Number(seat?.minAttemptMs)
-    return Math.min(ms, own > 0 ? own : CHAIN_STEP_MS)
-}
-
 
 /**
  * 關聯之功能表(唯一一份;抓取套件之 featureProblemsOf 之表):重評與檢定標準之各功能——稱呼(含開啟之設定)、開啟判準、判定小組之必填席、
@@ -468,7 +424,7 @@ export function relateSeatPathOf(settings, segment) {
 
 export default {
     RELATE_AI_DEFAULT, RELATE_AI_SCHEMA, RELATE_DEFAULT, RELATE_SCHEMA, RELATE_SETTING_TYPES, RELATE_INDEX_TITLE,
-    resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, callTimeoutMsOf, chainStepMsOf, relateWarningsOf,
+    resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, relateWarningsOf,
     RELATE_FEATURES, relateFeatureProblems, relatePanelsOf, RELATE_SEAT_LABELS, relateSeatsOf, RELATE_SEAT_KEYS, relateSeatOf,
     RELATE_SEGMENTS,
     relateSeatPathOf,

@@ -301,6 +301,69 @@ describe('unit-relate-reeval', function() {
         assert.deepEqual([r2.detail.reevalDeferred, r2.detail.reevalCompleted], [false, 1], 'opt.reserveMs 優先')
     })
 
+    it('第三席之進門門檻取該席首家之逾時(保留時間;REL-20〈逐次進門門檻〉、Gitea #132):前兩席耗時後,扣保留之剩餘已不足段之開工門檻(三席首家逾時之最大值)而仍夠第三席首家之逾時 → 第三席照叫、該篇評完;恰等 → 照叫;連第三席首家之逾時亦不足 → 不送出、中止(不記 tries、不評完);每頁開工前之守門仍取三席之最大', async () => {
+        const split = (seat, item) => item.slugs.map((s) => (seat === 'first' ? { to: s, verdict: 'retire', reason: '新內容與對象已無共同機制可言' } : { to: s, verdict: 'keep' }))
+        // 替身:前兩席並行(兩席之進門皆已判過)後才推進假時鐘「前兩席耗時 firstMs」;第三席之進門由抓取套件之包裝判(不足即不送出,替身收不到)
+        const mk = (o) => {
+            let now = 0
+            // 兩頁:兩篇變更之筆記(各一頁、依序;同第三席中止案之環境)
+            const e = o.pages === 2
+                ? env({
+                    notes: [{ id: 'n', title: '變更篇', knowledgeChangedAt: V }, { id: 'n2', title: '變更篇二', knowledgeChangedAt: V }, { id: 'a', title: '甲' }, { id: 'b', title: '乙' }, { id: 'c', title: '丙' }, { id: 'd', title: '丁' }],
+                    edges: [E('n', 'a', T0), E('n', 'b', T0), E('n2', 'c', T0), E('n2', 'd', T1)],
+                    third: true, reeval: split,
+                })
+                : base({ reeval: split, third: true })
+            e.ctx.deps.settings.ai.providerTimeouts['stub:a'] = 60_000    // 正向席與重評第一席(relate.ai)
+            e.ctx.deps.settings.ai.providerTimeouts['stub:b'] = 360_000   // 段之開工門檻＝三席首家逾時之最大值 360 秒
+            e.ctx.deps.settings.ai.providerTimeouts['stub:c'] = 120_000   // 第三席首家之逾時 120 秒
+            e.ctx.remainingMs = () => o.totalMs - now
+            e.ctx.expired = () => false
+            e.ctx.deps.reserveMs = 900_000
+            const seats = []
+            const callAI = async (prompt, check, co) => {
+                if (co?.segment === 'reeval') seats.push(co.seat)
+                const r = await e.callAI(prompt, check, co)
+                if (co?.segment === 'reeval' && co.seat === 'first') now += o.firstMs
+                return r
+            }
+            return { e, seats, run: () => stageRelate({ callAI }).run(e.ctx) }
+        }
+        // ①頁開工時扣保留後剩 420 秒;前兩席耗 200 秒 → 剩 220 秒(< 360、≥ 120)→ 第三席照叫、四條邊判定、本版本評完(修前:第三席不送出、aborted)
+        const a = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000 })
+        const ra = await a.run()
+        const na = await a.e.notes.get('n')
+        assert.deepEqual([a.seats, ra.detail.aborted, ra.detail.reevalThird, na.edgesReviewedChangeAt, na.reevalTries || 0], [['first', 'second', 'third'], false, 4, V, 0], JSON.stringify(ra.detail))
+        // ②等號邊界:耗 300 秒 → 剩恰 120 秒 → 照叫、評完
+        const b = mk({ totalMs: 900_000 + 420_000, firstMs: 300_000 })
+        const rb = await b.run()
+        assert.deepEqual([b.seats, rb.detail.aborted, (await b.e.notes.get('n')).edgesReviewedChangeAt], [['first', 'second', 'third'], false, V], JSON.stringify(rb.detail))
+        // ③耗 300.001 秒 → 剩 119.999 秒 → 不送出、中止:不記 tries、不評完(下輪再評)
+        const c = mk({ totalMs: 900_000 + 420_000, firstMs: 300_001 })
+        const rc = await c.run()
+        const nc = await c.e.notes.get('n')
+        assert.deepEqual([c.seats, rc.detail.aborted, rc.detail.reevalThird, nc.edgesReviewedChangeAt || '', nc.reevalTries || 0], [['first', 'second'], true, 4, '', 0], JSON.stringify(rc.detail))
+        // ④每頁開工前之守門仍取段之開工門檻(三席之最大,不取第三席之門檻):兩篇各一頁;第一頁耗 200 秒後剩 220 秒 → 第一頁之第三席照叫、該篇評完,第二頁不開工(下輪再評、不記 tries)
+        const p = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000, pages: 2 })
+        const rp = await p.run()
+        const [p1, p2] = [await p.e.notes.get('n'), await p.e.notes.get('n2')]
+        assert.deepEqual([p.seats, rp.detail.aborted, p1.edgesReviewedChangeAt, p2.edgesReviewedChangeAt || '', p2.reevalTries || 0], [['first', 'second', 'third'], false, V, '', 0], JSON.stringify(rp.detail))
+    })
+
+    it('前兩席並行之呼叫:第一席之呼叫同步拋出 → 仍呼叫第二席(同修前;抓取套件之包裝不為 async,本段之呼叫函數把同步拋出轉為 rejected promise),該批照失敗處理、本篇不評完', async () => {
+        const e = base({ reeval: byTitle() })
+        const seats = []
+        const callAI = (prompt, check, co) => {
+            if (co?.segment === 'reeval') {
+                seats.push(co.seat)
+                if (co.seat === 'first') throw new Error('第一席同步拋出')
+            }
+            return e.callAI(prompt, check, co)
+        }
+        await stageRelate({ callAI }).run(e.ctx)
+        assert.deepEqual([seats, (await e.notes.get('n')).edgesReviewedChangeAt || ''], [['first', 'second'], ''])
+    })
+
     it('物件摘要(objects.createRelateObject):有重評頁 → 關聯段 summary 附「｜重評 N 篇（改型 a、撤銷 b、候選 c）」;無待重評之輪不附', async () => {
         const e = base({ reeval: byTitle() })
         const obj = createRelateObject({ relate: { callAI: e.callAI } })

@@ -151,7 +151,7 @@ describe('unit-relate-forward-reserve', function() {
         assert.deepEqual(e.calls.map((c) => c.budgetMs), [15 * MIN, 15 * MIN], '呼叫預算＝剩餘 30 分 − 保留 15 分(不是整輪 30 分)')
         assert.deepEqual(e.calls.map((c) => c.stopBefore), [false, false])
         // 第二批扣完時間後(剩 20 分,扣保留 5 分:< 開工門檻 6 分、≥ 鏈內續派門檻 1 分)——同一呼叫之鏈內不停(REL-20:遞補仍可用扣保留後之 5 分,
-        //   逾時由 budgetMs 封頂);下一輪由開工門檻擋下(下行之 stopped)。鏈內門檻仍扣保留,見 unit-relate-aicall 之 reservedCallOf
+        //   逾時由 budgetMs 封頂);下一輪由開工門檻擋下(下行之 stopped)。鏈內門檻仍扣保留,見 unit-relate-aicall 之接線案(抓取套件之 reservedAiCallOf)
         assert.deepEqual(e.calls.map((c) => c.stopAfter), [false, false], '鏈內以續派門檻(開工門檻與 60 秒之較小者)判')
         assert.deepEqual([d.targets, d.pending, d.stopped, !!d.forwardDeferred], [4, 6, true, false])
         assert.equal((await poolIds(e)).length, 6, '其餘 6 篇留池中')

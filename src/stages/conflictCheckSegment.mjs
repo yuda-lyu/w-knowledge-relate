@@ -43,13 +43,14 @@
 //   收尾三件事之序一律:記檢核 → 結案待判 → 寫帳。
 // 【存量進度】rs4Done／rs4Total(已核／兩端皆在之衝突邊;與既有邊覆核 RS6 同口徑)每輪計數,外部巡檢列示。
 // 【時間】扣保留時間(關聯子階段之 opt.reserveMs,未給取 deps.reserveMs;由組裝者注入)後須夠一次呼叫(三席首家逾時之最大者)才開工;
-//   不夠 → 本輪不核(提案已持久,不丟)。額度中止(skipped;含第三席)見【失敗語意】。
+//   不夠 → 本輪不核(提案已持久,不丟)。第三席之每次呼叫以該席首家之逾時判進門(stages/relateAiCall 檔頭【逐次進門門檻】)。
+//   額度中止(skipped;含第三席)見【失敗語意】。
 
 import isarr from 'wsemi/src/isarr.mjs'
 import isobj from 'wsemi/src/isobj.mjs'
 import { oneline } from '../core/capturePackage.mjs'
-import { reserveOf, reserveMsOf } from '../core/capturePackage.mjs'
-import { RELATE_DEFAULT, callTimeoutMsOf, relateFeatureProblems } from '../core/relateSettings.mjs'
+import { reserveOf, reserveMsOf, reservedAiCallOf, captureCallMsOf } from '../core/capturePackage.mjs'
+import { RELATE_DEFAULT, relateFeatureProblems } from '../core/relateSettings.mjs'
 import { panelSeats, PANEL_WHY_LABELS } from '../core/summarizePackage.mjs'
 import { STATUS } from '../core/capturePackage.mjs'
 import { putHold, resolveHold, listHolds, holdKey, pipelineDueOf } from '../core/capturePackage.mjs'
@@ -67,7 +68,7 @@ import { RS6 } from '../stores/edgeReviewPolicy.mjs'
 import { seatVotesOf, relationTypesVersionOf } from '../stores/edgeCheckKit.mjs'
 import { createCheckHasher } from '../stores/checkMaterial.mjs'
 import { stockSourceResolvedOf } from '../standards/edgeQueue.mjs'
-import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf } from './relateAiCall.mjs'
 import { runCheckPanelPages } from './checkPanelPages.mjs'
 
 const checkJson = (d) => Array.isArray(d) && d.some((it) => Number.isInteger(it?.index))
@@ -290,7 +291,9 @@ export async function runConflictCheckSegment(o) {
     const promptItem = (x) => checkPromptItemOf(x, x.bad)
 
     // ── 時間 ──
-    const firstMs = callTimeoutMsOf(settings, [seats.first, seats.second, seats.third])
+    // 段之開工門檻(整段延後、每頁開工前之守門)＝三席首家逾時之最大值;第三席之逐次進門門檻＝該席首家之逾時(stages/relateAiCall 檔頭【逐次進門門檻】)
+    const firstMs = captureCallMsOf(settings, [seats.first, seats.second, seats.third])
+    const thirdMs = captureCallMsOf(settings, seats.third)
     const sub = reserveOf(ctx, reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, '衝突核對段之 reserveMs')(ctx))
     /**
      * 登錄待判(重試、逾次、判不了、隔離):使用者負責之待判(要求重試而本輪又未得判定)負責者與下一步不改;逾次改由使用者;其餘依 h。
@@ -321,11 +324,12 @@ export async function runConflictCheckSegment(o) {
     }
 
     // ── 判定(逐頁:第一輪 first＋second(既有邊),第二輪 third)──
-    // 進門以開工門檻判、鏈內以續派門檻判(stages/relateAiCall 之 reservedCallOf):主席等滿逾時後仍續派遞補,不因剩餘不足一次主席逾時而放棄整條鏈
-    const ask = reservedCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, firstMs)
+    // 進門以本次之進門門檻判、鏈內以續派門檻判(抓取套件之 reservedAiCallOf):主席等滿逾時後仍續派遞補,不因剩餘不足一次主席逾時而放棄整條鏈;
+    //   第三席於前兩票之後才叫,以該席首家之逾時判進門(startMs),不以三席之最大值再擋一次
+    const ask = reservedAiCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, { firstMs })
     const call = async (spec, prompt, which) => {
         out.aiCalls++
-        return ask(prompt, checkJson, { spec, seat: which, segment: 'conflictCheck' })
+        return ask(prompt, checkJson, { spec, seat: which, segment: 'conflictCheck', startMs: which === 'third' ? thirdMs : undefined })
     }
     const vopt = (items) => ({ relationTypes: domain.relationTypes, resolveType: domain.resolveType, conflictType: rt.conflictType, verdictOf: checkVerdictOf, indices: new Set(items.map((x) => x.index)), currentOf: (i) => items.find((x) => x.index === i)?.edge })
     // 判定小組之逐頁執行與既有邊覆核同一份(stages/checkPanelPages);本段之差異:新提案之兩票＝提案席(keep;供應者＝提案之實際成交者)＋

@@ -38,13 +38,13 @@
 //   使用者可完成之處置)。判定之項一律寫覆核帳 relate-edge-review.jsonl(本輪未判者不寫);結果記檢核紀錄(checks,與 RS4 同一雜湊——含素材,
 //   stores/checkMaterial.createCheckHasher)。收尾三件事之序一律:記檢核 → 結案待判 → 寫帳。
 // 【時間】扣保留時間(關聯子階段之 opt.reserveMs,未給取 deps.reserveMs;由組裝者注入)後須夠一次呼叫才開工;不夠或額度中止 → 本輪不核
-//   (存量不丟,下輪再排;額度中止記 rs6Aborted)。
+//   (存量不丟,下輪再排;額度中止記 rs6Aborted)。第三席之每次呼叫以該席首家之逾時判進門(stages/relateAiCall 檔頭【逐次進門門檻】)。
 
 import isobj from 'wsemi/src/isobj.mjs'
 import isestr from 'wsemi/src/isestr.mjs'
 import { oneline } from '../core/capturePackage.mjs'
-import { reserveOf, reserveMsOf } from '../core/capturePackage.mjs'
-import { RELATE_DEFAULT, callTimeoutMsOf, relateFeatureProblems } from '../core/relateSettings.mjs'
+import { reserveOf, reserveMsOf, reservedAiCallOf, captureCallMsOf } from '../core/capturePackage.mjs'
+import { RELATE_DEFAULT, relateFeatureProblems } from '../core/relateSettings.mjs'
 import { panelSeats, PANEL_WHY_LABELS } from '../core/summarizePackage.mjs'
 import { STATUS } from '../core/capturePackage.mjs'
 import { putHold, resolveHold, listHolds, pipelineDueOf } from '../core/capturePackage.mjs'
@@ -61,7 +61,7 @@ import { RS6, reviewVerdictOf, rs6DecisionOf, reviewQueueOf } from '../stores/ed
 import { seatVotesOf, relationTypesVersionOf } from '../stores/edgeCheckKit.mjs'
 import { createCheckHasher } from '../stores/checkMaterial.mjs'
 import { queueConflictCheck, queueConflictProposal, stockSourceResolvedOf } from '../standards/edgeQueue.mjs'
-import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf } from './relateAiCall.mjs'
 import { runCheckPanelPages } from './checkPanelPages.mjs'
 
 const checkJson = (d) => Array.isArray(d) && d.some((it) => Number.isInteger(it?.index))
@@ -229,7 +229,9 @@ export async function runEdgeReviewSegment(o) {
     const promptItem = (x) => checkPromptItemOf(x, x.bad)
 
     // ── 時間 ──
-    const firstMs = callTimeoutMsOf(settings, [seats.first, seats.second, seats.third])
+    // 段之開工門檻＝三席首家逾時之最大值;第三席之逐次進門門檻＝該席首家之逾時(stages/relateAiCall 檔頭【逐次進門門檻】;與衝突核對同一規則)
+    const firstMs = captureCallMsOf(settings, [seats.first, seats.second, seats.third])
+    const thirdMs = captureCallMsOf(settings, seats.third)
     const sub = reserveOf(ctx, reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, '既有邊覆核段之 reserveMs')(ctx))
     if (!sub.canStart(firstMs)) {
         det.rs6Deferred = true
@@ -238,10 +240,10 @@ export async function runEdgeReviewSegment(o) {
     }
 
     // ── 判定(逐頁:第一、二席並行;未成立而可成立者 → 第三席)──
-    const ask = reservedCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, firstMs)
+    const ask = reservedAiCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, { firstMs })
     const call = async (spec, prompt, which) => {
         out.aiCalls++
-        return ask(prompt, checkJson, { spec, seat: which, segment: 'edgeReview' })
+        return ask(prompt, checkJson, { spec, seat: which, segment: 'edgeReview', startMs: which === 'third' ? thirdMs : undefined })
     }
     const vopt = (items) => ({ relationTypes: domain.relationTypes, resolveType: domain.resolveType, conflictType: rt.conflictType, roles: domain.relationTypeRoles, verdictOf: reviewVerdictOf, indices: new Set(items.map((x) => x.index)), currentOf: (i) => items.find((x) => x.index === i)?.edge })
     // 判定小組之逐頁執行與衝突核對同一份(stages/checkPanelPages);本段:兩席皆看整頁、票組 [第一席, 第二席];

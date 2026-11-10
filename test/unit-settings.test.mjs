@@ -16,7 +16,7 @@ import assert from 'node:assert/strict'
 import providers from 'w-dispatch-ai/src/providers.mjs'
 import {
     RELATE_AI_DEFAULT, RELATE_AI_SCHEMA, RELATE_DEFAULT, RELATE_SCHEMA, RELATE_SETTING_TYPES, RELATE_INDEX_TITLE,
-    resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, callTimeoutMsOf, relateWarningsOf, relatePanelsOf, RELATE_SEAT_LABELS, relateSeatsOf,
+    resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, relateWarningsOf, relatePanelsOf, RELATE_SEAT_LABELS, relateSeatsOf,
     RELATE_FEATURES, relateFeatureProblems,
 } from '../src/core/relateSettings.mjs'
 import { SUMMARIZE_AI_DEFAULT, SUMMARIZE_AI_SCHEMA } from '../src/core/summarizePackage.mjs'
@@ -82,6 +82,7 @@ const show = showSettingValue
 // 各型別之邊界樣本(合格樣本須通過型別判準、不合格樣本須不通過——判準取抓取套件與本段之型別表,樣本先經其篩過再用;各型別須至少各留一個)
 const SAMPLES = {
     pint: { valid: [7, 8], invalid: [0, -1, 1.5, '5', NaN, null, Infinity] },
+    growth: { valid: [4, 1.5], invalid: [0.5, 0, -1, '4', NaN, null, Infinity] },
     p0int: { valid: [7, 8], invalid: [-1, 1.5, '5', NaN, null] },
     bool: { valid: [true, false], invalid: ['true', 1, 0, null] },
     objArr: { valid: [[{ id: 'x' }], [{ a: 1 }, { b: 2 }]], invalid: [{}, [1], ['x'], 'x', null] },
@@ -302,17 +303,6 @@ describe('unit-settings', function() {
         it('公式:ai.parallel 參與;rounds 0 → 容量 0', () => {
             assert.equal(RS({ ai: { parallel: 2 }, relate: { rounds: 5, notesPerCall: 4 } }).capacity.relate, 40)
             assert.equal(RS({ relate: { rounds: 0 } }).capacity.relate, 0)
-        })
-
-        it('開工門檻 callTimeoutMsOf(各段同一函數):各席首選家之單次逾時取最大者——ai.providerTimeouts[首選] → ai.timeoutMs → 300000;席位自帶之 timeoutMs 不讀(取值序與既有門檻同);非物件之席位略過', () => {
-            const s = RS({ ai: { timeoutMs: 120000, providerTimeouts: { 'x:slow': 600000 } } })
-            assert.equal(callTimeoutMsOf(s, { use: 'x:fast' }), 120000, '未列逐家逾時 → ai.timeoutMs')
-            assert.equal(callTimeoutMsOf(s, { use: 'x:slow' }), 600000, '逐家逾時優先')
-            assert.equal(callTimeoutMsOf(s, [{ use: 'x:fast' }, { use: 'x:slow' }, null]), 600000, '多席取最大;null 略過')
-            assert.equal(callTimeoutMsOf(s, { use: 'x:fast', timeoutMs: 999 }), 120000, '席位之 timeoutMs 不入開工門檻')
-            assert.equal(callTimeoutMsOf(RS({}), { use: 'x:y' }), 300000, '預設 ai.timeoutMs')
-            assert.equal(callTimeoutMsOf({ ai: {} }, []), 300000, '無席位、無設定 → 300000')
-            assert.equal(callTimeoutMsOf(s, []), 120000, '無席位 → ai.timeoutMs')
         })
     })
 

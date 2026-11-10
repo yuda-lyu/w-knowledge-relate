@@ -5,15 +5,13 @@
 //   'reverse'｜'rotation');批次參數(每批目標數、並行批數)同正向;輪數＝剛好跑完佇列;失敗或未涵蓋只排隊尾(反向 tries 只決定排序、輪巡只更新時刻),
 //   永不丟。
 // 【時間】扣掉保留給後段之時間(opt.reserveMs,未給取每輪依賴之 deps.reserveMs;由組裝者注入,本段不讀他工作之設定)後須夠一次呼叫
-//   (callTimeoutMsOf:席位首家之單次逾時)才開工(有目標而不夠即本輪延後,記 deferred),每次呼叫以「剩餘−保留」封頂(抓取套件之 reserveOf);
-//   遞補鏈內(嘗試之間)則以續派門檻(chainStepMsOf)判停而非開工門檻(stages/relateAiCall 之 reservedCallOf)。
+//   (抓取套件之 captureCallMsOf:席位首家之單次逾時,席位 timeoutMs 優先)才開工(有目標而不夠即本輪延後,記 deferred),每次呼叫經抓取套件之
+//   reservedAiCallOf:進門以開工門檻判、預算與「剩餘−保留」取小(reserveOf)、遞補鏈內(嘗試之間)以續派門檻判停而非開工門檻(stages/relateAiCall 檔頭)。
 //   執行器於 items 算出之前建立(sub 與 firstMs 之求值時點與各段原碼同),run 時才守門。
 // 【席位】反向段與輪巡段同一席位(core/relateSettings 之 relateSeatOf:relate.reverse.ai,未設即 relate.ai)。
 
-import { reserveOf, reserveMsOf } from '../core/capturePackage.mjs'
+import { reserveOf, reserveMsOf, reservedAiCallOf, captureCallMsOf } from '../core/capturePackage.mjs'
 import { runAiBatchStage } from '../core/summarizePackage.mjs'
-import { callTimeoutMsOf } from '../core/relateSettings.mjs'
-import { reservedCallOf } from './relateAiCall.mjs'
 import { makeSlugResolver } from '../stores/candidates.mjs'
 
 /**
@@ -57,7 +55,7 @@ import { makeSlugResolver } from '../stores/candidates.mjs'
  */
 export function createRelateQueueRunner(o) {
     const { ctx, settings, opt, domain, log, seat, segment, label, reserveLabel, call, validOf, applyVia } = o
-    const firstMs = callTimeoutMsOf(settings, seat)
+    const firstMs = captureCallMsOf(settings, seat)
     const sub = reserveOf(ctx, reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, reserveLabel)(ctx))
     const run = async ({ items, bump, deferredNote }) => {
         if (!items.length) return { deferred: false, ran: null }
@@ -71,7 +69,7 @@ export function createRelateQueueRunner(o) {
         const isValid = validOf(perBatch)
         const batchSize = opt.batchSize ?? settings.relate.notesPerCall
         const parallel = opt.parallel ?? settings.ai.parallel
-        const askSeg = reservedCallOf(call, sub, firstMs)
+        const askSeg = reservedAiCallOf(call, sub, { firstMs })
         const callSeg = (p, c) => askSeg(p, c, { spec: seat, seat: 'proposer', segment })
         const ran = await runAiBatchStage({
             log,

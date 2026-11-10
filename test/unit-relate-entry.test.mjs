@@ -116,7 +116,7 @@ describe('unit-relate-entry', function() {
             'createKnowledgeRelate', 'createRelateObject', 'relateSummaryOf', 'createRelateRuntime', 'resolveRelateData', 'relateScanOf',
             'stageRelate', 'stageRelateProject', 'stageRelationIndex', 'mwBuildEdges', 'mwMarkDirty', 'mwPersistEdges', 'mwQueueReverse', 'mwMarkRelated', 'mwProjectDirty', 'mwRebuildRelationIndex',
             'mwReevalVerdict', 'mwReevalAgree', 'mwReevalApply', 'mwReevalMarkReviewed', 'runReevalSegment', 'runConflictCheckSegment', 'runEdgeReviewSegment', 'relateAiCallOf',
-            'resolveRelateSettings', 'relateSeatsOf', 'relatePanelsOf', 'relateFeatureProblems', 'relateWarningsOf', 'relateCapacityOf', 'callTimeoutMsOf',
+            'resolveRelateSettings', 'relateSeatsOf', 'relatePanelsOf', 'relateFeatureProblems', 'relateWarningsOf', 'relateCapacityOf',
             'resolveRelateVocab', 'pickRelateVocab', 'relateGuideDefaultOf', 'createRelateDomain', 'relateDomainNeedsOf',
             'makeEdge', 'edgeId', 'mergeEdge', 'persistEdge', 'projectNote', 'projectNotes', 'rebuildRelationIndex', 'isRelated', 'relatePendingOf', 'retireEdge', 'retiredEdgesOf',
             'readEdgeAudit', 'openDeletions', 'appendConflictEvent', 'readConflictEvents',

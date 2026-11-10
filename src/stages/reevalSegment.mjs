@@ -43,8 +43,8 @@ import { oneline } from '../core/capturePackage.mjs'
 import { readMd, summaryTextOf } from '../core/summarizePackage.mjs'
 import { runAiBatchStage } from '../core/summarizePackage.mjs'
 import { defineMw, applyTaps, makeMsg, count, runChainOverMsgs, cmp } from '../core/capturePackage.mjs'
-import { reserveOf, reserveMsOf } from '../core/capturePackage.mjs'
-import { RELATE_DEFAULT, callTimeoutMsOf, relateFeatureProblems, relateSeatOf } from '../core/relateSettings.mjs'
+import { reserveOf, reserveMsOf, reservedAiCallOf, captureCallMsOf } from '../core/capturePackage.mjs'
+import { RELATE_DEFAULT, relateFeatureProblems, relateSeatOf } from '../core/relateSettings.mjs'
 import { needThird, PANEL_WHY, PANEL_WHY_LABELS } from '../core/summarizePackage.mjs'
 import { listHolds, putHold, resolveHold, holdKey, retryRequestedOf } from '../core/capturePackage.mjs'
 import { makeEdge } from '../stores/edgeStore.mjs'
@@ -59,7 +59,7 @@ import { needsEdgeReview, edgesReviewedOf } from '../stores/relatedNotes.mjs'
 import { makeSlugResolver } from '../stores/candidates.mjs'
 import { shuffleStable, sameEdgeVerdict } from '../stores/edgeCheckKit.mjs'
 import { queueConflictProposal } from '../standards/edgeQueue.mjs'
-import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf } from './relateAiCall.mjs'
 
 /**
  * 本版本評完時結案該篇之「逾次未評完」待判(RS5,物件 note)——否則使用者要求重試後評完,登錄仍在、每輪又把該篇重新待評
@@ -597,8 +597,9 @@ export async function runReevalSegment(o) {
     const seatA = relateSeatOf(settings, 'reeval.first')
     const seatB = relateSeatOf(settings, 'reeval.second')
     const seatC = relateSeatOf(settings, 'reeval.third')
-    // 開工門檻含第三席(與衝突核對、既有邊覆核同一規則)
-    const firstMs = callTimeoutMsOf(settings, [seatA, seatB, seatC])
+    // 開工門檻含第三席(與衝突核對、既有邊覆核同一規則);第三席之逐次進門門檻＝該席首家之逾時(stages/relateAiCall 檔頭【逐次進門門檻】)
+    const firstMs = captureCallMsOf(settings, [seatA, seatB, seatC])
+    const thirdMs = captureCallMsOf(settings, seatC)
     const sub = reserveOf(ctx, reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, '關聯重評段之 reserveMs')(ctx))
     if (!sub.canStart(firstMs)) {
         det.reevalDeferred = true
@@ -607,8 +608,9 @@ export async function runReevalSegment(o) {
     }
 
     const chain = o.chain || reevalChainOf(opt)
-    const ask = reservedCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, firstMs)
-    const call = (spec, p, which) => ask(p, checkSingle, { spec, seat: which, segment: 'reeval' })
+    const ask = reservedAiCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, { firstMs })
+    // async:呼叫端同步拋出時回 rejected promise(包裝不為 async;前兩席以 Promise.all 並行,第一席之同步拋出不得使第二席未被呼叫——同修前)
+    const call = async (spec, p, which) => ask(p, checkSingle, { spec, seat: which, segment: 'reeval', startMs: which === 'third' ? thirdMs : undefined })
     let thirdCalls = 0
     let thirdStopped = false
     const seg = {

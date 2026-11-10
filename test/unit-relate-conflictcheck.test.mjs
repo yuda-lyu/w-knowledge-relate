@@ -573,6 +573,56 @@ describe('unit-relate-conflictcheck', function() {
         assert.deepEqual([c.seen, rc.detail.rs4Aborted, rc.detail.rs4Retry, await c.e.relations.get(edgeId('n', 'm'))], [[false], false, 1, null], JSON.stringify(rc.detail))
     })
 
+    it('第三席之進門門檻取該席首家之逾時(保留時間;REL-20〈逐次進門門檻〉、Gitea #132):前兩票耗時後,扣保留之剩餘已不足段之開工門檻(三席首家逾時之最大值)而仍夠第三席首家之逾時 → 第三席照叫、該項照判(不記 rs4Aborted);連第三席首家之逾時亦不足 → 不送出、中止、該項留待下輪(不落地、入待判、不計次);第三席之逾時由席位 timeoutMs 給者同;每頁開工前之守門仍取三席之最大', async () => {
+        // 替身:第一席「耗時 firstMs」(推進假時鐘)後回票;第三席之進門由抓取套件之包裝判(不足即不送出,替身收不到該次呼叫)
+        const mk = (o) => {
+            let now = 0
+            const e = env({
+                notes: [...fresh(['n']), ...done(o.pages === 2 ? ['m', 'm2'] : ['m'])],
+                forward: { 標題n: [{ to: 'm', type: C, reason: R_CONFLICT }, ...(o.pages === 2 ? [{ to: 'm2', type: C, reason: R_FIX }] : [])] },
+                check: byPair({ first: () => ({ verdict: 'change', type: T0, reason: R_OTHER }), third: () => ({ verdict: 'change', type: T0, reason: R_OTHER }) }),
+                ...(o.seats ? { seats: o.seats } : {}),
+                ...(o.pages === 2 ? { relate: { standards: { conflictCheck: { pageSize: 1 } } } } : {}),
+            })
+            e.ctx.deps.settings.ai.providerTimeouts['stub:fwd'] = 60_000
+            e.ctx.deps.settings.ai.providerTimeouts['stub:b'] = 360_000   // 段之開工門檻＝三席首家逾時之最大值 360 秒
+            if (!o.seats) e.ctx.deps.settings.ai.providerTimeouts['stub:c'] = 120_000   // 第三席首家之逾時 120 秒
+            e.ctx.remainingMs = () => o.totalMs - now
+            e.ctx.deps.reserveMs = 900_000
+            const seats = []
+            const callAI = async (prompt, check, co) => {
+                if (co?.segment === 'conflictCheck') {
+                    seats.push(co.seat)
+                    if (co.seat === 'first') now += o.firstMs
+                }
+                return e.callAI(prompt, check, co)
+            }
+            return { e, seats, run: () => stageRelate({ callAI }).run(e.ctx) }
+        }
+        // ①頁開工時扣保留後剩 420 秒(≥360);第一席耗 200 秒 → 剩 220 秒:不足段之開工門檻 360、仍夠第三席之 120 → 第三席照叫、判非衝突改型(修前:第三席不送出、rs4Aborted)
+        const a = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000 })
+        const ra = await a.run()
+        assert.deepEqual([a.seats, ra.detail.rs4Aborted, ra.detail.rs4Third, ra.detail.rs4Downgraded, (await a.e.relations.get(edgeId('n', 'm')))?.type], [['first', 'third'], false, 1, 1, T0], JSON.stringify(ra.detail))
+        // ②等號邊界:第一席耗 300 秒 → 剩恰 120 秒 → 第三席照叫
+        const b = mk({ totalMs: 900_000 + 420_000, firstMs: 300_000 })
+        const rb = await b.run()
+        assert.deepEqual([b.seats, rb.detail.rs4Aborted, (await b.e.relations.get(edgeId('n', 'm')))?.type], [['first', 'third'], false, T0], JSON.stringify(rb.detail))
+        // ③第一席耗 300.001 秒 → 剩 119.999 秒:連第三席首家之逾時亦不足 → 不送出、中止、該項留待下輪
+        const c = mk({ totalMs: 900_000 + 420_000, firstMs: 300_001 })
+        const rc = await c.run()
+        assert.deepEqual([c.seats, rc.detail.rs4Aborted, rc.detail.rs4Third, rc.detail.rs4Checked, await c.e.relations.get(edgeId('n', 'm'))], [['first'], true, 1, 0, null], JSON.stringify(rc.detail))
+        assert.equal((await c.e.holds.get(holdKey(RS4.objectProposal, edgeId('n', 'm'), RS4.std)))?.owner, 'pipeline')
+        // ④第三席之逾時由席位 timeoutMs 給(120 秒;逐家逾時未列)→ 同①(修前之門檻不讀席位 timeoutMs)
+        const d = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000, seats: { first: { use: 'stub:a' }, second: { use: 'stub:b' }, third: { use: 'stub:c', timeoutMs: 120_000 } } })
+        const rd = await d.run()
+        assert.deepEqual([d.seats, rd.detail.rs4Aborted, (await d.e.relations.get(edgeId('n', 'm')))?.type], [['first', 'third'], false, T0], JSON.stringify(rd.detail))
+        // ⑤每頁開工前之守門仍取段之開工門檻(三席之最大,不取第三席之門檻):每頁一項、兩項提案;第一頁之第一席耗 200 秒後剩 220 秒 → 第一頁之第三席照叫、第二頁不開工(rs4Stopped;該提案留待下輪)
+        const p = mk({ totalMs: 900_000 + 420_000, firstMs: 200_000, pages: 2 })
+        const rp = await p.run()
+        const landed = [await p.e.relations.get(edgeId('n', 'm')), await p.e.relations.get(edgeId('n', 'm2'))].filter(Boolean)
+        assert.deepEqual([p.seats, rp.detail.rs4Stopped, rp.detail.rs4Aborted, landed.map((x) => x.type)], [['first', 'third'], true, false, [T0]], JSON.stringify(rp.detail))
+    })
+
     it('鏈內續派(既有衝突邊之待判,第一、第二席並行;REL-20):兩席交 AI 之 shouldStop 同以續派門檻判且扣保留——扣保留後剩 299.999 秒(< 開工門檻 300)不停、剩 59.999 秒停', async () => {
         const edge = makeEdge({ from: 'a', to: 'b', type: C, reason: R_CONFLICT, nowIso: OLD })
         const hold = { id: holdKey(RS4.objectEdge, edge.id, RS4.std), object: RS4.objectEdge, oid: edge.id, std: RS4.std, status: 'open', owner: 'pipeline', reason: '提煉判為非對立', next: '關聯段兩席核對', since: OLD, at: OLD, tries: 0, ctx: { from: 'a', to: 'b', core: 'x' } }

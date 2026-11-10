@@ -5,13 +5,17 @@
 //   席別:正向／反向／輪巡為 'proposer'(提案席;衝突核對之提案票即此席所出)、判定小組為 'first'／'second'／'third'。
 // 【截斷放行逐次給】關聯之回覆皆為陣列(一項一篇或一項一條邊),逐項驗證、部分接受——回覆被截斷時救回前段完整之項仍有用(未涵蓋者
 //   下輪再判),故每次呼叫明給 acceptTruncated:true。逐次給而不在調度層建構期開:同一調度層亦服務他工作,截斷放行是本套件之選擇。
-// 【扣保留之段進門與鏈內分開判】扣保留之各段(reservedCallOf 包在 relateAiCallOf 之外)以開工門檻(callTimeoutMsOf)判「要不要送出一次新的
-//   呼叫」,交調度層之 shouldStop(遞補鏈內、嘗試之間)則以續派門檻(chainStepMsOf)判——兩個決定不共用同一門檻,否則主席等滿逾時後遞補一律被中止。
-
-import { chainStepMsOf } from '../core/relateSettings.mjs'
+// 【扣保留之段:進門與鏈內分開判,經抓取套件之唯一包裝】扣保留之各段把本檔之呼叫函數交抓取套件之 reservedAiCallOf(call, sub, { firstMs })
+//   (core/capturePackage;本套件不另寫一份):進門以本次之進門門檻判「要不要送出一次新的呼叫」(不足即不送出,回進門即中止之形狀),交調度層之
+//   shouldStop(遞補鏈內、嘗試之間)以續派門檻判、budgetMs 與扣保留之剩餘取小。段之開工門檻 firstMs 取抓取套件之 captureCallMsOf(settings,
+//   席位或席位陣列;席位 timeoutMs → ai.providerTimeouts → ai.extraProviders 之條目逾時 → ai.timeoutMs,多席取最大)。
+// 【逐次進門門檻(判定小組之第三席;使用端 Gitea #132)】判定小組三段(衝突核對、既有邊覆核、關聯重評)之段開工門檻為三席首家逾時之最大值
+//   (每頁開工前之守門、整段延後之判定:前兩席並行,須夠最慢之一席)。第三席於前兩票之後才叫,若仍以該最大值判進門,頁開工時剩餘 <
+//   「開工門檻＋前兩席耗時」者,前兩票已得而第三席不送出——送第三席之項整批留待下輪、前兩票作廢。故三段之第三席每次呼叫給
+//   startMs ＝ captureCallMsOf(settings, 第三席)(該席首家之逾時;包裝內與 firstMs 取小、不轉交);第一、二席不給(取 firstMs)。
 
 /**
- * 建立關聯之 AI 呼叫函數
+ * 建立關聯之 AI 呼叫函數(扣保留之段再以抓取套件之 reservedAiCallOf 包一層;見檔頭)
  *
  * @param {Object} o 輸入 { ai:AI 調度層(具 callJson), callAI?:注入之呼叫函數 (prompt, check, callOpt) => Promise(給了即取代 ai.callJson) }
  * @returns {Function} 回傳 (prompt, check, { spec, seat, segment, shouldStop, budgetMs }) => Promise(調度層之回傳形狀)
@@ -36,32 +40,4 @@ export function relateAiCallOf(o = {}) {
     }
 }
 
-/**
- * 扣保留之段之呼叫(正向、反向、輪巡、重評、既有邊覆核、衝突核對同一份;包在 relateAiCallOf 之外):
- *   ①進門:扣保留後不足開工門檻(firstMs)→ 不送出,回 skipped(與調度層進門即回 ABORTED 同義;不計此次之失敗);
- *   ②鏈內:交調度層之 shouldStop 以鏈內續派門檻(chainStepMsOf)判——主席失敗(含等滿逾時)後仍續派遞補,
- *     各次嘗試之逾時由 budgetMs(＝進門當下之剩餘−保留;相對預算,於調度層起算時才開始計)封頂,使遞補不致侵入保留;
- *   ③失敗之歸類不另判:中止、預算用盡與「被截止切斷之末家」由調度層之結果(errorType、嘗試之間之 shouldStop)歸為 skipped;
- *     各家皆試過而真的失敗者照計失敗(不因此刻剩餘不足開工門檻而改標 skipped);惟轉接層於失敗後仍以鏈內 shouldStop 判斷是否被截止切斷,
- *     故此刻剩餘已低於續派門檻者同樣視為中止
- *
- * @param {Function} ask 輸入 relateAiCallOf 之產物
- * @param {Object} sub 輸入扣保留之預算(抓取套件之 reserveOf 之產物;取 shouldStop、remainingMs)
- * @param {Number} firstMs 輸入開工門檻毫秒數(callTimeoutMsOf;0＝未保留)
- * @returns {Function} 回傳 (prompt, check, { spec, seat, segment }) => Promise(調度層之回傳形狀)
- * @example
- * let left = 420000
- * let sub = { shouldStop: (ms) => left < ms, remainingMs: () => left }
- * let ask = async (p, c, o) => { left -= 300000; return o.shouldStop() ? { ok: false, skipped: true } : { ok: true } }
- * console.log((await reservedCallOf(ask, sub, 360000)('p', () => true, {})).ok)
- * // => true
- */
-export function reservedCallOf(ask, sub, firstMs) {
-    return async (prompt, check, c = {}) => {
-        if (sub.shouldStop(firstMs)) return { ok: false, data: null, error: 'ABORTED', providerId: '', attempts: 0, skipped: true, errors: [] }
-        const stepMs = chainStepMsOf(firstMs, c.spec)
-        return ask(prompt, check, { ...c, shouldStop: () => sub.shouldStop(stepMs), budgetMs: sub.remainingMs() })
-    }
-}
-
-export default { relateAiCallOf, reservedCallOf }
+export default { relateAiCallOf }
