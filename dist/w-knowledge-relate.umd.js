@@ -1,5 +1,5 @@
 /*!
- * w-knowledge-relate v1.0.11
+ * w-knowledge-relate v1.0.12
  * (c) 2018-2021 yuda-lyu(semisphere)
  * Released under the MIT License.
  */
