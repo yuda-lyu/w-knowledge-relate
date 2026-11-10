@@ -532,6 +532,73 @@ describe('unit-relate-conflictcheck', function() {
         assert.deepEqual([rf.detail.rs4TimeDeferred, (await f.relations.get(edgeId('n', 'm')))?.type], [false, C], 'opt.reserveMs 優先')
     })
 
+    it('鏈內續派(保留時間;REL-20):第三席主席等滿逾時後,扣保留之剩餘已不足開工門檻(三席首家逾時之最大值)而仍夠一次遞補 → 鏈內不中止、遞補成交、該項照判(不記 rs4Aborted);剩餘連鏈內門檻亦不足 → 中止(同修前);全鏈皆試過而真的失敗 → 照計失敗(retry、不記中止),不因剩餘不足開工門檻改標中止', async () => {
+        // 替身模擬調度層之遞補鏈:第三席之主席「掛起 hangMs」(推進假時鐘)後,於嘗試之間問 co.shouldStop()——true 即回中止(ABORTED),否則由遞補成交
+        const mk = (o) => {
+            let now = 0
+            const e = env({
+                notes: [...fresh(['n']), ...done(['m'])],
+                forward: { 標題n: [{ to: 'm', type: C, reason: R_CONFLICT }] },
+                check: byPair({ first: () => ({ verdict: 'change', type: T0, reason: R_OTHER }), third: () => ({ verdict: 'change', type: T0, reason: R_OTHER }) }),
+            })
+            e.ctx.deps.settings.ai.providerTimeouts['stub:fwd'] = 60_000
+            e.ctx.deps.settings.ai.providerTimeouts['stub:b'] = 360_000   // 開工門檻＝三席首家逾時之最大值 360 秒
+            e.ctx.remainingMs = () => o.totalMs - now
+            e.ctx.deps.reserveMs = 900_000
+            const seen = []
+            const callAI = async (prompt, check, co) => {
+                if (co?.segment === 'conflictCheck' && co.seat === 'third') {
+                    now += o.hangMs
+                    const stop = co.shouldStop()
+                    seen.push(stop)
+                    if (stop) return { ok: false, data: null, error: 'ABORTED', skipped: true, attempts: 1 }
+                    if (o.chainFails) return { ok: false, data: null, error: 'stub fail', skipped: false, attempts: 2 }
+                }
+                return e.callAI(prompt, check, co)
+            }
+            return { e, seen, run: () => stageRelate({ callAI }).run(e.ctx) }
+        }
+        // ①進門時扣保留後剩 420 秒(≥360);主席掛起 300 秒 → 剩 120 秒:不足開工門檻 360、仍夠鏈內門檻 60 → 遞補成交
+        const a = mk({ totalMs: 900_000 + 420_000, hangMs: 300_000 })
+        const ra = await a.run()
+        assert.deepEqual([a.seen, ra.detail.rs4Aborted, ra.detail.rs4Third, ra.detail.rs4Downgraded, (await a.e.relations.get(edgeId('n', 'm')))?.type], [[false], false, 1, 1, T0], JSON.stringify(ra.detail))
+        // ②主席掛起 400 秒 → 剩 20 秒:連鏈內門檻亦不足 → 中止、該項留待下輪(不落地、入待判、不計次)
+        const b = mk({ totalMs: 900_000 + 420_000, hangMs: 400_000 })
+        const rb = await b.run()
+        assert.deepEqual([b.seen, rb.detail.rs4Aborted, await b.e.relations.get(edgeId('n', 'm'))], [[true], true, null], JSON.stringify(rb.detail))
+        assert.equal((await b.e.holds.get(holdKey(RS4.objectProposal, edgeId('n', 'm'), RS4.std)))?.owner, 'pipeline')
+        // ③全鏈皆試過而真的失敗(非中止;此時剩 120 秒 ≥ 續派門檻)→ 照計失敗:該項 retry(rs4Retry 1、不記 rs4Aborted、不落地),不因剩餘不足開工門檻而改標中止
+        const c = mk({ totalMs: 900_000 + 420_000, hangMs: 300_000, chainFails: true })
+        const rc = await c.run()
+        assert.deepEqual([c.seen, rc.detail.rs4Aborted, rc.detail.rs4Retry, await c.e.relations.get(edgeId('n', 'm'))], [[false], false, 1, null], JSON.stringify(rc.detail))
+    })
+
+    it('鏈內續派(既有衝突邊之待判,第一、第二席並行;REL-20):兩席交 AI 之 shouldStop 同以續派門檻判且扣保留——扣保留後剩 299.999 秒(< 開工門檻 300)不停、剩 59.999 秒停', async () => {
+        const edge = makeEdge({ from: 'a', to: 'b', type: C, reason: R_CONFLICT, nowIso: OLD })
+        const hold = { id: holdKey(RS4.objectEdge, edge.id, RS4.std), object: RS4.objectEdge, oid: edge.id, std: RS4.std, status: 'open', owner: 'pipeline', reason: '提煉判為非對立', next: '關聯段兩席核對', since: OLD, at: OLD, tries: 0, ctx: { from: 'a', to: 'b', core: 'x' } }
+        const e = env({ notes: done(['a', 'b']), edges: [edge], holds: [hold], check: () => ({ verdict: 'change', type: T1, reason: R_OTHER }) })
+        const KEEP = 900_000
+        const state = { left: KEEP + 2_000_000 }
+        e.ctx.remainingMs = () => state.left
+        e.ctx.deps.reserveMs = KEEP
+        const probes = []
+        const callAI = async (prompt, check, co) => {
+            if (co?.segment === 'conflictCheck') {
+                const keep = state.left
+                state.left = KEEP + 299_999
+                const a = co.shouldStop()
+                state.left = KEEP + 59_999
+                const b = co.shouldStop()
+                state.left = keep
+                probes.push([co.seat, a, b])
+            }
+            return e.callAI(prompt, check, co)
+        }
+        await stageRelate({ callAI }).run(e.ctx)
+        assert.deepEqual(probes.map((p) => p[0]).sort(), ['first', 'second'])
+        assert.deepEqual(probes.map((p) => p.slice(1)), [[false, true], [false, true]])
+    })
+
     it('既有衝突之再提案照常合併(不交核對);既有非衝突邊之升級提案交核對,判非衝突 → 原非衝突邊不變', async () => {
         const c0 = makeEdge({ from: 'n', to: 'm', type: C, reason: R_CONFLICT, nowIso: OLD })
         const t0 = makeEdge({ from: 'n', to: 'k', type: T0, reason: R_OTHER, nowIso: OLD })

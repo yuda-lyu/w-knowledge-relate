@@ -1,11 +1,11 @@
-# 現況（w-knowledge-relate）— 2026-11-08
+# 現況（w-knowledge-relate）— 2026-11-10
 
 > 只記現況，不寫過程（過程在 `../exp/`）。接續工作先讀本檔；完成一項功能或結束一輪工作即更新。
 > **路徑基準**：原始碼在 `src/`，本檔所列檔案路徑除已標 `src/`、`test/`、`toolg/` 者外皆相對 `src/`。
 
 ## 身分與位置
 
-- npm 套件 `w-knowledge-relate`（`package.json` 版本 1.0.7）；主入口 `src/WKnowledgeRelate.mjs`（具名匯出與預設匯出同一組，283 名）、總組裝 `createKnowledgeRelate`、執行期件 `createRelateRuntime`、物件 `relateObject.mjs`；`main` 指 `dist/w-knowledge-relate.umd.js`。
+- npm 套件 `w-knowledge-relate`（`package.json` 版本 1.0.7）；主入口 `src/WKnowledgeRelate.mjs`（具名匯出與預設匯出同一組，285 名）、總組裝 `createKnowledgeRelate`、執行期件 `createRelateRuntime`、物件 `relateObject.mjs`；`main` 指 `dist/w-knowledge-relate.umd.js`。
 - 佈局：`src/`（根層 5 檔＋`bench/ core/ domain/ ops/ stages/ standards/ stores/`）、`test/`、`toolg/`、`g.mjs`（離線範例）、`模型評比.csv`；不設 `exports`／`files`、不提供 `.npmignore`（npm 包＝git 版控內容，`sgud/` 與 `test/tools/` 隨包）。
 - 依賴：`w-knowledge-capture` ^1.0.13（經 `src/core/capturePackage.mjs`，128 名；指定詞 `w-knowledge-capture/src/WKnowledgeCapture.mjs`；1.0.12 起提供產出鏈共用件與各段 `ctx.stamp`）、`w-knowledge-summarize` ^1.0.9（經 `src/core/summarizePackage.mjs`，33 名；指定詞 `w-knowledge-summarize/src/WKnowledgeSummarize.mjs`；測試橋接取其 `test/tools/`）、`wsemi` ^1.9.52；dev：`w-data-pipeline`、`w-dispatch-ai`、`w-orm-lmdb`（測試用）、`w-package-tools`（編譯與文件工具）。
 - 被誰用：下游經各自之埠，以 `w-knowledge-relate/src/…` 與 `w-knowledge-relate/test/tools/…` 深層路徑取本套件之件。
@@ -29,6 +29,7 @@
 | 2026-11-05 | 正向段亦扣保留時間（REL-18）後全套（`npm test`）；新增 `unit-relate-forward-reserve` 15 案，對正向段保留邏輯植入 19 個變異皆被殺；既有保留時間案 4 案之環境改為正向席首家逾時短於被測段之（斷言不變） | **567 ✓、0 ✗、4 pending**（pending 同上）；新測試首版 13 案對修前碼 12 紅、1 綠（未注入保留之行為不變案），後補 2 案（池空不報停止、`opt.rounds` 打錯不被吞）以變異驗證；`dist/`、`docs/` 未重產（發布時自動產製） |
 | 2026-11-08 | 撤回（`revertEdgeRevision`）改為撤銷該次改寫所留之產出鏈（REL-19〈撤回與撤銷〉）後全套（`quiet-run --lock`）：`unit-flow-provenance` 之撤回案改為三段帳各三案（改寫前帶產出鏈／改寫前無／舊帳列）＋判不了＋無須動，`unit-relate-provenance` 加撤銷共用件之單元；對 25 種變異（含「仍追加 null 紀錄」「不退歷史」）逐一跑兩個新檔 | **630 ✓、0 ✗、4 pending**（前次 614；增 16）；行為測試對本輪改動前之工作樹 11 ✗、21 ✓；25 種變異全數被殺（0 存活）；入口具名匯出 278 → 283 |
 | 2026-11-08 | 邊之產出鏈（REL-19）後全套（`npm test`，`quiet-run --lock`）：新增 `unit-flow-provenance`（行為，各寫邊點）與 `unit-relate-provenance`（新件之單元、選件、`graph.json` 開關）；三處既有斷言刻意更新（撤出理由清單加 `reprocess`、`relate` 設定 30 葉、deps 鍵集加 `promptFpOf`）；對 46 種變異植入逐一跑兩個新檔 | **614 ✓、0 ✗、4 pending**（前次 567；增 47＝新案 `unit-flow-provenance` 22＋`unit-relate-provenance` 25；pending 同上）；行為測試對 `git archive HEAD` 之修前碼 21 ✗、1 ✓（`graph.json` 預設不變）；46 種變異全數被殺（0 存活）；`dist/`、`docs/` 未重產（發布時自動產製） |
+| 2026-11-10 | 扣保留之 AI 呼叫進門與遞補鏈內分開判（REL-20；使用端 Gitea #128）後全套（`npm test`，`quiet-run --lock`）：新增 `chainStepMsOf`（`core/relateSettings`）、`reservedCallOf`（`stages/relateAiCall`）；`unit-relate-aicall` 加 `chainStepMsOf／reservedCallOf` 案、六類呼叫接線案（席位未給與各席給 `minAttemptMs` 兩種）與站點全集盤點案、新檔 `unit-relate-chain`（真轉接層＋真調度層＋本機假 REST，固定埠 8863）、`unit-relate-conflictcheck` 加鏈內續派案與既有衝突邊兩席案、`unit-relate-forward-reserve` R6 改斷言；對 15 種變異（五個呼叫點各改回舊寫法、鏈內不扣保留、鏈內改用開工門檻、拿掉進門判定、加回「全鏈失敗改標 skipped」、不採席位 `minAttemptMs`、計續派門檻不帶席位、衝突核對第二席單獨改回舊寫法、恰等門檻錯誤中止、進門回傳缺欄）逐一跑受影響九檔 | **641 ✓、0 ✗、4 pending**（前次 630；增 11 案）；新案對 `git archive HEAD` 之修前碼：`unit-relate-aicall` 與 `unit-relate-chain` 載入即失敗（無 `chainStepMsOf`／`reservedCallOf`），其餘三檔以去除該匯入之變體跑得 7 ✗（接線案 11 種段／席別為 `[true, true]`、站點盤點案、鏈內續派兩案、R6 等）；15 種變異全數被殺（0 存活；基準 186 ✓）；入口具名匯出 283 → 285；`dist/`、`docs/` 未重產（發布時自動產製） |
 | 2026-11-02 | 編譯與載入 | `toolg/gDistRollup.mjs` exit 0；`require(dist)` 具名匯出 269＝主入口 269，集合與型別同；`jsdoc`、`gDocsExams`、`genDocsDist` exit 0 |
 
 ## 功能現況（對應規則帳本）
@@ -37,6 +38,7 @@
 |---|---|---|
 | 正向（新筆記、內容變更之筆記）、投影、總覽 | 落地 | REL-01～08；`unit-relate-stage`、`unit-flow-relate`、`unit-relate-projection` |
 | 保留時間（`opt.reserveMs`／`deps.reserveMs`）：正向段與反向、輪巡、重評、既有邊覆核、衝突核對皆扣；正向段開工前與每輪開工前判，不足即少做幾輪（開工前即不足 → `forwardDeferred`，新筆記留池）；未注入（0）行為同未扣 | 落地 | REL-18；`unit-relate-forward-reserve` |
+| 扣保留之 AI 呼叫：進門以開工門檻（各席首家逾時之最大值）判、遞補鏈內（交 AI 之 `shouldStop`）以續派門檻 `chainStepMsOf`（`min(開工門檻, 席位 minAttemptMs〔未給取 60 秒〕)`，開工門檻 0 → 0）判且扣保留，各次嘗試之逾時由 `budgetMs` 封頂；單一入口 `reservedCallOf`，五處呼叫點（正向、反向／輪巡、重評、既有邊覆核、衝突核對）皆經它；全鏈真失敗照計失敗、被截止切斷者為中止；每頁／每輪守門仍用開工門檻 | 落地（`chainStepMsOf`、`reservedCallOf` 為入口新增具名匯出）；**已知取捨**：被 `budgetMs` 封頂而逾時之嘗試，調度層（w-dispatch-ai）仍記條目冷卻與組盡，根本修正屬該套件 | REL-20；`unit-relate-aicall`、`unit-relate-conflictcheck`、`unit-relate-forward-reserve` |
 | 邊之產出鏈（`produced`／`producedHistory`／`producedHistoryDropped`）：新建與可見欄位改變之寫入追加一筆（stamp、stage、seat、provider〔遞補時為遞補者〕、promptFp、pkg、at）；判定小組改寫取被採用之那一票；不呼叫 AI 者 seat／provider 同時 null；舊邊不回填；`graph.json` 預設不變、`relate.graphProduced` 開啟時帶 `produced:{ stamp, stage, provider }`；選件 `edgesByProvenance(deps, query)`（純讀）；撤出理由 `reprocess` 已登錄；回退（存量處置）與撤回（`revertEdgeRevision`）撤銷該次改寫所留之產出鏈（不追加；撤回回傳 `producedUndo:{ done, how, why? }`，三段稽核之改寫列 `edge` 另帶改寫前之產出鏈三欄） | 落地 | REL-19；`unit-flow-provenance`、`unit-relate-provenance` |
 | 反向段 `relate.reverse.perRun`（預設 0）、候選輪巡 `relate.rotation`（預設 0） | 落地，預設停用 | STD-20；`unit-relate-rotation` |
 | 重評 RS5（兩席；`relate.reeval.apply` 預設 false） | 落地；**開閘須使用者同意** | REL-13；`unit-relate-change`、`unit-relate-aicall`、`unit-relate-reeval` |
@@ -49,6 +51,7 @@
 
 ## 已知缺口與待辦
 
+- **開工門檻 `callTimeoutMsOf` 不含席位自帶之 `timeoutMs`**（待裁定；修前即有，外審 2026-11-10 指出）：轉接層以席位 `timeoutMs` 覆寫鏈內各條目之逾時，而 `callTimeoutMsOf` 只取 `ai.providerTimeouts`／`ai.timeoutMs`，席位給了 `timeoutMs` 者開工門檻與實際首家逾時不符（進門與每頁／每輪守門皆受影響；REL-20 不改此行為）。修法需動各段進門與守門之門檻，須另案裁定。
 - **RS5 開閘**（須使用者同意）：逐條覆核影子期候選帳 → 先 `'additive'` 再 `'all'`；第二席需有逐案兩回全過之席位。
 - **`模型評比.csv`** 含已不在 `w-dispatch-ai` 內建目錄之列（歷史記錄，不影響執行）；「AI 工作目錄」欄有兩種寫法（「套件外之工作目錄」「專案外之工作目錄」，抓取套件 1.0.2 起寫後者）。
 - **已知限制**（README §17 餘者）：`restoreNote` 之 `noteGate` 未注入 → WARN 原樣還原；`netGuard` 未給＝不判斷。

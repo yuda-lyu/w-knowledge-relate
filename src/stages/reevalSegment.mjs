@@ -59,7 +59,7 @@ import { needsEdgeReview, edgesReviewedOf } from '../stores/relatedNotes.mjs'
 import { makeSlugResolver } from '../stores/candidates.mjs'
 import { shuffleStable, sameEdgeVerdict } from '../stores/edgeCheckKit.mjs'
 import { queueConflictProposal } from '../standards/edgeQueue.mjs'
-import { relateAiCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
 
 /**
  * 本版本評完時結案該篇之「逾次未評完」待判(RS5,物件 note)——否則使用者要求重試後評完,登錄仍在、每輪又把該篇重新待評
@@ -607,8 +607,8 @@ export async function runReevalSegment(o) {
     }
 
     const chain = o.chain || reevalChainOf(opt)
-    const ask = relateAiCallOf({ ai, callAI: opt.callAI })
-    const call = (spec, p, which) => ask(p, checkSingle, { spec, seat: which, segment: 'reeval', shouldStop: () => sub.shouldStop(firstMs), budgetMs: sub.remainingMs() })
+    const ask = reservedCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, firstMs)
+    const call = (spec, p, which) => ask(p, checkSingle, { spec, seat: which, segment: 'reeval' })
     let thirdCalls = 0
     let thirdStopped = false
     const seg = {

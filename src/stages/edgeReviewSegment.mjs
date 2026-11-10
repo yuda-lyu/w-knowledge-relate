@@ -61,7 +61,7 @@ import { RS6, reviewVerdictOf, rs6DecisionOf, reviewQueueOf } from '../stores/ed
 import { seatVotesOf, relationTypesVersionOf } from '../stores/edgeCheckKit.mjs'
 import { createCheckHasher } from '../stores/checkMaterial.mjs'
 import { queueConflictCheck, queueConflictProposal, stockSourceResolvedOf } from '../standards/edgeQueue.mjs'
-import { relateAiCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
 import { runCheckPanelPages } from './checkPanelPages.mjs'
 
 const checkJson = (d) => Array.isArray(d) && d.some((it) => Number.isInteger(it?.index))
@@ -238,10 +238,10 @@ export async function runEdgeReviewSegment(o) {
     }
 
     // ── 判定(逐頁:第一、二席並行;未成立而可成立者 → 第三席)──
-    const ask = relateAiCallOf({ ai, callAI: opt.callAI })
+    const ask = reservedCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, firstMs)
     const call = async (spec, prompt, which) => {
         out.aiCalls++
-        return ask(prompt, checkJson, { spec, seat: which, segment: 'edgeReview', shouldStop: () => sub.shouldStop(firstMs), budgetMs: sub.remainingMs() })
+        return ask(prompt, checkJson, { spec, seat: which, segment: 'edgeReview' })
     }
     const vopt = (items) => ({ relationTypes: domain.relationTypes, resolveType: domain.resolveType, conflictType: rt.conflictType, roles: domain.relationTypeRoles, verdictOf: reviewVerdictOf, indices: new Set(items.map((x) => x.index)), currentOf: (i) => items.find((x) => x.index === i)?.edge })
     // 判定小組之逐頁執行與衝突核對同一份(stages/checkPanelPages);本段:兩席皆看整頁、票組 [第一席, 第二席];

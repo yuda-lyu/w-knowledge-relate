@@ -183,6 +183,29 @@ export function callTimeoutMsOf(settings, seats) {
     return list.length ? Math.max(...list.map(of)) : of(null)
 }
 
+/** 鏈內續派之最低所需(毫秒):主席失敗後,扣保留之剩餘不少於此數才續派遞補 */
+const CHAIN_STEP_MS = 60_000
+
+/**
+ * 鏈內續派門檻:一次呼叫之遞補鏈內(主席失敗後之嘗試之間)是否續派之判停值——席位之 minAttemptMs(未給取 CHAIN_STEP_MS)與開工門檻之較小者。
+ *   開工門檻(callTimeoutMsOf)只管「要不要送出一次新的呼叫」;鏈內若仍以開工門檻判,進門時剩餘不足「開工門檻＋主席逾時」者,
+ *   主席等滿逾時後之剩餘即小於開工門檻,遞補被中止(形同未設遞補)。各次嘗試之逾時另由 budgetMs(剩餘−保留)封頂。
+ *   開工門檻為 0(正向段未保留:守門只剩整輪逾期)者回 0,與未保留時之行為相同
+ *
+ * @param {Number} firstMs 輸入開工門檻毫秒數(callTimeoutMsOf 之值;非正數視為 0)
+ * @param {Object} [seat] 輸入本次呼叫之席位(取 minAttemptMs;非正數或未給即取 CHAIN_STEP_MS)
+ * @returns {Number} 回傳毫秒數
+ * @example
+ * console.log(chainStepMsOf(360000), chainStepMsOf(30000), chainStepMsOf(0), chainStepMsOf(360000, { minAttemptMs: 30000 }))
+ * // => 60000 30000 0 30000
+ */
+export function chainStepMsOf(firstMs, seat) {
+    const ms = Number(firstMs)
+    if (!(ms > 0)) return 0
+    const own = Number(seat?.minAttemptMs)
+    return Math.min(ms, own > 0 ? own : CHAIN_STEP_MS)
+}
+
 
 /**
  * 關聯之功能表(唯一一份;抓取套件之 featureProblemsOf 之表):重評與檢定標準之各功能——稱呼(含開啟之設定)、開啟判準、判定小組之必填席、
@@ -445,7 +468,7 @@ export function relateSeatPathOf(settings, segment) {
 
 export default {
     RELATE_AI_DEFAULT, RELATE_AI_SCHEMA, RELATE_DEFAULT, RELATE_SCHEMA, RELATE_SETTING_TYPES, RELATE_INDEX_TITLE,
-    resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, callTimeoutMsOf, relateWarningsOf,
+    resolveRelateSettings, relateCapacityOf, RELATE_CAPACITY_DESC, callTimeoutMsOf, chainStepMsOf, relateWarningsOf,
     RELATE_FEATURES, relateFeatureProblems, relatePanelsOf, RELATE_SEAT_LABELS, relateSeatsOf, RELATE_SEAT_KEYS, relateSeatOf,
     RELATE_SEGMENTS,
     relateSeatPathOf,

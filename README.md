@@ -367,7 +367,7 @@ createKnowledgeRelate({
 - **免費池額度**(`ai.pools`)、**健康降序**(`ai.healthStreak`,預設 3)、**能力預篩**(`ai.providerLimits`;內建調度層另計條目之固有上限——長提示詞〔數篇×數十候選〕於呼叫前避開放不下之條目):事件各以 WARN 一行寫入當輪日誌(「供應商額度：」「供應商健康：」「供應商能力：」;注入 `cfg.aiAdapter` 時不接)。
 - **失敗預覽**:內建調度層之失敗形狀帶 `preview`(模型回覆之前段),批次失敗之 WARN 附之。
 - **斷網不計(選用)**:`cfg.netGuard` 給本機網路判斷器(抓取套件之 `createNetGuard` 產物或同形之 `{ check, confirmDown, isDown, describe }`)時,整鏈皆敗之呼叫經其確認不通即回 `skipped`——該段中止、不記 tries。重評逾次即登錄待判、衝突核對與既有邊覆核逾次即轉使用者,斷網之失敗若照計,會把網路問題變成使用者之待判;本套件不內建探測(探測端點屬抓取之設定),未給或 `null` 不判斷。
-- **整組置換**:`cfg.aiAdapter` 給一個具 `callJson(prompt, check, { spec, budgetMs?, shouldStop?, acceptTruncated? })` 之物件,回傳 `{ ok, data, error, providerId, attempts, skipped, preview?, truncated? }`;`validateSeats`、`drainStats`、`aiUsageToday` 選用。多工作共用調度狀態(冷卻、健康、用量)時,注入同一個實例。只換關聯段之呼叫者,給 `cfg.stageOpts.relate.callAI(prompt, check, { spec, seat, segment, shouldStop, budgetMs, acceptTruncated })`(六類呼叫同一形狀;`seat` 為 `proposer`／`first`／`second`／`third`)。
+- **整組置換**:`cfg.aiAdapter` 給一個具 `callJson(prompt, check, { spec, budgetMs?, shouldStop?, acceptTruncated? })` 之物件,回傳 `{ ok, data, error, providerId, attempts, skipped, preview?, truncated? }`;`validateSeats`、`drainStats`、`aiUsageToday` 選用。多工作共用調度狀態(冷卻、健康、用量)時,注入同一個實例。只換關聯段之呼叫者,給 `cfg.stageOpts.relate.callAI(prompt, check, { spec, seat, segment, shouldStop, budgetMs, acceptTruncated })`(六類呼叫同一形狀;`seat` 為 `proposer`／`first`／`second`／`third`)。其中 `budgetMs` 為扣保留後之剩餘(各次嘗試之逾時以之封頂)、`shouldStop` 為遞補鏈內(嘗試之間)是否續派之判停:以續派門檻〔`min(開工門檻〔各席首家逾時之最大值〕, 席位 minAttemptMs〔未給取 60 秒〕)`;正向段未保留時開工門檻為 0,故為 0;選配段不論有無保留皆以正的開工門檻計〕判且扣保留;進門時扣保留後不足開工門檻者不送出(不呼叫 `callAI`)。
 - CLI 型條目讀取哪些檔由 CLI 決定(會讀工作目錄上層之指示檔);要量不受其影響之能力,把 `aiWorkspace` 放在沒有這些檔之目錄樹。
 
 ---
@@ -418,7 +418,7 @@ const rt = createRelateRuntime(cfg, settings, {
 | 改某一環之行為 | `cfg.stageOpts.<relate|project|relationIndex>.tap`:動作鏈之錨點 before／after／replace(關聯:`buildEdges`、`markDirty`、`persistEdges`、`queueReverse`、`markRelated`——正向、反向、輪巡同一條鏈;投影:`project`;總覽:`rebuild`);重評鏈 `cfg.stageOpts.reeval.tap`(`verdict`、`agree`、`apply`、`markReviewed`)或 `cfg.stageOpts.reeval.chain` 整條置換。錨點對不上者建構期即拋 |
 | 換掉整條管線 | `cfg.stages` 給 `[{ name, run(ctx) }]`(與 `stageOpts` 擇一);可用匯出之子階段工廠(`stageRelate`、`stageRelateProject`、`stageRelationIndex`)自組,依賴一律走 `ctx.deps` |
 | 他總組裝共用關聯件 | `createRelateRuntime`(§9);物件 `createRelateObject(opt)`(子階段 opts 與總組裝之 `stageOpts` 同形) |
-| 保留時間給後段 | `cfg.stageOpts.relate.reserveMs`(毫秒數或 `(ctx) => 毫秒數`):正向段與選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留後剩餘不足一次呼叫即不開工、每次呼叫以「剩餘−保留」封頂;正向段每輪開工前亦判,不足即少做幾輪(開工前即不足 → 本輪延後,新筆記留在待處理池、report 記 `forwardDeferred`;容量鍵不縮)。他總組裝亦可於每輪依賴給 `deps.reserveMs`(同形) |
+| 保留時間給後段 | `cfg.stageOpts.relate.reserveMs`(毫秒數或 `(ctx) => 毫秒數`):正向段與選配段(反向、輪巡、重評、既有邊覆核、衝突核對)扣保留後剩餘不足一次呼叫即不開工、每次呼叫以「剩餘−保留」封頂、遞補鏈內(主席失敗後之嘗試之間)以續派門檻〔席位 `minAttemptMs`,未給取 60 秒,不超過開工門檻〕而非開工門檻判停(主席等滿逾時後,剩餘仍夠續派門檻者遞補照派,見 §19);正向段每輪開工前亦判,不足即少做幾輪(開工前即不足 → 本輪延後,新筆記留在待處理池、report 記 `forwardDeferred`;容量鍵不縮)。他總組裝亦可於每輪依賴給 `deps.reserveMs`(同形) |
 | 調整上限 | `cfg.stageOpts.relate.maxRelationsPerNote`(單篇至多取用之關聯數,預設 4,衝突優先保留;見 §17)、`cfg.stageOpts.relationIndex.indexTopN`(總覽顯示篇數,預設 40) |
 | 換儲存 | `cfg.lmdb.WOrm` 給相容之 ORM 建構函數 |
 | 收尾通知／巡檢 | `cfg.afterRun({ report, summaryFile, log, deps })`(管線之外、摘要之後;失敗只記 WARN) |
@@ -644,3 +644,8 @@ createKnowledgeRelate({
 | `ops/` | 維運 API(刪除／還原／撤銷、懸空清理、全庫投影、重評基準、被撤出之邊之還原、受影響者之投影) | `noteOps`、`projectOps` |
 
 席位之「未設即沿用」只在 `core/relateSettings` 之 `relateSeatOf`(各段、判定小組之定義與席位檢核同讀);物件之階段名與子階段鍵即日誌契約 `RELATE_REPORT_KEYS`(同一實體)。
+
+## 19. 升級注意(行為變更)
+
+- **扣保留之各段:遞補鏈內改以續派門檻判停**(使用端〔Gitea #128〕):正向、反向、輪巡、重評、既有邊覆核、衝突核對於有保留(或整輪有截止)時,原以「開工門檻」(各席首家單次逾時之最大值)同時判「要不要送出一次新的呼叫」與「同一次呼叫內、嘗試之間要不要續派遞補」——進門時扣保留之剩餘不足「開工門檻＋主席逾時」者,主席等滿自己的逾時後剩餘即低於開工門檻,遞補被中止(形同未設遞補)。現改為:進門仍以開工門檻判;鏈內(交 AI 調度層之 `shouldStop`)以**續派門檻**判且仍扣保留——`min(開工門檻, 席位 minAttemptMs〔未給或非正數取 60 秒〕)`,正向段未保留(開工門檻為 0)者為 0;各次嘗試之逾時由 `budgetMs`(＝進門當下之剩餘−保留)封頂,使遞補不致侵入保留。每頁／每輪開工前之守門不變。全鏈皆試過而真的失敗者照計失敗(retry、記 tries),被截止切斷者仍為中止;轉接層於失敗後仍以鏈內 `shouldStop` 判斷是否被截止切斷,故此刻剩餘已低於續派門檻者亦視為中止。不留相容開關。
+- **進門不足時不再呼叫注入之 `callAI`**:扣保留後剩餘不足開工門檻時,包裝層直接回 `{ ok:false, error:'ABORTED', skipped:true, attempts:0 }`(與調度層進門即中止同義),不再呼叫 `cfg.stageOpts.relate.callAI`／調度層;轉接層之 AI 實績少記一筆 `(aborted)`。注入 `callAI` 之替身所見的 `shouldStop` 語意隨第一項改變(鏈內為續派門檻,不再是開工門檻)。

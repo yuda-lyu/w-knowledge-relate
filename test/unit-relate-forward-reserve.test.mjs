@@ -143,15 +143,16 @@ describe('unit-relate-forward-reserve', function() {
 
     // ─── 每輪開工前、每次呼叫之封頂 ───
 
-    it('R6 每輪(issue 情境二):剩餘 30 分、保留 15 分、首家 6 分 → 第 1 輪做完、第 2 輪開工前停;處理篇數＝parallel×notesPerCall,其餘留池;呼叫預算＝剩餘−保留;嘗試之間的 shouldStop 亦扣保留', async () => {
+    it('R6 每輪(issue 情境二):剩餘 30 分、保留 15 分、首家 6 分 → 第 1 輪做完、第 2 輪開工前停;處理篇數＝parallel×notesPerCall,其餘留池;呼叫預算＝剩餘−保留;嘗試之間的 shouldStop 以續派門檻判且扣保留(REL-20)', async () => {
         // 每次呼叫耗 5 分;第 1 輪兩批並行 → 耗 10 分,剩 20 分,扣保留 5 分 < 6 分
         const e = env({ pool: 10, left: 30 * MIN, cost: 5 * MIN, reserve: 15 * MIN, parallel: 2, notesPerCall: 2, rounds: 3 })
         const d = (await e.run()).detail
         assert.equal(e.calls.length, 2, `只做第 1 輪的兩批:${JSON.stringify(e.calls)}`)
         assert.deepEqual(e.calls.map((c) => c.budgetMs), [15 * MIN, 15 * MIN], '呼叫預算＝剩餘 30 分 − 保留 15 分(不是整輪 30 分)')
         assert.deepEqual(e.calls.map((c) => c.stopBefore), [false, false])
-        // 第二批扣完時間後(剩 20 分,扣保留 5 分 < 6 分),同一呼叫之嘗試之間應停
-        assert.deepEqual(e.calls.map((c) => c.stopAfter), [false, true], 'shouldStop 扣保留(舊碼只看整輪逾期而恆 false)')
+        // 第二批扣完時間後(剩 20 分,扣保留 5 分:< 開工門檻 6 分、≥ 鏈內續派門檻 1 分)——同一呼叫之鏈內不停(REL-20:遞補仍可用扣保留後之 5 分,
+        //   逾時由 budgetMs 封頂);下一輪由開工門檻擋下(下行之 stopped)。鏈內門檻仍扣保留,見 unit-relate-aicall 之 reservedCallOf
+        assert.deepEqual(e.calls.map((c) => c.stopAfter), [false, false], '鏈內以續派門檻(開工門檻與 60 秒之較小者)判')
         assert.deepEqual([d.targets, d.pending, d.stopped, !!d.forwardDeferred], [4, 6, true, false])
         assert.equal((await poolIds(e)).length, 6, '其餘 6 篇留池中')
         // 容量鍵語意不變:時間不足只是少做輪數;下一輪時間足夠即照常做滿 parallel×notesPerCall

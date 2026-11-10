@@ -67,7 +67,7 @@ import { conceptKeysOf, pickCandidates, makeSlugResolver } from '../stores/candi
 import { createReverseIndex } from '../stores/reverseCandidates.mjs'
 import { REEVAL_REPROPOSE_DAYS } from '../stores/reevalPolicy.mjs'
 import { rotationPageOf, rotationQueueOf, rotationProgressOf, rotationCursorOf, rotationBumpOf } from '../stores/rotationPolicy.mjs'
-import { relateAiCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
 import { itemTargetOf, coveredItemOf, mwBuildEdges, mwMarkDirty, mwPersistEdges, mwQueueReverse, mwMarkRelated } from './relateChain.mjs'
 import { maintainRelations } from './relateMaintain.mjs'
 import { createRelateQueueRunner } from './relateQueueSegment.mjs'
@@ -252,7 +252,7 @@ export function stageRelate(opt = {}) {
             const inPool = inRelatePool
 
             // 時間預算(抓取套件之 budget 單一擁有者):正向段與各選配段同一份保留時間(檔頭【時間】)——扣掉保留給後段之時間後才是本段可用:
-            //   開工前判一次(fwdDeferred)、每輪開工前由 harness 以 fwdBatchStop 守門,每次呼叫以「剩餘−保留」封頂、嘗試之間(fwdStop)可中止
+            //   開工前判一次(fwdDeferred)、每輪開工前由 harness 以 fwdBatchStop 守門,每次呼叫以「剩餘−保留」封頂、嘗試之間以續派門檻(chainStepMsOf;reservedCallOf)可中止
             const call = relateAiCallOf({ ai, callAI: opt.callAI })
             const fwdSeat = relateSeatOf(settings, 'relate')
             const fwdKeep = reserveMsOf(opt.reserveMs ?? ctx.deps.reserveMs, '關聯正向段之 reserveMs')(ctx)
@@ -262,7 +262,8 @@ export function stageRelate(opt = {}) {
             const fwdStop = () => fwdTime.shouldStop(fwdMinMs)
             // 批次每輪開工前之守門:有保留時,池已空(無待處理者)不報時間停止——剩餘常低於門檻,池空仍記 stopped 與 WARN 會誤導;無保留者同扣保留前
             const fwdBatchStop = fwdKeep > 0 ? () => live.some(inPool) && fwdStop() : fwdStop
-            const callFwd = (p, c) => call(p, c, { spec: fwdSeat, seat: 'proposer', segment: 'forward', shouldStop: fwdStop, budgetMs: fwdTime.remainingMs() })
+            const askFwd = reservedCallOf(call, fwdTime, fwdMinMs)
+            const callFwd = (p, c) => askFwd(p, c, { spec: fwdSeat, seat: 'proposer', segment: 'forward' })
             // 開工前:有待處理者而扣保留後剩餘不足一次呼叫 → 本輪不開工(輪數 0:不取件、不呼叫、不記 relateTries),新筆記留在池中下輪再做;
             //   輪數不是正整數(opt.rounds 打錯)者不在此判,照舊交批次執行器檢核而拋錯,不被延後吞掉
             const fwdRounds = opt.rounds ?? settings.relate.rounds

@@ -67,7 +67,7 @@ import { RS6 } from '../stores/edgeReviewPolicy.mjs'
 import { seatVotesOf, relationTypesVersionOf } from '../stores/edgeCheckKit.mjs'
 import { createCheckHasher } from '../stores/checkMaterial.mjs'
 import { stockSourceResolvedOf } from '../standards/edgeQueue.mjs'
-import { relateAiCallOf } from './relateAiCall.mjs'
+import { relateAiCallOf, reservedCallOf } from './relateAiCall.mjs'
 import { runCheckPanelPages } from './checkPanelPages.mjs'
 
 const checkJson = (d) => Array.isArray(d) && d.some((it) => Number.isInteger(it?.index))
@@ -321,10 +321,11 @@ export async function runConflictCheckSegment(o) {
     }
 
     // ── 判定(逐頁:第一輪 first＋second(既有邊),第二輪 third)──
-    const ask = relateAiCallOf({ ai, callAI: opt.callAI })
+    // 進門以開工門檻判、鏈內以續派門檻判(stages/relateAiCall 之 reservedCallOf):主席等滿逾時後仍續派遞補,不因剩餘不足一次主席逾時而放棄整條鏈
+    const ask = reservedCallOf(relateAiCallOf({ ai, callAI: opt.callAI }), sub, firstMs)
     const call = async (spec, prompt, which) => {
         out.aiCalls++
-        return ask(prompt, checkJson, { spec, seat: which, segment: 'conflictCheck', shouldStop: () => sub.shouldStop(firstMs), budgetMs: sub.remainingMs() })
+        return ask(prompt, checkJson, { spec, seat: which, segment: 'conflictCheck' })
     }
     const vopt = (items) => ({ relationTypes: domain.relationTypes, resolveType: domain.resolveType, conflictType: rt.conflictType, verdictOf: checkVerdictOf, indices: new Set(items.map((x) => x.index)), currentOf: (i) => items.find((x) => x.index === i)?.edge })
     // 判定小組之逐頁執行與既有邊覆核同一份(stages/checkPanelPages);本段之差異:新提案之兩票＝提案席(keep;供應者＝提案之實際成交者)＋
