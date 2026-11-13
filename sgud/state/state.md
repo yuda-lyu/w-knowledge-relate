@@ -70,6 +70,11 @@
 
 - **邊之產出鏈之已知限制**（REL-19／README §17）：輪巡（規格未列）記為 `relate`；還原類（規格未列）原樣放回者帶撤出前之產出鏈、確定性修正或使用者新理由者追加 `standards-fix`；撤回判不了改寫前之產出鏈者（舊帳列且現行邊不符判準）不動產出鏈並於回傳帶原因字樣，歷史滿 50 筆後之改寫已捨去最舊一筆而退一筆時捨去數不減；`promptFp` 為「內建題組＋現行詞彙」之提示詞版本（不含 `cfg.prompts` 之覆寫；經 UMD `dist` 取用時內建題組不隨包而省略）；`provider` 空字串者不寫產出鏈；`produced` 鍵集縮減或歷史滿額輪替時 `writeEdge` 回讀不符而走 `replace`（先刪後插、非原子，同 `history` 變短之既有路徑）。
 
+## 瀏覽器之啟動改經 w-playwright(2026-11-13,主控;排程第 442 項)
+
+- 本套件打包 w-knowledge-capture 之原始碼,其抓取階梯經 w-fetch-web 啟動 Chromium;w-fetch-web 1.0.44 起一律經自有套件 `w-playwright`(合併 `--disable-features` 以免 Chromium 每次啟動以錯誤密碼登入 Windows、10 次即鎖帳號).
+- 改動:`toolg/gDistRollup.mjs` 之 globals／external 由 `'playwright'` 改 `'w-playwright'`(各 1 處);`dependencies` 不另宣告 `w-playwright`(依本套件帳本之依賴對帳:`src/` 未直接匯入者不列;經 w-knowledge-capture 之依賴取得,同原 playwright 之作法);w-knowledge-capture 隨發布升至最新.
+
 ## 需使用者決定者
 
 - 無新項（RS5 開閘、RS6 開啟皆已記為須同意之既定程序）。
