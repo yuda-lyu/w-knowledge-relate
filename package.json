@@ -1,10 +1,10 @@
 {
   "name": "w-knowledge-relate",
-  "version": "1.0.40",
+  "version": "1.0.41",
   "main": "dist/w-knowledge-relate.umd.js",
   "dependencies": {
-    "w-knowledge-capture": "^1.0.46",
-    "w-knowledge-summarize": "^1.0.41",
+    "w-knowledge-capture": "^1.0.47",
+    "w-knowledge-summarize": "^1.0.42",
     "wsemi": "^1.9.72"
   },
   "devDependencies": {
